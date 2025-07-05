@@ -1,12 +1,12 @@
 import Link from "next/link"
-import { Bot, Twitter, Github, Linkedin } from "lucide-react"
+import { Bot, Twitter, Github, Linkedin, DownloadCloud } from "lucide-react"
 import { Button } from "../ui/button"
 
 export function Footer() {
   return (
     <footer className="bg-muted/50 dark:bg-muted/10">
       <div className="container py-12 max-w-7xl">
-        <div className="grid gap-8 md:grid-cols-4">
+        <div className="grid gap-8 md:grid-cols-5">
           <div className="flex flex-col gap-2 md:col-span-1">
             <Link href="#" className="flex items-center gap-2" prefetch={false}>
               <Bot className="h-6 w-6 text-primary" />
@@ -16,7 +16,7 @@ export function Footer() {
               Agentic AI for the Future of Work.
             </p>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 md:col-span-3 gap-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 md:col-span-4 gap-8">
             <div>
               <h4 className="font-semibold">Platform</h4>
               <ul className="mt-4 space-y-2 text-sm">
@@ -40,6 +40,18 @@ export function Footer() {
                 <li><a href="#" className="text-muted-foreground hover:text-foreground">Privacy Policy</a></li>
                 <li><a href="#" className="text-muted-foreground hover:text-foreground">Terms of Use</a></li>
               </ul>
+            </div>
+            <div>
+              <h4 className="font-semibold">Findme Messenger</h4>
+              <p className="mt-4 text-sm text-muted-foreground">
+                A messaging platform powered by Nerida Brain.
+              </p>
+              <Button asChild className="mt-4" size="sm">
+                <a href="#">
+                  <DownloadCloud />
+                  Download
+                </a>
+              </Button>
             </div>
           </div>
         </div>
