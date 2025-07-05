@@ -1,9 +1,10 @@
 import Link from "next/link"
+import Image from "next/image"
 import { Button } from "@/components/ui/button"
 
 export function Hero() {
   return (
-    <section className="relative py-20 md:py-32">
+    <section className="relative pt-20 pb-12 md:pt-32 md:pb-20">
       <div
         className="absolute top-0 left-1/2 -translate-x-1/2 -z-10 h-full w-full max-w-7xl"
         style={{
@@ -25,6 +26,18 @@ export function Hero() {
             <Button size="lg" variant="outline" asChild>
               <Link href="#platform">Explore Capabilities</Link>
             </Button>
+          </div>
+           <div className="mt-12 md:mt-16 w-full px-4">
+              <div className="relative rounded-xl border bg-card shadow-2xl shadow-primary/10">
+                <Image
+                  src="https://placehold.co/1200x600.png"
+                  width={1200}
+                  height={600}
+                  alt="Nerida AI Platform Showcase"
+                  className="rounded-xl"
+                  data-ai-hint="agentic ai"
+                />
+              </div>
           </div>
         </div>
       </div>
