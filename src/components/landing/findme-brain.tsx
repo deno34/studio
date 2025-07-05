@@ -82,7 +82,14 @@ export function NeridaBrain() {
             Nerida Brain is our core intelligent engine that powers real-time interaction, task execution, and semantic understanding. It's designed to be your business's central nervous system.
           </p>
           <ul className="mt-6 space-y-4">
-            {['Real-time Messaging', 'Smart Scheduling', 'Task Execution', 'Semantic Understanding'].map((item, i) => (
+            {[
+              'Autonomous Task Execution',
+              'Multi-agent Collaboration',
+              'Context-Aware Reasoning',
+              'Proactive Intelligence',
+              'Smart Scheduling',
+              'Enterprise-Grade Security'
+            ].map((item, i) => (
               <li key={i} className="flex items-center gap-3">
                 <div className="w-2 h-2 rounded-full bg-primary" />
                 <span className="font-medium">{item}</span>
