@@ -1,4 +1,3 @@
-import Image from "next/image"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 
@@ -26,21 +25,6 @@ export function Hero() {
             <Button size="lg" variant="outline" asChild>
               <Link href="#platform">Explore Capabilities</Link>
             </Button>
-          </div>
-        </div>
-        <div className="mt-16 w-full max-w-5xl mx-auto">
-          <div className="relative rounded-xl border bg-card/50 shadow-xl">
-             <div className="absolute inset-0 -z-10 rounded-xl" style={{
-               background: 'radial-gradient(circle at 50% 50%, hsla(var(--primary) / 0.05), transparent 70%)'
-             }}></div>
-            <Image
-              src="https://placehold.co/1200x600.png"
-              width={1200}
-              height={600}
-              alt="Nerida AI Platform Visualization"
-              data-ai-hint="abstract network"
-              className="rounded-xl"
-            />
           </div>
         </div>
       </div>
