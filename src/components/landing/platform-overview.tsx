@@ -6,7 +6,7 @@ export function PlatformOverview() {
     {
       icon: <BrainCircuit className="w-8 h-8 text-primary" />,
       title: "Real-time Decision Support",
-      description: "Leverage Findme Brain to analyze data streams and provide actionable insights instantly."
+      description: "Leverage Nerida Brain to analyze data streams and provide actionable insights instantly."
     },
     {
       icon: <Plug className="w-8 h-8 text-primary" />,
