@@ -16,6 +16,9 @@ const messages = [
 ];
 
 function ChatMessage({ message }: { message: { from: 'user' | 'bot'; text: string } }) {
+  if (!message) {
+    return null;
+  }
   const isBot = message.from === 'bot';
   return (
     <div className={cn("flex items-start gap-3", isBot ? "" : "justify-end")}>
