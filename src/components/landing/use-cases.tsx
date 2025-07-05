@@ -1,6 +1,6 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent } from "@/components/ui/card"
-import { LifeBuoy, Truck, HeartPulse, ShoppingCart } from "lucide-react"
+import { LifeBuoy, Truck, HeartPulse, ShoppingCart, Landmark, Factory } from "lucide-react"
 
 export function UseCases() {
   const industries = [
@@ -35,6 +35,22 @@ export function UseCases() {
       problem: "Managing inventory and personalizing customer experiences.",
       solution: "Agents track stock levels, automate reordering, and provide personalized product recommendations to customers.",
       useCase: "Inventory Management & Personalized Shopping Assistants"
+    },
+    {
+      value: "finance",
+      label: "Finance",
+      icon: <Landmark className="w-5 h-5 mr-2" />,
+      problem: "Manual fraud detection is slow, and client onboarding is document-intensive.",
+      solution: "AI agents monitor transactions for anomalies in real-time, verify identities for KYC, and automate onboarding workflows.",
+      useCase: "Automated Fraud Detection & Client Onboarding"
+    },
+    {
+      value: "manufacturing",
+      label: "Manufacturing",
+      icon: <Factory className="w-5 h-5 mr-2" />,
+      problem: "Unplanned downtime and supply chain disruptions lead to costly production delays.",
+      solution: "Agents perform predictive maintenance by analyzing sensor data and dynamically adjust schedules based on supply chain signals.",
+      useCase: "Predictive Maintenance & Dynamic Scheduling"
     }
   ]
 
@@ -49,7 +65,7 @@ export function UseCases() {
         </div>
         <div className="mt-12">
           <Tabs defaultValue="support" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 h-auto">
+            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 h-auto">
               {industries.map((industry) => (
                 <TabsTrigger key={industry.value} value={industry.value} className="py-2.5 flex items-center justify-center text-center">
                   {industry.icon}
