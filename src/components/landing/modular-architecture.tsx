@@ -27,7 +27,7 @@ export function ModularArchitecture() {
               <Card className="z-10 bg-background/80 backdrop-blur-sm p-4 w-48 text-center shadow-lg">
                 <Cpu className="w-8 h-8 mx-auto text-primary"/>
                 <h3 className="font-bold mt-2">Nerida AI Core</h3>
-                <p className="text-xs text-muted-foreground">Findme Brain</p>
+                <p className="text-xs text-muted-foreground">Nerida Brain</p>
               </Card>
 
               <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-px h-1/2 bg-border"></div>

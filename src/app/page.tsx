@@ -1,7 +1,7 @@
 import { Header } from '@/components/landing/header';
 import { Hero } from '@/components/landing/hero';
 import { PlatformOverview } from '@/components/landing/platform-overview';
-import { FindmeBrain } from '@/components/landing/findme-brain';
+import { NeridaBrain } from '@/components/landing/findme-brain';
 import { ModularArchitecture } from '@/components/landing/modular-architecture';
 import { EthicalAI } from '@/components/landing/ethical-ai';
 import { UseCases } from '@/components/landing/use-cases';
@@ -16,7 +16,7 @@ export default function Home() {
       <main className="flex-1">
         <Hero />
         <PlatformOverview />
-        <FindmeBrain />
+        <NeridaBrain />
         <ModularArchitecture />
         <EthicalAI />
         <UseCases />

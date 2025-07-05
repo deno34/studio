@@ -8,7 +8,7 @@ import { Bot, User } from 'lucide-react';
 import { Button } from '../ui/button';
 
 const messages = [
-  { from: 'user', text: 'Findme, analyze Q3 sales data and identify top-performing regions.' },
+  { from: 'user', text: 'Nerida, analyze Q3 sales data and identify top-performing regions.' },
   { from: 'bot', text: 'Analyzing Q3 sales data now...' },
   { from: 'bot', text: 'Analysis complete. The Northeast region shows a 25% increase in sales, driven by the new product line. The West coast is flat. Would you like a detailed report?' },
   { from: 'user', text: 'Yes, generate a report and schedule a meeting with the regional heads for tomorrow at 10 AM.' },
@@ -39,7 +39,7 @@ function ChatMessage({ message }: { message: { from: 'user' | 'bot'; text: strin
   );
 }
 
-export function FindmeBrain() {
+export function NeridaBrain() {
   const [displayedMessages, setDisplayedMessages] = useState<any[]>([]);
   const [isSimulating, setIsSimulating] = useState(true);
   const chatContainerRef = useRef<HTMLDivElement>(null);
@@ -76,10 +76,10 @@ export function FindmeBrain() {
     <section id="features" className="py-20 md:py-28">
       <div className="container max-w-7xl grid md:grid-cols-2 gap-12 items-center">
         <div className="md:pr-8">
-          <span className="text-primary font-semibold">Findme Brain</span>
+          <span className="text-primary font-semibold">Nerida Brain</span>
           <h2 className="text-3xl md:text-4xl font-bold mt-2">The Neural Core of Nerida</h2>
           <p className="mt-4 text-muted-foreground text-lg">
-            Findme Brain is our core intelligent engine that powers real-time interaction, task execution, and semantic understanding. It's designed to be your business's central nervous system.
+            Nerida Brain is our core intelligent engine that powers real-time interaction, task execution, and semantic understanding. It's designed to be your business's central nervous system.
           </p>
           <ul className="mt-6 space-y-4">
             {['Real-time Messaging', 'Smart Scheduling', 'Task Execution', 'Semantic Understanding'].map((item, i) => (
