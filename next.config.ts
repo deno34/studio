@@ -16,6 +16,12 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'firebasestudio.prompt-tuning.uc.r.appspot.com',
+        port: '',
+        pathname: '/**',
+      },
     ],
   },
 };
