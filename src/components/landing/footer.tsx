@@ -15,6 +15,10 @@ export function Footer() {
             <p className="text-sm text-muted-foreground">
               Agentic AI for the Future of Work.
             </p>
+            <div className="mt-4 text-sm space-y-1">
+              <a href="mailto:neridaai@gmail.com" className="text-muted-foreground hover:text-foreground block">neridaai@gmail.com</a>
+              <a href="mailto:trapslashinc@gmail.com" className="text-muted-foreground hover:text-foreground block">trapslashinc@gmail.com</a>
+            </div>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 md:col-span-4 gap-8">
             <div>
