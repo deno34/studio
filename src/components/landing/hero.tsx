@@ -30,7 +30,8 @@ export function Hero() {
            <div className="mt-12 md:mt-16 w-full px-4">
               <div className="relative rounded-xl border bg-card shadow-2xl shadow-primary/10">
                 <Image
-                  src="https://firebasestudio.prompt-tuning.uc.r.appspot.com/image-proxy/93b827e6-f55a-4632-841c-2252a1c0d152_1200x900.jpeg"
+                  src="https://placehold.co/1200x600.png"
+                  data-ai-hint="abstract technology"
                   width={1200}
                   height={600}
                   alt="Nerida AI Platform Showcase"

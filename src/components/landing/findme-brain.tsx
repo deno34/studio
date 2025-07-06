@@ -8,14 +8,16 @@ import { Bot, User } from 'lucide-react';
 import { Button } from '../ui/button';
 
 const messages = [
-  { from: 'user', text: 'Nerida, analyze Q3 sales data and identify top-performing regions.' },
-  { from: 'bot', text: 'Analyzing Q3 sales data now...' },
-  { from: 'bot', text: 'Analysis complete. The Northeast region shows a 25% increase in sales, driven by the new product line. The West coast is flat. Would you like a detailed report?' },
-  { from: 'user', text: 'Yes, generate a report and schedule a meeting with the regional heads for tomorrow at 10 AM.' },
-  { from: 'bot', text: 'Report generated. I\'ve scheduled "Q3 Sales Review" with all regional heads for tomorrow at 10 AM and attached the report to the invite.' }
+  { from: 'user' as const, text: 'Nerida, analyze Q3 sales data and identify top-performing regions.' },
+  { from: 'bot' as const, text: 'Analyzing Q3 sales data now...' },
+  { from: 'bot' as const, text: 'Analysis complete. The Northeast region shows a 25% increase in sales, driven by the new product line. The West coast is flat. Would you like a detailed report?' },
+  { from: 'user' as const, text: 'Yes, generate a report and schedule a meeting with the regional heads for tomorrow at 10 AM.' },
+  { from: 'bot' as const, text: 'Report generated. I\'ve scheduled "Q3 Sales Review" with all regional heads for tomorrow at 10 AM and attached the report to the invite.' }
 ];
 
-function ChatMessage({ message }: { message: { from: 'user' | 'bot'; text: string } }) {
+type Message = { from: 'user' | 'bot'; text: string };
+
+function ChatMessage({ message }: { message: Message }) {
   if (!message) {
     return null;
   }
@@ -40,7 +42,7 @@ function ChatMessage({ message }: { message: { from: 'user' | 'bot'; text: strin
 }
 
 export function NeridaBrain() {
-  const [displayedMessages, setDisplayedMessages] = useState<any[]>([]);
+  const [displayedMessages, setDisplayedMessages] = useState<Message[]>([]);
   const [isSimulating, setIsSimulating] = useState(true);
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
@@ -105,7 +107,7 @@ export function NeridaBrain() {
                   <ChatMessage key={index} message={msg} />
                 ))}
               </div>
-              <div className="mt-4 flex justify-center">
+              <div className=".mt-4 flex justify-center">
                 <Button onClick={runSimulation} disabled={isSimulating} variant="outline" size="sm">
                   {isSimulating ? 'Simulation in progress...' : 'Re-run Simulation'}
                 </Button>
