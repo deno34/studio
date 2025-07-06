@@ -30,7 +30,7 @@ export function Hero() {
            <div className="mt-12 md:mt-16 w-full px-4">
               <div className="relative rounded-xl border bg-card shadow-2xl shadow-primary/10">
                 <Image
-                  src="https://firebasestudio.prompt-tuning.uc.r.appspot.com/image/f6a5b6f0-51a8-422f-98f5-932d80d19de4"
+                  src="https://placehold.co/1200x600.png"
                   data-ai-hint="abstract technology"
                   width={1200}
                   height={600}
