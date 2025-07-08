@@ -11,7 +11,7 @@ export function Hero() {
           background: 'radial-gradient(circle at top, hsla(var(--primary) / 0.1), transparent 40%)'
         }}
        />
-      <div className="container max-w-7xl text-center px-4">
+      <div className="container max-w-7xl text-center">
         <div className="flex flex-col items-center">
           <h1 className="text-4xl font-black md:text-6xl lg:text-7xl tracking-tighter">
             Agentic AI for the <br className="hidden md:block" /> Future of Work
@@ -27,15 +27,14 @@ export function Hero() {
               <Link href="#platform">Explore Capabilities</Link>
             </Button>
           </div>
-           <div className="mt-[-2.75rem] w-full px-4">
+           <div className="mt-[-2.75rem] w-full">
               <div className="relative rounded-xl border bg-card shadow-2xl shadow-primary/10">
                 <Image
-                  src="https://placehold.co/1200x600.png"
+                  src="/icon.png"
                   width={1200}
                   height={600}
                   alt="Nerida AI Platform Showcase"
                   className="rounded-xl object-cover"
-                  data-ai-hint="abstract technology"
                 />
               </div>
           </div>
