@@ -30,8 +30,7 @@ export function Hero() {
            <div className="mt-12 md:mt-16 w-full px-4">
               <div className="relative rounded-xl border bg-card shadow-2xl shadow-primary/10">
                 <Image
-                  src="https://placehold.co/1200x600.png"
-                  data-ai-hint="abstract technology"
+                  src="/icon.png"
                   width={1200}
                   height={600}
                   alt="Nerida AI Platform Showcase"
