@@ -27,7 +27,7 @@ export function Hero() {
               <Link href="#platform">Explore Capabilities</Link>
             </Button>
           </div>
-           <div className="mt-[-2rem] md:mt-[-2.75rem] w-full px-4">
+           <div className="mt-[-1.5rem] w-full px-4">
               <div className="relative rounded-xl border bg-card shadow-2xl shadow-primary/10">
                 <Image
                   src="/icon.png"
