@@ -18,7 +18,7 @@ function ArchitectureNode({ icon, title, description, className }: { icon: React
 export function ModularArchitecture() {
   return (
     <section className="py-20 md:py-28 bg-muted/50 dark:bg-muted/10">
-      <div className="container max-w-7xl">
+      <div className="container max-w-7xl px-4">
         <div className="grid md:grid-cols-2 gap-12 items-center">
           <div className="relative">
             <div className="relative p-8 rounded-xl aspect-square flex items-center justify-center">

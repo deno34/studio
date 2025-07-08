@@ -25,7 +25,7 @@ run();
 export function DeveloperPortalPreview() {
   return (
     <section id="developers" className="py-20 md:py-28 bg-muted/50 dark:bg-muted/10">
-      <div className="container max-w-7xl grid md:grid-cols-2 gap-12 items-center">
+      <div className="container max-w-7xl grid md:grid-cols-2 gap-12 items-center px-4">
         <div className="md:pr-8">
           <h2 className="text-3xl md:text-4xl font-bold">Built for Developers</h2>
           <p className="mt-4 text-muted-foreground text-lg">

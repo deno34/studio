@@ -27,7 +27,7 @@ export function EthicalAI() {
           background: 'linear-gradient(180deg, hsl(var(--background)), hsla(var(--primary) / 0.05), hsl(var(--background)))'
         }}
        />
-      <div className="container max-w-7xl">
+      <div className="container max-w-7xl px-4">
         <div className="text-center">
           <h2 className="text-3xl md:text-4xl font-bold">Built on a Foundation of Trust</h2>
           <p className="mt-4 max-w-2xl mx-auto text-muted-foreground">

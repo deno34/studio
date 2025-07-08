@@ -56,7 +56,7 @@ export function UseCases() {
 
   return (
     <section id="use-cases" className="py-20 md:py-28">
-      <div className="container max-w-7xl">
+      <div className="container max-w-7xl px-4">
         <div className="text-center">
           <h2 className="text-3xl md:text-4xl font-bold">Transforming Every Industry</h2>
           <p className="mt-4 max-w-2xl mx-auto text-muted-foreground">

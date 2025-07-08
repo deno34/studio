@@ -48,7 +48,7 @@ export function EarlyAccess() {
 
   return (
     <section id="early-access" className="py-20 md:py-28">
-      <div className="container max-w-3xl">
+      <div className="container max-w-3xl px-4">
         <div className="text-center">
           <h2 className="text-3xl md:text-4xl font-bold">Request Early Access</h2>
           <p className="mt-4 max-w-2xl mx-auto text-muted-foreground">
