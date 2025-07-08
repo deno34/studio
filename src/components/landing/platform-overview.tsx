@@ -21,9 +21,9 @@ export function PlatformOverview() {
   ]
 
   return (
-    <section id="platform" className="py-20 md:py-28 bg-muted/50 dark:bg-muted/10">
+    <section id="platform" className="pb-20 md:pb-28 bg-muted/50 dark:bg-muted/10">
       <div className="container max-w-7xl">
-        <div className="text-center">
+        <div className="text-center max-w-4xl mx-auto relative z-10 mt-[-6rem] md:mt-[-8rem] bg-background/80 dark:bg-zinc-900/80 backdrop-blur-sm p-8 rounded-xl shadow-2xl border">
           <h2 className="text-3xl md:text-4xl font-bold">A Platform Built for Tomorrow</h2>
           <p className="mt-4 max-w-2xl mx-auto text-muted-foreground">
             Nerida AI provides the modular building blocks for creating powerful, business-aware AI agents.
