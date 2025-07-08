@@ -46,7 +46,7 @@ export function Footer() {
               </ul>
             </div>
             <div>
-              <h4 className="font-semibold">Findme Messenger</h4>
+              <h4 className="font-semibold">Brainsay</h4>
               <p className="mt-4 text-sm text-muted-foreground">
                 A messaging platform powered by Nerida Brain.
               </p>
