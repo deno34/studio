@@ -3,7 +3,6 @@ import Link from "next/link"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
 import { Menu, Bot } from "lucide-react"
-import { ThemeToggle } from "./theme-toggle"
 
 export function Header() {
   const navLinks = [
@@ -34,7 +33,6 @@ export function Header() {
           ))}
         </nav>
         <div className="hidden md:flex items-center gap-2">
-           <ThemeToggle />
            <Button asChild>
             <Link href="#early-access">Request Early Access</Link>
           </Button>
@@ -65,7 +63,6 @@ export function Header() {
                 ))}
               </nav>
               <div className="flex items-center gap-2">
-                <ThemeToggle />
                 <Button asChild className="flex-1">
                   <Link href="#early-access">Request Early Access</Link>
                 </Button>

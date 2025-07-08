@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { Bot, User } from 'lucide-react';
 import { Button } from '../ui/button';
@@ -55,7 +55,7 @@ export function NeridaBrain() {
       if (currentMessageIndex < messages.length) {
         setDisplayedMessages(prev => [...prev, messages[currentMessageIndex]]);
         currentMessageIndex++;
-        setTimeout(addMessage, messages[currentMessageIndex-1].from === 'bot' ? 1500 : 800);
+        setTimeout(addMessage, messages[currentMessageIndex-1]?.from === 'bot' ? 1500 : 800);
       } else {
         setIsSimulating(false);
       }
@@ -76,7 +76,7 @@ export function NeridaBrain() {
 
   return (
     <section id="features" className="py-20 md:py-28">
-      <div className="container max-w-7xl grid md:grid-cols-2 gap-12 items-center">
+      <div className="container max-w-7xl grid md:grid-cols-2 gap-12 items-center px-4">
         <div className="md:pr-8">
           <span className="text-primary font-semibold">Nerida Brain</span>
           <h2 className="text-3xl md:text-4xl font-bold mt-2">The Neural Core of Nerida</h2>
