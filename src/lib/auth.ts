@@ -1,14 +1,15 @@
 
-'use client';
-import { 
+import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signInWithPopup,
   GoogleAuthProvider,
   signOut,
+  getAuth,
 } from "firebase/auth";
-import { auth } from './firebase'; // Import the initialized auth instance
+import { app } from './firebase'; // Import the initialized app
 
+const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
 export const signUpWithEmail = (email, password) => {
