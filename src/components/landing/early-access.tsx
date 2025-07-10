@@ -18,8 +18,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast"
 import { Lock, Loader2 } from "lucide-react"
 import { useState } from "react"
-import { saveEarlyAccessRequest } from "@/ai/flows/save-early-access-flow"
 import { EarlyAccessRequestSchema } from "@/lib/types"
+import { saveEarlyAccessRequest } from "@/app/actions"
 
 const formSchema = EarlyAccessRequestSchema;
 
