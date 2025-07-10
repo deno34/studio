@@ -2,21 +2,24 @@
 import Link from "next/link"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
-import { Menu, Bot } from "lucide-react"
+import { Menu, Bot, LogOut } from "lucide-react"
+import { useAuth } from "@/contexts/auth-context"
 
 export function Header() {
+  const { user, signOutUser } = useAuth()
+
   const navLinks = [
-    { href: "#platform", label: "Platform" },
-    { href: "#features", label: "Features" },
-    { href: "#ethics", label: "Ethics" },
-    { href: "#use-cases", label: "Use Cases" },
-    { href: "#developers", label: "Developers" },
+    { href: "/#platform", label: "Platform" },
+    { href: "/#features", label: "Features" },
+    { href: "/#ethics", label: "Ethics" },
+    { href: "/#use-cases", label: "Use Cases" },
+    { href: "/#developers", label: "Developers" },
   ]
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 max-w-7xl items-center justify-between px-4">
-        <Link href="#" className="flex items-center gap-2" prefetch={false}>
+        <Link href="/" className="flex items-center gap-2" prefetch={false}>
           <Bot className="h-6 w-6 text-primary" />
           <span className="font-bold text-lg">Nerida AI</span>
         </Link>
@@ -33,9 +36,25 @@ export function Header() {
           ))}
         </nav>
         <div className="hidden md:flex items-center gap-2">
-           <Button asChild>
-            <Link href="#early-access">Request Early Access</Link>
-          </Button>
+          {user ? (
+            <>
+              <Button asChild variant="ghost">
+                <Link href="/dashboard">Dashboard</Link>
+              </Button>
+              <Button onClick={signOutUser} variant="outline" size="icon" title="Logout">
+                <LogOut className="h-4 w-4" />
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button variant="ghost" asChild>
+                <Link href="/login">Login</Link>
+              </Button>
+              <Button asChild>
+                <Link href="/signup">Sign Up</Link>
+              </Button>
+            </>
+          )}
         </div>
         <Sheet>
           <SheetTrigger asChild>
@@ -62,10 +81,26 @@ export function Header() {
                   </Link>
                 ))}
               </nav>
-              <div className="flex items-center gap-2">
-                <Button asChild className="flex-1">
-                  <Link href="#early-access">Request Early Access</Link>
-                </Button>
+              <div className="flex flex-col gap-2">
+                 {user ? (
+                  <>
+                    <Button asChild className="flex-1">
+                      <Link href="/dashboard">Dashboard</Link>
+                    </Button>
+                     <Button onClick={signOutUser} variant="outline" className="flex-1">
+                      Logout
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Button asChild className="flex-1">
+                      <Link href="/login">Login</Link>
+                    </Button>
+                    <Button asChild variant="outline" className="flex-1">
+                      <Link href="/signup">Sign Up</Link>
+                    </Button>
+                  </>
+                )}
               </div>
             </div>
           </SheetContent>
