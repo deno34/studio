@@ -27,7 +27,7 @@ export function Hero() {
               </Button>
           </div>
       </div>
-       <div className="container max-w-5xl px-4 mt-16 md:mt-24">
+       <div className="container max-w-7xl px-4 mt-16 md:mt-24">
             <div className="relative rounded-xl border bg-card shadow-2xl shadow-primary/10 p-2">
             <Image
                 src="/icon.png"
