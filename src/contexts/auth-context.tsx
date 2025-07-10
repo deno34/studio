@@ -12,7 +12,8 @@ import {
   signInWithPopup,
   GoogleAuthProvider,
   signOut,
-  type Auth
+  type Auth,
+  sendEmailVerification
 } from 'firebase/auth';
 import { initializeApp, getApps, getApp, type FirebaseApp } from 'firebase/app';
 import { firebaseConfig } from '@/lib/firebaseConfig';
@@ -23,6 +24,7 @@ interface AuthContextType {
   signInWithEmail: (email, password) => Promise<any>;
   signUpWithEmail: (email, password) => Promise<any>;
   signInWithGoogle: () => Promise<any>;
+  sendVerificationEmail: (user: User) => Promise<void>;
   signOutUser: () => Promise<void>;
 }
 
@@ -35,7 +37,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const router = useRouter();
 
   useEffect(() => {
-    // This code will only run on the client
     const app: FirebaseApp = !getApps().length ? initializeApp(firebaseConfig) : getApp();
     const authInstance = getAuth(app);
     setAuth(authInstance);
@@ -63,6 +64,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const provider = new GoogleAuthProvider();
     return signInWithPopup(auth, provider);
   }
+  
+  const handleSendVerificationEmail = (user: User) => {
+    if (!auth) throw new Error("Auth not initialized");
+    return sendEmailVerification(user);
+  }
 
   const handleSignOut = async () => {
     if (!auth) throw new Error("Auth not initialized");
@@ -80,6 +86,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     signInWithEmail: handleSignInWithEmail,
     signUpWithEmail: handleSignUpWithEmail,
     signInWithGoogle: handleSignInWithGoogle,
+    sendVerificationEmail: handleSendVerificationEmail,
     signOutUser: handleSignOut
   };
 

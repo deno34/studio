@@ -24,7 +24,7 @@ const formSchema = z.object({
 export default function SignUpPage() {
   const router = useRouter();
   const { toast } = useToast();
-  const { signUpWithEmail, signInWithGoogle } = useAuth();
+  const { signUpWithEmail, signInWithGoogle, sendVerificationEmail } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
@@ -42,8 +42,12 @@ export default function SignUpPage() {
     try {
       const userCredential = await signUpWithEmail(values.email, values.password);
       if (userCredential?.user) {
-        toast({ title: "Account created successfully!" });
-        router.push("/dashboard");
+        await sendVerificationEmail(userCredential.user);
+        toast({ 
+          title: "Account created!",
+          description: "We've sent a verification link to your email address.",
+        });
+        router.push("/login");
       }
     } catch (error: any) {
       toast({
