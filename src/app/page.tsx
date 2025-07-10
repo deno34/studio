@@ -5,6 +5,11 @@ import { UseCases } from '@/components/landing/use-cases';
 import { Testimonials } from '@/components/landing/testimonials';
 import { EarlyAccess } from '@/components/landing/early-access';
 import { Footer } from '@/components/landing/footer';
+import { PlatformOverview } from '@/components/landing/platform-overview';
+import { NeridaBrain } from '@/components/landing/findme-brain';
+import { EthicalAI } from '@/components/landing/ethical-ai';
+import { ModularArchitecture } from '@/components/landing/modular-architecture';
+import { DeveloperPortalPreview } from '@/components/landing/developer-portal-preview';
 
 export default function Home() {
   return (
@@ -12,9 +17,14 @@ export default function Home() {
       <Header />
       <main className="flex-1">
         <Hero />
+        <PlatformOverview />
         <ProductFeatures />
+        <NeridaBrain />
         <UseCases />
+        <EthicalAI />
         <Testimonials />
+        <ModularArchitecture />
+        <DeveloperPortalPreview />
         <EarlyAccess />
       </main>
       <Footer />
