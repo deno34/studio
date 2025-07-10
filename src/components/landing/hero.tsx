@@ -19,7 +19,7 @@ export function Hero() {
           <p className="mt-4 max-w-2xl text-lg text-muted-foreground">
             Meet Nerida AI — ethical, modular, and intelligent automation for every industry.
           </p>
-          <div className="mt-8 flex flex-wrap justify-center gap-4 relative z-10">
+          <div className="mt-8 flex flex-wrap justify-center gap-4">
             <Button size="lg" asChild>
               <Link href="#early-access">Request Early Access</Link>
             </Button>
@@ -27,7 +27,7 @@ export function Hero() {
               <Link href="#platform">Explore Capabilities</Link>
             </Button>
           </div>
-           <div className="mt-[-2.75rem] w-full">
+           <div className="mt-16 w-full px-8 md:mt-24">
               <div className="relative rounded-xl border bg-card shadow-2xl shadow-primary/10">
                 <Image
                   src="https://placehold.co/1200x600.png"
