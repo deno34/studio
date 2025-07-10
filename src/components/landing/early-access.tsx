@@ -16,17 +16,17 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useToast } from "@/hooks/use-toast"
-import { Lock } from "lucide-react"
+import { Lock, Loader2 } from "lucide-react"
+import { useState } from "react"
+import { saveEarlyAccessRequest } from "@/ai/flows/save-early-access-flow"
+import { EarlyAccessRequestSchema } from "@/lib/types"
 
-const formSchema = z.object({
-  email: z.string().email({ message: "Please enter a valid email address." }),
-  company: z.string().min(2, { message: "Company name must be at least 2 characters." }),
-  intendedUse: z.string().min(10, { message: "Please describe your intended use case." }),
-  timeline: z.string().nonempty({ message: "Please select an integration timeline." }),
-})
+const formSchema = EarlyAccessRequestSchema;
 
 export function EarlyAccess() {
   const { toast } = useToast()
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -37,13 +37,30 @@ export function EarlyAccess() {
     },
   })
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values)
-    toast({
-      title: "Registration successful!",
-      description: "Thank you for your interest. We'll be in touch soon.",
-    })
-    form.reset()
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    setIsSubmitting(true)
+    try {
+      const result = await saveEarlyAccessRequest(values)
+
+      if (result.success) {
+        toast({
+          title: "Registration successful!",
+          description: "Thank you for your interest. We'll be in touch soon.",
+        })
+        form.reset()
+      } else {
+        throw new Error(result.message)
+      }
+    } catch (error) {
+      console.error(error)
+      toast({
+        title: "Oh no, something went wrong.",
+        description: error instanceof Error ? error.message : "There was a problem with your request. Please try again.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -122,8 +139,9 @@ export function EarlyAccess() {
                   </FormItem>
                 )}
               />
-              <Button type="submit" size="lg" className="w-full bg-accent hover:bg-accent/90 text-accent-foreground">
-                Register for Early Access
+              <Button type="submit" size="lg" className="w-full bg-accent hover:bg-accent/90 text-accent-foreground" disabled={isSubmitting}>
+                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {isSubmitting ? 'Registering...' : 'Register for Early Access'}
               </Button>
             </form>
           </Form>
