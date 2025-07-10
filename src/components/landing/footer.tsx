@@ -1,3 +1,4 @@
+
 import Link from "next/link"
 import { Bot, Twitter, Github, Linkedin } from "lucide-react"
 import { Button } from "../ui/button"
@@ -8,7 +9,7 @@ export function Footer() {
       <div className="container py-12 max-w-7xl px-4">
         <div className="grid gap-8 md:grid-cols-5">
           <div className="flex flex-col gap-2 md:col-span-2">
-            <Link href="#" className="flex items-center gap-2" prefetch={false}>
+            <Link href="/" className="flex items-center gap-2" prefetch={false}>
               <Bot className="h-6 w-6 text-primary" />
               <span className="font-bold">Nerida AI</span>
             </Link>
@@ -33,9 +34,9 @@ export function Footer() {
             <div>
               <h4 className="font-semibold">Platform</h4>
               <ul className="mt-4 space-y-2 text-sm">
-                <li><Link href="#features" className="text-muted-foreground hover:text-foreground">Features</Link></li>
-                <li><Link href="#use-cases" className="text-muted-foreground hover:text-foreground">Use Cases</Link></li>
-                <li><Link href="#testimonials" className="text-muted-foreground hover:text-foreground">Testimonials</Link></li>
+                <li><Link href="/features" className="text-muted-foreground hover:text-foreground">Features</Link></li>
+                <li><Link href="/use-cases" className="text-muted-foreground hover:text-foreground">Use Cases</Link></li>
+                <li><Link href="/pricing" className="text-muted-foreground hover:text-foreground">Pricing</Link></li>
                 <li><Link href="#early-access" className="text-muted-foreground hover:text-foreground">Demo</Link></li>
               </ul>
             </div>
@@ -43,8 +44,8 @@ export function Footer() {
               <h4 className="font-semibold">Company</h4>
               <ul className="mt-4 space-y-2 text-sm">
                 <li><a href="#" className="text-muted-foreground hover:text-foreground">About Us</a></li>
-                <li><a href="#" className="text-muted-foreground hover:text-foreground">Blog</a></li>
-                <li><a href="#" className="text-muted-foreground hover:text-foreground">Careers</a></li>
+                <li><Link href="/blog" className="text-muted-foreground hover:text-foreground">Blog</Link></li>
+                <li><Link href="/careers" className="text-muted-foreground hover:text-foreground">Careers</Link></li>
                 <li><a href="mailto:neridaai@gmail.com" className="text-muted-foreground hover:text-foreground">Contact</a></li>
               </ul>
             </div>

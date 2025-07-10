@@ -1,3 +1,4 @@
+
 "use client"
 import Link from "next/link"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
@@ -14,6 +15,7 @@ export function Header() {
     { href: "/use-cases", label: "Use Cases" },
     { href: "/blog", label: "Blog" },
     { href: "/pricing", label: "Pricing" },
+    { href: "/careers", label: "Careers" },
   ]
 
   return (
