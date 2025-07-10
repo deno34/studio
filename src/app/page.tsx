@@ -10,6 +10,7 @@ import { NeridaBrain } from '@/components/landing/findme-brain';
 import { EthicalAI } from '@/components/landing/ethical-ai';
 import { ModularArchitecture } from '@/components/landing/modular-architecture';
 import { DeveloperPortalPreview } from '@/components/landing/developer-portal-preview';
+import { BrainsayPromo } from '@/components/landing/brainsay-promo';
 
 export default function Home() {
   return (
@@ -25,6 +26,7 @@ export default function Home() {
         <Testimonials />
         <ModularArchitecture />
         <DeveloperPortalPreview />
+        <BrainsayPromo />
         <EarlyAccess />
       </main>
       <Footer />
