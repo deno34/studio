@@ -1,10 +1,8 @@
-
 'use client';
+
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { onAuthStateChanged, User, signOut, Auth } from 'firebase/auth';
-import { getAuth } from 'firebase/auth';
-import { app } from '@/lib/firebase';
 import { useRouter } from 'next/navigation';
+import { onAuthStateChanged, User, auth, signOutUser as firebaseSignOut } from '@/lib/auth';
 
 interface AuthContextType {
   user: User | null;
@@ -17,14 +15,10 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [auth, setAuth] = useState<Auth | null>(null);
   const router = useRouter();
 
   useEffect(() => {
-    const authInstance = getAuth(app);
-    setAuth(authInstance);
-
-    const unsubscribe = onAuthStateChanged(authInstance, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUser(user);
       setLoading(false);
     });
@@ -33,9 +27,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const signOutUser = async () => {
-    if (auth) {
-      await signOut(auth);
+    try {
+      await firebaseSignOut();
       router.push('/');
+    } catch (error) {
+      console.error("Error signing out: ", error);
     }
   };
 
