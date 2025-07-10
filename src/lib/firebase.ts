@@ -1,8 +1,6 @@
-/**
- * @fileOverview Shared Firebase configuration.
- * This file exports the configuration object required to initialize Firebase services.
- * It is imported by both client-side and server-side modules.
- */
+
+// Your web app's Firebase configuration
+// This file is safe to share, as it doesn't contain any secrets.
 export const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
   authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,

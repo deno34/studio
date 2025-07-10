@@ -39,9 +39,11 @@ export default function SignUpPage() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
     try {
-      await signUpWithEmail(values.email, values.password);
-      toast({ title: "Account created successfully!" });
-      router.push("/dashboard");
+      const userCredential = await signUpWithEmail(values.email, values.password);
+      if (userCredential.user) {
+        toast({ title: "Account created successfully!" });
+        router.push("/dashboard");
+      }
     } catch (error) {
       toast({
         variant: "destructive",
@@ -56,9 +58,11 @@ export default function SignUpPage() {
   async function handleGoogleSignIn() {
     setIsGoogleLoading(true);
     try {
-      await signInWithGoogle();
-      toast({ title: "Signed in with Google successfully!" });
-      router.push("/dashboard");
+      const userCredential = await signInWithGoogle();
+      if (userCredential.user) {
+        toast({ title: "Signed in with Google successfully!" });
+        router.push("/dashboard");
+      }
     } catch (error) {
        toast({
         variant: "destructive",
