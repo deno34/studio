@@ -13,7 +13,7 @@ export function BrainsayPromo() {
                 </div>
             </div>
             <div className="md:pr-8">
-              <p className="text-primary font-semibold">Also from Nerida AI</p>
+              <p className="text-primary font-semibold">Also from Nerida Ai creators</p>
               <h2 className="text-3xl md:text-4xl font-bold mt-2">Introducing Brainsay</h2>
               <p className="mt-4 text-muted-foreground text-lg">
                 From the creators of Nerida AI comes Brainsay, a revolutionary messaging platform powered by the same intelligent Nerida Brain. Experience smarter conversations and seamless collaboration.
