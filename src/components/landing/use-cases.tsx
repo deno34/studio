@@ -1,96 +1,55 @@
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Card, CardContent } from "@/components/ui/card"
-import { LifeBuoy, Truck, HeartPulse, ShoppingCart, Landmark, Factory } from "lucide-react"
+import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Rocket, PenTool, Bot, Building, Users } from "lucide-react"
 
 export function UseCases() {
-  const industries = [
+  const solutions = [
     {
-      value: "support",
-      label: "Customer Support",
-      icon: <LifeBuoy className="w-5 h-5 mr-2" />,
-      problem: "High ticket volumes and slow resolution times.",
-      solution: "Nerida agents triage tickets, answer common questions, and route complex issues to the right human agent, 24/7.",
-      useCase: "Automated Ticket Routing & Tier-1 Support"
+      icon: <Rocket className="w-8 h-8 text-primary" />,
+      title: "For Startups",
+      description: "Scale faster with an AI that handles customer support, lead generation, and market research, letting you focus on product."
     },
     {
-      value: "logistics",
-      label: "Logistics",
-      icon: <Truck className="w-5 h-5 mr-2" />,
-      problem: "Inefficient routing and supply chain disruptions.",
-      solution: "AI agents monitor shipments in real-time, predict delays, and automatically optimize routes to save time and fuel.",
-      useCase: "Real-time Order Optimization & Disruption Alerts"
+      icon: <PenTool className="w-8 h-8 text-primary" />,
+      title: "For Agencies",
+      description: "Automate client reporting, draft marketing copy, and manage project workflows to deliver results more efficiently."
     },
     {
-      value: "healthcare",
-      label: "Healthcare",
-      icon: <HeartPulse className="w-5 h-5 mr-2" />,
-      problem: "Administrative overhead and appointment scheduling chaos.",
-      solution: "HIPAA-compliant agents manage patient appointments, send reminders, and handle billing inquiries securely.",
-      useCase: "Smart Appointment Scheduling & Patient Communication"
+      icon: <Bot className="w-8 h-8 text-primary" />,
+      title: "For Tech Teams",
+      description: "Integrate with your CI/CD pipeline, automate testing scripts, and generate documentation to speed up development cycles."
     },
     {
-      value: "retail",
-      label: "Retail",
-      icon: <ShoppingCart className="w-5 h-5 mr-2" />,
-      problem: "Managing inventory and personalizing customer experiences.",
-      solution: "Agents track stock levels, automate reordering, and provide personalized product recommendations to customers.",
-      useCase: "Inventory Management & Personalized Shopping Assistants"
+      icon: <Building className="w-8 h-8 text-primary" />,
+      title: "For Retail",
+      description: "Optimize inventory, personalize customer interactions, and manage your supply chain with an AI that understands your business."
     },
     {
-      value: "finance",
-      label: "Finance",
-      icon: <Landmark className="w-5 h-5 mr-2" />,
-      problem: "Manual fraud detection is slow, and client onboarding is document-intensive.",
-      solution: "AI agents monitor transactions for anomalies in real-time, verify identities for KYC, and automate onboarding workflows.",
-      useCase: "Automated Fraud Detection & Client Onboarding"
-    },
-    {
-      value: "manufacturing",
-      label: "Manufacturing",
-      icon: <Factory className="w-5 h-5 mr-2" />,
-      problem: "Unplanned downtime and supply chain disruptions lead to costly production delays.",
-      solution: "Agents perform predictive maintenance by analyzing sensor data and dynamically adjust schedules based on supply chain signals.",
-      useCase: "Predictive Maintenance & Dynamic Scheduling"
+      icon: <Users className="w-8 h-8 text-primary" />,
+      title: "For Remote Workers",
+      description: "Summarize meetings, organize tasks, and draft communications to stay productive and connected, wherever you are."
     }
   ]
-
   return (
     <section id="use-cases" className="py-20 md:py-28">
       <div className="container max-w-7xl px-4">
         <div className="text-center">
-          <h2 className="text-3xl md:text-4xl font-bold">Transforming Every Industry</h2>
+          <h2 className="text-3xl md:text-4xl font-bold">Solutions for Every Team</h2>
           <p className="mt-4 max-w-2xl mx-auto text-muted-foreground">
-            From startups to enterprise giants, Nerida AI provides intelligent automation solutions tailored to your unique challenges.
+            Nerida AI is a flexible partner, adapting to the unique challenges and workflows of your industry.
           </p>
         </div>
-        <div className="mt-12">
-          <Tabs defaultValue="support" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 h-auto">
-              {industries.map((industry) => (
-                <TabsTrigger key={industry.value} value={industry.value} className="py-2.5 flex items-center justify-center text-center">
-                  {industry.icon}
-                  {industry.label}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-            {industries.map((industry) => (
-              <TabsContent key={industry.value} value={industry.value}>
-                <Card className="mt-6">
-                  <CardContent className="p-8 grid md:grid-cols-2 gap-8">
-                    <div>
-                      <h3 className="text-xl font-bold">{industry.label}</h3>
-                      <p className="mt-2 text-muted-foreground"><span className="font-semibold text-foreground">The Problem:</span> {industry.problem}</p>
-                      <p className="mt-4 text-muted-foreground"><span className="font-semibold text-foreground">The Nerida Solution:</span> {industry.solution}</p>
-                    </div>
-                    <div className="bg-muted p-6 rounded-lg">
-                      <h4 className="font-semibold">Example Use Case</h4>
-                      <p className="mt-2 text-primary font-medium">{industry.useCase}</p>
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-            ))}
-          </Tabs>
+        <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {solutions.map((solution) => (
+            <Card key={solution.title} className="bg-card/50 dark:bg-muted/20 border-border/50 transition-all hover:border-primary/50 hover:shadow-lg hover:-translate-y-1">
+              <CardHeader className="p-6">
+                <div className="p-3 rounded-full bg-primary/10 mb-4 inline-block">
+                 {solution.icon}
+                </div>
+                <CardTitle>{solution.title}</CardTitle>
+                <CardDescription className="mt-2">{solution.description}</CardDescription>
+              </CardHeader>
+            </Card>
+          ))}
         </div>
       </div>
     </section>
