@@ -9,11 +9,11 @@ export function Header() {
   const { user, signOutUser } = useAuth()
 
   const navLinks = [
-    { href: "/#platform", label: "Platform" },
-    { href: "/#features", label: "Features" },
-    { href: "/#ethics", label: "Ethics" },
-    { href: "/#use-cases", label: "Use Cases" },
-    { href: "/#developers", label: "Developers" },
+    { href: "/features", label: "Features" },
+    { href: "/ethics", label: "Ethics" },
+    { href: "/use-cases", label: "Use Cases" },
+    { href: "/blog", label: "Blog" },
+    { href: "/pricing", label: "Pricing" },
   ]
 
   return (
@@ -65,7 +65,7 @@ export function Header() {
           </SheetTrigger>
           <SheetContent side="right">
             <div className="flex flex-col gap-6 p-6">
-              <Link href="#" className="flex items-center gap-2" prefetch={false}>
+              <Link href="/" className="flex items-center gap-2" prefetch={false}>
                 <Bot className="h-6 w-6 text-primary" />
                 <span className="font-bold">Nerida AI</span>
               </Link>
