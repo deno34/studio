@@ -3,7 +3,7 @@
 import { EarlyAccessRequest, EarlyAccessRequestSchema } from '@/lib/types';
 import { initializeApp, getApps, getApp, FirebaseApp } from "firebase/app";
 import { getFirestore, addDoc, collection } from "firebase/firestore";
-import { firebaseConfig } from '@/lib/firebase';
+import { firebaseConfig } from '@/lib/firebaseConfig';
 
 // This is a server-only file, so we can initialize a separate Firebase app instance here.
 // This prevents conflicts with the client-side Firebase app.

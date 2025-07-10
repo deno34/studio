@@ -1,24 +1,28 @@
+
 'use client';
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { 
-  initializeApp, 
-  getApps, 
-  getApp, 
-  type FirebaseApp 
-} from 'firebase/app';
-import {
+  type User, 
   onAuthStateChanged,
   getAuth,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  signInWithPopup,
+  GoogleAuthProvider,
   signOut,
-  type User,
+  type Auth
 } from 'firebase/auth';
-import { firebaseConfig } from '@/lib/firebase';
+import { initializeApp, getApps, getApp, type FirebaseApp } from 'firebase/app';
+import { firebaseConfig } from '@/lib/firebaseConfig';
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
+  signInWithEmail: (email, password) => Promise<any>;
+  signUpWithEmail: (email, password) => Promise<any>;
+  signInWithGoogle: () => Promise<any>;
   signOutUser: () => Promise<void>;
 }
 
@@ -27,24 +31,41 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [auth, setAuth] = useState<Auth | null>(null);
   const router = useRouter();
 
   useEffect(() => {
     // This code will only run on the client
-    const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
-    const auth = getAuth(app);
+    const app: FirebaseApp = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+    const authInstance = getAuth(app);
+    setAuth(authInstance);
     
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(authInstance, (user) => {
       setUser(user);
       setLoading(false);
     });
-
-    // Cleanup subscription on unmount
+    
     return () => unsubscribe();
   }, []);
 
-  const signOutUser = async () => {
-    const auth = getAuth(getApp()); // Ensure we have the auth instance
+  const handleSignInWithEmail = (email, password) => {
+    if (!auth) throw new Error("Auth not initialized");
+    return signInWithEmailAndPassword(auth, email, password);
+  }
+  
+  const handleSignUpWithEmail = (email, password) => {
+    if (!auth) throw new Error("Auth not initialized");
+    return createUserWithEmailAndPassword(auth, email, password);
+  }
+
+  const handleSignInWithGoogle = () => {
+    if (!auth) throw new Error("Auth not initialized");
+    const provider = new GoogleAuthProvider();
+    return signInWithPopup(auth, provider);
+  }
+
+  const handleSignOut = async () => {
+    if (!auth) throw new Error("Auth not initialized");
     try {
       await signOut(auth);
       router.push('/');
@@ -53,11 +74,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const value = { user, loading, signOutUser };
+  const value = { 
+    user, 
+    loading, 
+    signInWithEmail: handleSignInWithEmail,
+    signUpWithEmail: handleSignUpWithEmail,
+    signInWithGoogle: handleSignInWithGoogle,
+    signOutUser: handleSignOut
+  };
 
   return (
     <AuthContext.Provider value={value}>
-      {!loading && children}
+      {children}
     </AuthContext.Provider>
   );
 };

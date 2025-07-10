@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from "react";
@@ -15,19 +14,17 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 import { useAuth } from "@/contexts/auth-context";
 
-
 const formSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email." }),
-  password: z.string().min(6, { message: "Password must be at least 6 characters." }),
+  password: z.string().min(1, { message: "Password is required." }),
 });
 
-export default function SignUpPage() {
+export default function LoginPage() {
   const router = useRouter();
   const { toast } = useToast();
-  const { signUpWithEmail, signInWithGoogle } = useAuth();
+  const { signInWithEmail, signInWithGoogle } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
-
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -40,15 +37,15 @@ export default function SignUpPage() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
     try {
-      const userCredential = await signUpWithEmail(values.email, values.password);
-      if (userCredential?.user) {
-        toast({ title: "Account created successfully!" });
+      const userCredential = await signInWithEmail(values.email, values.password);
+      if (userCredential.user) {
+        toast({ title: "Login successful!" });
         router.push("/dashboard");
       }
-    } catch (error: any) {
+    } catch (error) {
       toast({
         variant: "destructive",
-        title: "Sign up failed.",
+        title: "Login failed.",
         description: error.message,
       });
     } finally {
@@ -60,11 +57,11 @@ export default function SignUpPage() {
     setIsGoogleLoading(true);
     try {
       const userCredential = await signInWithGoogle();
-      if (userCredential?.user) {
-        toast({ title: "Signed in with Google successfully!" });
+      if(userCredential.user) {
+        toast({ title: "Login successful!" });
         router.push("/dashboard");
       }
-    } catch (error: any) {
+    } catch (error) {
        toast({
         variant: "destructive",
         title: "Google sign-in failed.",
@@ -79,8 +76,8 @@ export default function SignUpPage() {
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl">Create an Account</CardTitle>
-          <CardDescription>Get started with Nerida AI by creating an account.</CardDescription>
+          <CardTitle className="text-2xl">Welcome Back!</CardTitle>
+          <CardDescription>Enter your credentials to access your account.</CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -113,11 +110,11 @@ export default function SignUpPage() {
               />
               <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Create Account
+                Login
               </Button>
             </form>
           </Form>
-           <div className="relative my-4">
+          <div className="relative my-4">
             <div className="absolute inset-0 flex items-center">
               <span className="w-full border-t" />
             </div>
@@ -125,7 +122,7 @@ export default function SignUpPage() {
               <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
             </div>
           </div>
-           <Button variant="outline" className="w-full" onClick={handleGoogleSignIn} disabled={isGoogleLoading}>
+          <Button variant="outline" className="w-full" onClick={handleGoogleSignIn} disabled={isGoogleLoading}>
             {isGoogleLoading ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             ) : (
@@ -134,9 +131,9 @@ export default function SignUpPage() {
             Google
           </Button>
           <p className="mt-4 text-center text-sm text-muted-foreground">
-            Already have an account?{" "}
-            <Link href="/login" className="font-medium text-primary hover:underline">
-              Log in
+            Don't have an account?{" "}
+            <Link href="/signup" className="font-medium text-primary hover:underline">
+              Sign up
             </Link>
           </p>
         </CardContent>

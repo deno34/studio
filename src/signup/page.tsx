@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from "react";
@@ -41,11 +40,11 @@ export default function SignUpPage() {
     setIsLoading(true);
     try {
       const userCredential = await signUpWithEmail(values.email, values.password);
-      if (userCredential?.user) {
+      if (userCredential.user) {
         toast({ title: "Account created successfully!" });
         router.push("/dashboard");
       }
-    } catch (error: any) {
+    } catch (error) {
       toast({
         variant: "destructive",
         title: "Sign up failed.",
@@ -60,11 +59,11 @@ export default function SignUpPage() {
     setIsGoogleLoading(true);
     try {
       const userCredential = await signInWithGoogle();
-      if (userCredential?.user) {
+      if (userCredential.user) {
         toast({ title: "Signed in with Google successfully!" });
         router.push("/dashboard");
       }
-    } catch (error: any) {
+    } catch (error) {
        toast({
         variant: "destructive",
         title: "Google sign-in failed.",

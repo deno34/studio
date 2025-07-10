@@ -13,7 +13,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
-import { signInWithEmail, signInWithGoogle } from "@/lib/auth";
+import { useAuth } from "@/contexts/auth-context";
 
 const formSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email." }),
@@ -23,6 +23,7 @@ const formSchema = z.object({
 export default function LoginPage() {
   const router = useRouter();
   const { toast } = useToast();
+  const { signInWithEmail, signInWithGoogle } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
@@ -38,11 +39,11 @@ export default function LoginPage() {
     setIsLoading(true);
     try {
       const userCredential = await signInWithEmail(values.email, values.password);
-      if (userCredential.user) {
+      if (userCredential?.user) {
         toast({ title: "Login successful!" });
         router.push("/dashboard");
       }
-    } catch (error) {
+    } catch (error: any) {
       toast({
         variant: "destructive",
         title: "Login failed.",
@@ -57,11 +58,11 @@ export default function LoginPage() {
     setIsGoogleLoading(true);
     try {
       const userCredential = await signInWithGoogle();
-      if(userCredential.user) {
+      if(userCredential?.user) {
         toast({ title: "Login successful!" });
         router.push("/dashboard");
       }
-    } catch (error) {
+    } catch (error: any) {
        toast({
         variant: "destructive",
         title: "Google sign-in failed.",

@@ -1,6 +1,4 @@
 
-// Your web app's Firebase configuration
-// This file is safe to share, as it doesn't contain any secrets.
 export const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
   authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
