@@ -30,11 +30,12 @@ export function Hero() {
            <div className="mt-[-2.75rem] w-full">
               <div className="relative rounded-xl border bg-card shadow-2xl shadow-primary/10">
                 <Image
-                  src="/icon.png"
+                  src="https://placehold.co/1200x600.png"
                   width={1200}
                   height={600}
                   alt="Nerida AI Platform Showcase"
                   className="rounded-xl object-cover"
+                  data-ai-hint="futuristic platform"
                 />
               </div>
           </div>
