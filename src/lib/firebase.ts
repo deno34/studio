@@ -19,8 +19,8 @@ if (!firebaseConfig.apiKey || !firebaseConfig.projectId) {
   console.warn(
     "Firebase config is not set up correctly. " +
     "Please create a .env.local file in the root of your project " +
-    "and add your Firebase project credentials. For example: " +
-    "NEXT_PUBLIC_FIREBASE_API_KEY='your-api-key'"
+    "and add your Firebase project credentials using NEXT_PUBLIC_ prefixes. " +
+    "Remember to restart your server after adding the keys."
   );
 }
 
