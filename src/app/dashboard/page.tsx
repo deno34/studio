@@ -152,9 +152,11 @@ export default function DashboardPage() {
                             <p className="text-sm text-muted-foreground">{user.email}</p>
                         </div>
                     </div>
-                     <Button variant="outline" size="sm">
-                        Edit Profile
-                        <ChevronRight className="w-4 h-4 ml-2" />
+                     <Button variant="outline" size="sm" asChild>
+                        <Link href="/dashboard/profile">
+                            Edit Profile
+                            <ChevronRight className="w-4 h-4 ml-2" />
+                        </Link>
                     </Button>
                 </CardContent>
               </Card>
