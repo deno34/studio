@@ -17,9 +17,9 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { useToast } from '@/hooks/use-toast';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Loader2, ArrowLeft } from 'lucide-react';
-import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { getStorage, ref, uploadBytes, getDownloadURL, FirebaseStorage } from 'firebase/storage';
 import { updateProfile } from 'firebase/auth';
-import { getApp } from 'firebase/app';
+import { getApp, FirebaseApp } from 'firebase/app';
 
 
 const profileFormSchema = z.object({
@@ -35,6 +35,12 @@ export default function ProfilePage() {
   const { toast } = useToast();
   const [isSaving, setIsSaving] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [firebaseApp, setFirebaseApp] = useState<FirebaseApp | null>(null);
+
+  useEffect(() => {
+    // This ensures getApp() is only called on the client side
+    setFirebaseApp(getApp());
+  }, []);
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
@@ -69,15 +75,14 @@ export default function ProfilePage() {
   };
 
   const onSubmit = async (data: ProfileFormValues) => {
-    if (!user) return;
+    if (!user || !firebaseApp) return;
     setIsSaving(true);
     let photoURL = user.photoURL;
 
     try {
       // Step 1: Upload image to Firebase Storage if a new one is provided
       if (data.photoFile) {
-        const app = getApp();
-        const storage = getStorage(app);
+        const storage: FirebaseStorage = getStorage(firebaseApp);
         const storageRef = ref(storage, `profile-pictures/${user.uid}`);
         await uploadBytes(storageRef, data.photoFile);
         photoURL = await getDownloadURL(storageRef);
@@ -177,7 +182,7 @@ export default function ProfilePage() {
                     )}
                   />
 
-                  <Button type="submit" disabled={isSaving}>
+                  <Button type="submit" disabled={isSaving || !firebaseApp}>
                     {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     Save Changes
                   </Button>
