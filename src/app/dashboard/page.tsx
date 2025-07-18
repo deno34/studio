@@ -11,17 +11,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
-import { LayoutDashboard, KeyRound, Bot, FileText, CreditCard } from 'lucide-react';
+import { LayoutDashboard, KeyRound, Bot, FileText, CreditCard, ChevronRight, BarChart3, ShieldCheck } from 'lucide-react';
 
 function DashboardSkeleton() {
   return (
     <div className="flex flex-col min-h-dvh bg-background text-foreground">
       <Header />
-      <main className="flex-1">
+      <main className="flex-1 bg-muted/30">
         <div className="container max-w-7xl py-12 px-4">
-          <Skeleton className="h-8 w-1/4 mb-4" />
-          <Skeleton className="h-4 w-1/2 mb-8" />
-          <div className="grid md:grid-cols-[240px_1fr] gap-8">
+          <div className="grid md:grid-cols-[240px_1fr] gap-8 items-start">
             <div className="flex flex-col gap-2">
               <Skeleton className="h-10 w-full" />
               <Skeleton className="h-10 w-full" />
@@ -29,21 +27,15 @@ function DashboardSkeleton() {
               <Skeleton className="h-10 w-full" />
               <Skeleton className="h-10 w-full" />
             </div>
-            <div>
-              <Card>
-                <CardHeader>
-                  <div className="flex items-center gap-4">
-                    <Skeleton className="h-16 w-16 rounded-full" />
-                    <div className="space-y-2">
-                      <Skeleton className="h-6 w-48" />
-                      <Skeleton className="h-4 w-64" />
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <Skeleton className="h-10 w-32" />
-                </CardContent>
-              </Card>
+            <div className="space-y-8">
+               <Skeleton className="h-8 w-48 mb-2" />
+               <Skeleton className="h-4 w-72 mb-8" />
+              <div className="grid gap-8 sm:grid-cols-2">
+                <Skeleton className="h-40 w-full" />
+                <Skeleton className="h-40 w-full" />
+                <Skeleton className="h-40 w-full" />
+                <Skeleton className="h-40 w-full" />
+              </div>
             </div>
           </div>
         </div>
@@ -58,11 +50,11 @@ export default function DashboardPage() {
   const router = useRouter();
 
   const navItems = [
-    { href: '/dashboard', label: 'Overview', icon: <LayoutDashboard /> },
-    { href: '#', label: 'My APIs', icon: <KeyRound /> },
-    { href: '#', label: 'My Agents', icon: <Bot /> },
-    { href: '#', label: 'Docs', icon: <FileText /> },
-    { href: '#', label: 'Billing', icon: <CreditCard /> },
+    { href: '/dashboard', label: 'Overview', icon: <LayoutDashboard className="w-4 h-4 mr-2" /> },
+    { href: '#', label: 'My APIs', icon: <KeyRound className="w-4 h-4 mr-2" /> },
+    { href: '#', label: 'My Agents', icon: <Bot className="w-4 h-4 mr-2" /> },
+    { href: '#', label: 'Docs', icon: <FileText className="w-4 h-4 mr-2" /> },
+    { href: '#', label: 'Billing', icon: <CreditCard className="w-4 h-4 mr-2" /> },
   ];
 
   useEffect(() => {
@@ -78,10 +70,10 @@ export default function DashboardPage() {
   return (
     <div className="flex flex-col min-h-dvh bg-background text-foreground">
       <Header />
-      <main className="flex-1">
+      <main className="flex-1 bg-muted/30">
         <div className="container max-w-7xl py-12 px-4">
           <div className="grid md:grid-cols-[240px_1fr] gap-8 items-start">
-            <nav className="flex flex-col gap-2">
+            <nav className="flex flex-col gap-1 sticky top-20">
               {navItems.map((item) => (
                 <Button
                   key={item.label}
@@ -98,25 +90,75 @@ export default function DashboardPage() {
             </nav>
             <div className="space-y-8">
               <div>
-                <h1 className="text-3xl font-bold">Dashboard</h1>
-                <p className="text-muted-foreground">Welcome back to Nerida AI.</p>
+                <h1 className="text-3xl font-bold">Welcome, {user.displayName || user.email?.split('@')[0]}</h1>
+                <p className="text-muted-foreground">Here's a quick overview of your Nerida AI account.</p>
               </div>
+              <div className="grid gap-6 sm:grid-cols-2">
+                 <Card>
+                    <CardHeader className="flex flex-row items-center justify-between pb-2">
+                        <CardTitle className="text-sm font-medium">API Keys</CardTitle>
+                        <KeyRound className="w-4 h-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold">2 Active</div>
+                        <p className="text-xs text-muted-foreground">Manage your API credentials</p>
+                    </CardContent>
+                 </Card>
+                 <Card>
+                    <CardHeader className="flex flex-row items-center justify-between pb-2">
+                        <CardTitle className="text-sm font-medium">Agents Running</CardTitle>
+                        <Bot className="w-4 h-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold">3 / 5</div>
+                        <p className="text-xs text-muted-foreground">Using Pro Plan capacity</p>
+                    </CardContent>
+                 </Card>
+                 <Card>
+                    <CardHeader className="flex flex-row items-center justify-between pb-2">
+                        <CardTitle className="text-sm font-medium">Usage This Month</CardTitle>
+                        <BarChart3 className="w-4 h-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold">1.2M</div>
+                        <p className="text-xs text-muted-foreground">Tokens processed</p>
+                    </CardContent>
+                 </Card>
+                 <Card>
+                    <CardHeader className="flex flex-row items-center justify-between pb-2">
+                        <CardTitle className="text-sm font-medium">Account Status</CardTitle>
+                        <ShieldCheck className="w-4 h-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold">Verified</div>
+                        <p className="text-xs text-muted-foreground">Your account is secure</p>
+                    </CardContent>
+                 </Card>
+              </div>
+
               <Card>
                 <CardHeader>
                   <CardTitle>User Profile</CardTitle>
-                  <CardDescription>This is your profile information.</CardDescription>
+                  <CardDescription>Your personal information and settings.</CardDescription>
                 </CardHeader>
-                <CardContent className="flex items-center gap-4">
-                  <Avatar className="h-16 w-16">
-                    <AvatarImage src={user.photoURL ?? undefined} alt={user.displayName || user.email || ''} />
-                    <AvatarFallback>{user.email?.charAt(0).toUpperCase()}</AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <h2 className="text-lg font-semibold">{user.displayName || 'No display name'}</h2>
-                    <p className="text-sm text-muted-foreground">{user.email}</p>
-                  </div>
+                <CardContent className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                        <Avatar className="h-16 w-16">
+                            <AvatarImage src={user.photoURL ?? undefined} alt={user.displayName || user.email || ''} />
+                            <AvatarFallback>{user.email?.charAt(0).toUpperCase()}</AvatarFallback>
+                        </Avatar>
+                        <div>
+                            <h2 className="text-lg font-semibold">{user.displayName || 'No display name'}</h2>
+                            <p className="text-sm text-muted-foreground">{user.email}</p>
+                        </div>
+                    </div>
+                     <Button variant="outline" size="sm">
+                        Edit Profile
+                        <ChevronRight className="w-4 h-4 ml-2" />
+                    </Button>
                 </CardContent>
               </Card>
+
             </div>
           </div>
         </div>
