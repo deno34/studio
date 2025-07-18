@@ -77,7 +77,7 @@ export default function DashboardPage() {
               {navItems.map((item) => (
                 <Button
                   key={item.label}
-                  variant={router.pathname === item.href ? 'secondary' : 'ghost'}
+                  variant={item.href === '/dashboard' ? 'secondary' : 'ghost'}
                   className="justify-start"
                   asChild
                 >
