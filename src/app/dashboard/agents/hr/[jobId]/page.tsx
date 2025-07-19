@@ -12,7 +12,7 @@ import { ArrowLeft, UploadCloud, Loader2, FileText, User, Percent, Star } from '
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-import type { JobPosting } from '@/lib/types';
+import type { JobPosting, Candidate } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -21,14 +21,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-
-// Mock data for candidates - this will be replaced with real data
-const mockCandidates = [
-  { id: '1', name: 'Alice Johnson', match: 92, skills: 'React, Node.js, TypeScript', status: 'Interviewing', explanation: 'Excellent match for all core skills and 5+ years of relevant experience.' },
-  { id: '2', name: 'Bob Williams', match: 85, skills: 'Python, Django, AWS', status: 'Shortlisted', explanation: 'Strong backend skills and AWS certification. Lacks frontend experience.' },
-  { id: '3', name: 'Charlie Brown', match: 78, skills: 'Java, Spring, Kubernetes', status: 'New', explanation: 'Solid Java experience but does not match the preferred tech stack.' },
-  { id: '4', name: 'Diana Prince', match: 95, skills: 'AI, PyTorch, LLMs, Vector DBs', status: 'New', explanation: 'Perfectly aligns with all required and desired skills for the Senior AI Engineer role.' },
-];
+import { ScheduleInterviewForm } from '@/components/dashboard/hr/schedule-interview-form';
 
 function JobPageSkeleton() {
     return (
@@ -63,53 +56,110 @@ export default function JobDetailPage() {
   const { jobId } = useParams();
   const { toast } = useToast();
   const [job, setJob] = useState<JobPosting | null>(null);
+  const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
+  const [isRanking, setIsRanking] = useState<string | null>(null);
 
-  // Sort candidates by match percentage descending
-  const sortedCandidates = [...mockCandidates].sort((a, b) => b.match - a.match);
+
+  const fetchJobAndCandidates = async () => {
+      if (typeof jobId !== 'string') return;
+      setIsLoading(true);
+      try {
+        // In a real app, you might fetch these in parallel
+        const jobRes = await fetch(`/api/modules/hr/jobs/${jobId}`, {
+            headers: { 'x-api-key': process.env.NEXT_PUBLIC_MASTER_API_KEY! }
+        });
+        if (!jobRes.ok) throw new Error('Failed to fetch job details');
+        const jobData = await jobRes.json();
+        setJob(jobData);
+
+        const candidatesRes = await fetch(`/api/modules/hr/candidates?jobId=${jobId}`, {
+            headers: { 'x-api-key': process.env.NEXT_PUBLIC_MASTER_API_KEY! }
+        });
+        if (!candidatesRes.ok) throw new Error('Failed to fetch candidates');
+        const candidatesData = await candidatesRes.json();
+        setCandidates(candidatesData.sort((a: Candidate, b: Candidate) => (b.matchPercentage || 0) - (a.matchPercentage || 0)));
+
+      } catch (error) {
+        console.error(error);
+        toast({ variant: 'destructive', title: 'Error', description: 'Could not fetch job data.' });
+      } finally {
+        setIsLoading(false);
+      }
+  };
 
   useEffect(() => {
-    if (typeof jobId === 'string') {
-      const fetchJobDetails = async () => {
-        setIsLoading(true);
-        try {
-          // This API endpoint doesn't exist yet, we'll create it next.
-          // For now, we just mock the loading state.
-          // const response = await fetch(`/api/modules/hr/jobs/${jobId}`);
-          // if (!response.ok) throw new Error('Failed to fetch job details');
-          // const data = await response.json();
-          
-          // MOCK DATA for now
-          await new Promise(resolve => setTimeout(resolve, 1000));
-          setJob({
-            id: jobId,
-            title: 'Senior AI Engineer',
-            location: 'Remote',
-            description: 'We are looking for a talented Senior AI Engineer to join our innovative team. The ideal candidate will have extensive experience in designing, developing, and deploying machine learning models and AI-powered applications. You will work on cutting-edge projects that push the boundaries of what is possible with artificial intelligence. Responsibilities include leading AI projects, mentoring junior engineers, and collaborating with cross-functional teams to deliver high-quality solutions. A strong background in Python, TensorFlow or PyTorch, and cloud platforms like AWS or GCP is required.',
-            status: 'Open',
-            createdAt: new Date().toISOString(),
-            userId: 'test-user',
-          });
-
-        } catch (error) {
-          console.error(error);
-          toast({ variant: 'destructive', title: 'Error', description: 'Could not fetch job details.' });
-        } finally {
-          setIsLoading(false);
-        }
-      };
-      fetchJobDetails();
-    }
+    fetchJobAndCandidates();
   }, [jobId, toast]);
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
-    if (files && files.length > 0) {
-        // We will implement the upload logic in a future step.
-        toast({ title: "Upload started...", description: `${files.length} resumes are being uploaded.` });
+    if (!files || files.length === 0 || typeof jobId !== 'string') return;
+    
+    setIsUploading(true);
+    toast({ title: "Upload started...", description: `${files.length} resumes are being processed.` });
+
+    try {
+        const formData = new FormData();
+        formData.append('jobId', jobId);
+        for (const file of files) {
+            formData.append('file', file);
+        }
+
+        const res = await fetch('/api/modules/hr/candidates', {
+            method: 'POST',
+            headers: { 'x-api-key': process.env.NEXT_PUBLIC_MASTER_API_KEY! },
+            body: formData,
+        });
+
+        if (!res.ok) {
+            const errorData = await res.json();
+            throw new Error(errorData.error || 'Upload failed');
+        }
+
+        const result = await res.json();
+        
+        toast({ title: "Upload Successful!", description: "Resumes have been added." });
+        
+        // Now, rank the new candidate(s)
+        setIsRanking(result.candidate.id); // Set ranking state for visual feedback
+        toast({ title: "AI Ranking in Progress...", description: "Your new candidate is being analyzed." });
+
+        const rankRes = await fetch('/api/modules/hr/candidates/rank', {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                'x-api-key': process.env.NEXT_PUBLIC_MASTER_API_KEY! 
+            },
+            body: JSON.stringify({ jobId, resumeText: result.candidate.resumeText, candidateId: result.candidate.id }),
+        });
+
+        if (!rankRes.ok) {
+            throw new Error('Ranking process failed');
+        }
+
+        toast({ title: "Ranking Complete!", description: "Candidate has been scored." });
+
+
+    } catch (error) {
+        console.error(error);
+        toast({ variant: 'destructive', title: 'An error occurred', description: error instanceof Error ? error.message : "Could not process resumes." });
+    } finally {
+        setIsUploading(false);
+        setIsRanking(null);
+        fetchJobAndCandidates(); // Refresh data
     }
-  }
+  };
+
+  const onInterviewScheduled = () => {
+    toast({
+      title: 'Interview Scheduled!',
+      description: "The interview has been successfully scheduled (mocked).",
+    });
+    // In a real app, you might want to refresh the candidate's status here
+    fetchJobAndCandidates();
+  };
 
   return (
     <div className="flex flex-col min-h-dvh bg-background text-foreground">
@@ -150,8 +200,10 @@ export default function JobDetailPage() {
                             <UploadCloud className="h-12 w-12 text-muted-foreground" />
                             <p className="font-medium">Drag & drop resumes here or click to upload</p>
                             <p className="text-sm text-muted-foreground">PDF, DOC, DOCX</p>
-                            <Button asChild variant="outline" size="sm" className="cursor-pointer">
-                                <label htmlFor="resume-upload">Browse Files</label>
+                             <Button asChild variant="outline" size="sm" className="relative">
+                                <label htmlFor="resume-upload" className="cursor-pointer">
+                                    {isUploading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Uploading...</> : 'Browse Files'}
+                                </label>
                             </Button>
                             <Input id="resume-upload" type="file" multiple className="sr-only" onChange={handleFileUpload} disabled={isUploading}/>
                         </div>
@@ -163,39 +215,47 @@ export default function JobDetailPage() {
                                 <TableHead><Percent className="h-4 w-4 inline-block mr-1" /> Match</TableHead>
                                 <TableHead><Star className="h-4 w-4 inline-block mr-1" /> Key Skills</TableHead>
                                 <TableHead>Status</TableHead>
-                                <TableHead><span className="sr-only">Actions</span></TableHead>
+                                <TableHead className="text-right">Actions</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {sortedCandidates.length > 0 ? sortedCandidates.map(c => (
+                                {candidates.length > 0 ? candidates.map(c => (
                                     <TableRow key={c.id}>
                                         <TableCell className="font-medium">
                                           {c.name}
-                                          {c.match > 90 && <Badge variant="secondary" className="ml-2 bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300">Top Candidate</Badge>}
+                                          {(c.matchPercentage || 0) > 90 && <Badge variant="secondary" className="ml-2 bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300">Top Candidate</Badge>}
+                                          {isRanking === c.id && <Badge variant="outline" className="ml-2"><Loader2 className="mr-1 h-3 w-3 animate-spin"/>Ranking...</Badge>}
                                         </TableCell>
                                         <TableCell>
-                                          <TooltipProvider>
-                                            <Tooltip>
-                                              <TooltipTrigger asChild>
-                                                <div className="flex items-center gap-1 cursor-help">
-                                                  <span>{c.match}%</span>
-                                                  <div className="flex">
-                                                    {[...Array(5)].map((_, i) => (
-                                                      <Star key={i} className={`w-3 h-3 ${c.match >= (i+1)*20 ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300 dark:text-gray-600'}`} />
-                                                    ))}
+                                          {c.matchPercentage !== undefined ? (
+                                             <TooltipProvider>
+                                              <Tooltip>
+                                                <TooltipTrigger asChild>
+                                                  <div className="flex items-center gap-1 cursor-help">
+                                                    <span>{c.matchPercentage}%</span>
+                                                    <div className="flex">
+                                                      {[...Array(5)].map((_, i) => (
+                                                        <Star key={i} className={`w-3 h-3 ${(c.matchPercentage || 0) >= (i+1)*20 ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300 dark:text-gray-600'}`} />
+                                                      ))}
+                                                    </div>
                                                   </div>
-                                                </div>
-                                              </TooltipTrigger>
-                                              <TooltipContent>
-                                                <p className="max-w-xs">{c.explanation}</p>
-                                              </TooltipContent>
-                                            </Tooltip>
-                                          </TooltipProvider>
+                                                </TooltipTrigger>
+                                                <TooltipContent>
+                                                  <p className="max-w-xs">{c.matchExplanation}</p>
+                                                </TooltipContent>
+                                              </Tooltip>
+                                            </TooltipProvider>
+                                          ) : (
+                                            <span className="text-muted-foreground">Not ranked</span>
+                                          )}
                                         </TableCell>
-                                        <TableCell className="text-muted-foreground">{c.skills}</TableCell>
+                                        <TableCell className="text-muted-foreground max-w-xs truncate">{c.matchingSkills?.join(', ') || 'N/A'}</TableCell>
                                         <TableCell><Badge variant="outline">{c.status}</Badge></TableCell>
-                                        <TableCell className="text-right">
-                                            <Button variant="ghost" size="sm">View Details</Button>
+                                        <TableCell className="text-right space-x-2">
+                                            <ScheduleInterviewForm candidate={c} onInterviewScheduled={onInterviewScheduled}>
+                                              <Button variant="outline" size="sm">Schedule</Button>
+                                            </ScheduleInterviewForm>
+                                            <Button variant="ghost" size="sm">View</Button>
                                         </TableCell>
                                     </TableRow>
                                 )) : (
