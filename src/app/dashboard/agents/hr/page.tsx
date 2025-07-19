@@ -1,15 +1,55 @@
 
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Header } from '@/components/landing/header';
 import { Footer } from '@/components/landing/footer';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, PlusCircle } from 'lucide-react';
+import { ArrowLeft, PlusCircle, Loader2 } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { CreateJobPostForm } from '@/components/dashboard/hr/create-job-post-form';
+import type { JobPosting } from '@/lib/types';
+import { useToast } from '@/hooks/use-toast';
+import { Badge } from '@/components/ui/badge';
 
 export default function HRAgentPage() {
+  const [jobPostings, setJobPostings] = useState<JobPosting[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
+
+  const fetchJobs = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch('/api/modules/hr/jobs', {
+        headers: { 'x-api-key': process.env.NEXT_PUBLIC_MASTER_API_KEY! }
+      });
+      if (!response.ok) {
+        throw new Error('Failed to fetch job postings.');
+      }
+      const data = await response.json();
+      setJobPostings(data);
+    } catch (error) {
+      console.error(error);
+      toast({
+        variant: 'destructive',
+        title: 'Error fetching jobs',
+        description: error instanceof Error ? error.message : "An unknown error occurred.",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchJobs();
+  }, []);
+
+  const handleJobCreated = () => {
+    fetchJobs(); // Refresh the job list after a new job is created
+  };
+
   return (
     <div className="flex flex-col min-h-dvh bg-background text-foreground">
       <Header />
@@ -36,10 +76,12 @@ export default function HRAgentPage() {
                   <CardTitle>Job Postings</CardTitle>
                   <CardDescription>Manage your open job positions.</CardDescription>
                 </div>
-                <Button size="sm">
-                  <PlusCircle className="mr-2 h-4 w-4" />
-                  Create Job Post
-                </Button>
+                <CreateJobPostForm onJobCreated={handleJobCreated}>
+                  <Button size="sm">
+                    <PlusCircle className="mr-2 h-4 w-4" />
+                    Create Job Post
+                  </Button>
+                </CreateJobPostForm>
               </CardHeader>
               <CardContent>
                 <Table>
@@ -55,11 +97,33 @@ export default function HRAgentPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    <TableRow>
-                      <TableCell colSpan={5} className="h-24 text-center">
-                        No job postings yet.
-                      </TableCell>
-                    </TableRow>
+                     {isLoading ? (
+                      <TableRow>
+                        <TableCell colSpan={5} className="h-24 text-center">
+                          <Loader2 className="mx-auto h-6 w-6 animate-spin text-muted-foreground" />
+                        </TableCell>
+                      </TableRow>
+                    ) : jobPostings.length > 0 ? (
+                      jobPostings.map((job) => (
+                        <TableRow key={job.id}>
+                          <TableCell className="font-medium">{job.title}</TableCell>
+                          <TableCell>{job.location}</TableCell>
+                          <TableCell><Badge variant={job.status === 'Open' ? 'default' : 'secondary'}>{job.status}</Badge></TableCell>
+                          <TableCell>{new Date(job.createdAt).toLocaleDateString()}</TableCell>
+                           <TableCell>
+                            <Button variant="ghost" size="sm" asChild>
+                              <Link href={`/dashboard/agents/hr/${job.id}`}>View</Link>
+                            </Button>
+                           </TableCell>
+                        </TableRow>
+                      ))
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={5} className="h-24 text-center">
+                          No job postings yet.
+                        </TableCell>
+                      </TableRow>
+                    )}
                   </TableBody>
                 </Table>
               </CardContent>

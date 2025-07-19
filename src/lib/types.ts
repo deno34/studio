@@ -1,3 +1,4 @@
+
 import {z} from 'zod';
 
 /**
@@ -60,3 +61,18 @@ export const PayrollSummaryOutputSchema = z.object({
   isPayslip: z.boolean().describe('Whether the document appears to be a valid payslip or payroll document.'),
 });
 export type PayrollSummaryOutput = z.infer<typeof PayrollSummaryOutputSchema>;
+
+// HR / Job Posting Schemas
+export const JobPostingSchema = z.object({
+  title: z.string().min(5, { message: "Job title must be at least 5 characters." }),
+  location: z.string().min(2, { message: "Location must be at least 2 characters." }),
+  description: z.string().min(50, { message: "Description must be at least 50 characters." }),
+});
+export type JobPostingFormValues = z.infer<typeof JobPostingSchema>;
+
+export interface JobPosting extends JobPostingFormValues {
+    id: string;
+    status: 'Open' | 'Closed' | 'Draft';
+    createdAt: string;
+    userId: string;
+}
