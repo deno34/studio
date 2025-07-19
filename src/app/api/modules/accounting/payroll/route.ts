@@ -1,4 +1,6 @@
 
+'use server';
+
 import { NextRequest, NextResponse } from 'next/server';
 import { validateApiKey } from '@/lib/auth';
 import { formidable } from 'formidable';
@@ -23,7 +25,7 @@ async function parseFormData(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     await validateApiKey(req);
-  } catch (error: any) => {
+  } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 401 });
   }
 
