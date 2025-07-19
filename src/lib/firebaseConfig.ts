@@ -13,8 +13,8 @@ export function getFirebaseConfig() {
   for (const [key, value] of Object.entries(firebaseConfig)) {
     if (!value) {
       console.error(`Firebase config error: Missing value for ${key}`);
-      // Return a partial config to allow specific errors to be thrown by Firebase SDK
-      // This helps in debugging which specific key is causing the issue.
+      // Throwing an error here can help in debugging during development
+      // In production, Firebase SDK will throw its own specific error
     }
   }
   
