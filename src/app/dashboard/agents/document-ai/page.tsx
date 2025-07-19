@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -219,7 +219,7 @@ function DocumentSummarizer() {
   const [summary, setSummary] = useState<DocumentSummaryOutput | null>(null);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
-  const audioRef = React.useRef<HTMLAudioElement | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -319,7 +319,7 @@ function DocumentSummarizer() {
     }
   }
   
-  React.useEffect(() => {
+  useEffect(() => {
     if (audioUrl && audioRef.current) {
       audioRef.current.play();
     }
