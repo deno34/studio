@@ -7,10 +7,10 @@ export async function uploadFile(fileBuffer: Buffer, path: string, contentType: 
   
   await file.save(fileBuffer, {
     metadata: { contentType },
+    public: true, // Make the file publicly readable upon upload
   });
 
-  // Make the file public and get its URL
-  await file.makePublic();
-  
+  // Return the public URL. 
+  // The format is `https://storage.googleapis.com/<bucket-name>/<file-path>`
   return file.publicUrl();
 }

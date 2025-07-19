@@ -13,8 +13,9 @@ export async function callMistral(prompt: string): Promise<string> {
       "Accept": "application/json",
     },
     body: JSON.stringify({
-      model: "mistral-tiny", // Using a cost-effective model for starters
+      model: "mistral-small", // Using a cost-effective and capable model
       messages: [{ role: "user", content: prompt }],
+      temperature: 0.2, // Lower temperature for more deterministic, factual output
     }),
   });
 
@@ -25,5 +26,9 @@ export async function callMistral(prompt: string): Promise<string> {
   }
 
   const data = await response.json();
-  return data.choices[0].message.content;
+  if (data.choices && data.choices[0] && data.choices[0].message) {
+    return data.choices[0].message.content;
+  }
+  
+  return "Mistral returned an empty or invalid response.";
 }

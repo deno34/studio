@@ -29,6 +29,14 @@ export async function generateInvoicePdf(data: InvoiceData): Promise<Buffer> {
   let yPosition = height - 180;
   page.drawText('Description', { x: 50, y: yPosition, font: boldFont, size: 12 });
   page.drawText('Amount', { x: width - 150, y: yPosition, font: boldFont, size: 12 });
+  yPosition -= 15;
+  page.drawLine({
+    start: { x: 50, y: yPosition },
+    end: { x: width - 50, y: yPosition },
+    thickness: 1,
+    color: rgb(0.75, 0.75, 0.75),
+  });
+
 
   // Items
   let subtotal = 0;
@@ -41,6 +49,15 @@ export async function generateInvoicePdf(data: InvoiceData): Promise<Buffer> {
   
   // Totals
   yPosition -= 30;
+   page.drawLine({
+    start: { x: width-280, y: yPosition },
+    end: { x: width - 50, y: yPosition },
+    thickness: 0.5,
+    color: rgb(0.75, 0.75, 0.75),
+  });
+  yPosition -= 20;
+
+
   const taxAmount = subtotal * (data.tax / 100);
   const total = subtotal + taxAmount;
 
