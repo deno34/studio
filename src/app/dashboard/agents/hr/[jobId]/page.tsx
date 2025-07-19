@@ -8,7 +8,7 @@ import { Header } from '@/components/landing/header';
 import { Footer } from '@/components/landing/footer';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, UploadCloud, Loader2, FileText, User, Percent, Star } from 'lucide-react';
+import { ArrowLeft, UploadCloud, Loader2, FileText, User, Percent, Star, LayoutGrid } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
@@ -197,9 +197,17 @@ export default function JobDetailPage() {
                 </Card>
 
                 <Card>
-                    <CardHeader>
+                    <CardHeader className="flex flex-row items-center justify-between">
+                      <div>
                         <CardTitle>Candidates</CardTitle>
                         <CardDescription>Upload and manage candidates for this job.</CardDescription>
+                      </div>
+                       <Button variant="outline" size="sm" asChild>
+                          <Link href={`/dashboard/agents/hr/${jobId}/pipeline`}>
+                            <LayoutGrid className="mr-2 h-4 w-4" />
+                            View Pipeline
+                          </Link>
+                       </Button>
                     </CardHeader>
                     <CardContent className="space-y-6">
                         <div className="flex flex-col items-center justify-center space-y-2 rounded-lg border-2 border-dashed p-8 text-center">

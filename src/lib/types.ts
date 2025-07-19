@@ -1,4 +1,5 @@
 
+
 import {z} from 'zod';
 
 /**
@@ -77,7 +78,11 @@ export interface JobPosting extends JobPostingFormValues {
     userId: string;
 }
 
+
 // HR / Candidate Schemas
+export const CandidateStatus = z.enum(['New', 'Shortlisted', 'Interviewing', 'Offer', 'Hired', 'Rejected']);
+export type CandidateStatusType = z.infer<typeof CandidateStatus>;
+
 export const CandidateRankingInputSchema = z.object({
   jobTitle: z.string(),
   jobDescription: z.string(),
@@ -101,7 +106,7 @@ export interface Candidate {
     resumeUrl: string;
     resumeText: string;
     createdAt: string;
-    status: 'New' | 'Shortlisted' | 'Interviewing' | 'Offer' | 'Hired' | 'Rejected';
+    status: CandidateStatusType;
     matchPercentage?: number;
     matchExplanation?: string;
     matchingSkills?: string[];
