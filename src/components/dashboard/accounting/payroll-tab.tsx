@@ -8,20 +8,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { UploadCloud, Loader2 } from "lucide-react";
+import { PayrollSummaryOutput } from "@/lib/types";
 
-interface PayrollSummary {
-  employeeName?: string;
-  payPeriod?: string;
-  grossPay?: number;
-  netPay?: number;
-  deductions?: { name: string; amount: number }[];
-  isPayslip?: boolean;
-}
 
 export function PayrollTab() {
   const { toast } = useToast();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [summary, setSummary] = useState<PayrollSummary | null>(null);
+  const [summary, setSummary] = useState<PayrollSummaryOutput | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [fileName, setFileName] = useState("");
 
@@ -73,7 +66,7 @@ export function PayrollTab() {
         });
         setSummary(null);
       } else {
-        setSummary(result as PayrollSummary);
+        setSummary(result as PayrollSummaryOutput);
         toast({
             title: 'Analysis Complete',
             description: 'Successfully extracted payroll information.',

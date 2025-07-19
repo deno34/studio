@@ -2,7 +2,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { validateApiKey } from '@/lib/auth';
 import admin from '@/lib/firebaseAdmin';
-import { generateFinancialReport, FinancialReportInput } from '@/ai/flows/financial-report-flow';
+import { generateFinancialReport } from '@/ai/flows/financial-report-flow';
+import { FinancialReportInput } from '@/lib/types';
 
 const db = admin.firestore();
 

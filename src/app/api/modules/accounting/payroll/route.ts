@@ -4,9 +4,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { validateApiKey } from '@/lib/auth';
 import { formidable } from 'formidable';
-import { summarizePayroll, PayrollSummaryInput, PayrollSummaryOutput } from '@/ai/flows/payroll-flow';
+import { summarizePayroll } from '@/ai/flows/payroll-flow';
+import { PayrollSummaryInput, PayrollSummaryOutput } from '@/lib/types';
 import fs from 'fs/promises';
-import { z } from 'zod';
 
 // Helper to parse multipart form data
 async function parseFormData(req: NextRequest) {

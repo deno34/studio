@@ -5,31 +5,11 @@
  * @fileOverview An AI flow for generating financial reports.
  * 
  * - generateFinancialReport - An exported wrapper function to call the flow.
- * - FinancialReportInput - The input type for the flow.
- * - FinancialReportOutput - The return type for the flow.
  */
 
 import { ai } from '@/ai/genkit';
-import { z } from 'zod';
+import { FinancialReportInput, FinancialReportInputSchema, FinancialReportOutput, FinancialReportOutputSchema } from '@/lib/types';
 
-const ExpenseSchema = z.object({
-  id: z.string(),
-  amount: z.number(),
-  category: z.string(),
-  date: z.string(),
-  note: z.string(),
-});
-
-export const FinancialReportInputSchema = z.object({
-  reportType: z.enum(['pnl', 'balance_sheet']).describe("The type of financial report to generate."),
-  expenses: z.array(ExpenseSchema).describe("A list of all expenses for the period."),
-});
-export type FinancialReportInput = z.infer<typeof FinancialReportInputSchema>;
-
-export const FinancialReportOutputSchema = z.object({
-  reportMarkdown: z.string().describe('The full financial report formatted as a Markdown string.'),
-});
-export type FinancialReportOutput = z.infer<typeof FinancialReportOutputSchema>;
 
 export async function generateFinancialReport(input: FinancialReportInput): Promise<FinancialReportOutput> {
   return generateFinancialReportFlow(input);
