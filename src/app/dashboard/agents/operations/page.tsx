@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ArrowLeft } from 'lucide-react';
 import { LogisticsTab } from '@/components/dashboard/operations/logistics-tab';
 import { SchedulingTab } from '@/components/dashboard/operations/scheduling-tab';
+import { PlannerTab } from '@/components/dashboard/operations/planner-tab';
 
 export default function OperationsAgentPage() {
   return (
@@ -31,15 +32,19 @@ export default function OperationsAgentPage() {
           </div>
 
           <Tabs defaultValue="logistics" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
+            <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="logistics">Logistics</TabsTrigger>
               <TabsTrigger value="scheduling">Scheduling</TabsTrigger>
+              <TabsTrigger value="planner">Daily Planner</TabsTrigger>
             </TabsList>
             <TabsContent value="logistics">
               <LogisticsTab />
             </TabsContent>
             <TabsContent value="scheduling">
               <SchedulingTab />
+            </TabsContent>
+            <TabsContent value="planner">
+                <PlannerTab />
             </TabsContent>
           </Tabs>
         </div>

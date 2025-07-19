@@ -165,3 +165,14 @@ export interface Task extends z.infer<typeof TaskSchema> {
     userId: string;
     createdAt: string;
 }
+
+// Operations / Daily Planner Schemas
+export const DailyPlannerInputSchema = z.object({
+    tasks: z.array(TaskSchema.pick({ title: true, type: true })).describe("A list of tasks and meetings for the day."),
+});
+export type DailyPlannerInput = z.infer<typeof DailyPlannerInputSchema>;
+
+export const DailyPlannerOutputSchema = z.object({
+    planMarkdown: z.string().describe("The full daily plan formatted as a Markdown string."),
+});
+export type DailyPlannerOutput = z.infer<typeof DailyPlannerOutputSchema>;
