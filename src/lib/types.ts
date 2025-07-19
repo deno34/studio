@@ -134,6 +134,7 @@ export const LogisticsPlanInputSchema = z.object({
     destination: z.string().min(3, "Destination is required."),
     goodsDescription: z.string().min(10, "Goods description is required."),
     transportMode: z.enum(['Road', 'Air', 'Sea']),
+    deliveryDeadline: z.string().optional().describe("The delivery deadline for the shipment."),
 });
 export type LogisticsPlanInput = z.infer<typeof LogisticsPlanInputSchema>;
 

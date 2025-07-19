@@ -31,6 +31,7 @@ export default function OperationsAgentPage() {
       destination: '',
       goodsDescription: '',
       transportMode: 'Road',
+      deliveryDeadline: '',
     },
   });
 
@@ -133,26 +134,39 @@ export default function OperationsAgentPage() {
                         </FormItem>
                       )}
                     />
-                    <FormField
-                      control={form.control}
-                      name="transportMode"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Transport Mode</FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
-                            <FormControl>
-                              <SelectTrigger><SelectValue placeholder="Select a mode" /></SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="Road">Road</SelectItem>
-                              <SelectItem value="Air">Air</SelectItem>
-                              <SelectItem value="Sea">Sea</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                     <div className="grid sm:grid-cols-2 gap-4">
+                        <FormField
+                        control={form.control}
+                        name="transportMode"
+                        render={({ field }) => (
+                            <FormItem>
+                            <FormLabel>Transport Mode</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <FormControl>
+                                <SelectTrigger><SelectValue placeholder="Select a mode" /></SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                <SelectItem value="Road">Road</SelectItem>
+                                <SelectItem value="Air">Air</SelectItem>
+                                <SelectItem value="Sea">Sea</SelectItem>
+                                </SelectContent>
+                            </Select>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="deliveryDeadline"
+                            render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Delivery Deadline</FormLabel>
+                                <FormControl><Input type="date" {...field} /></FormControl>
+                                <FormMessage />
+                            </FormItem>
+                            )}
+                        />
+                     </div>
                     <Button type="submit" className="w-full" disabled={isLoading}>
                       {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Bot className="mr-2 h-4 w-4" />}
                       {isLoading ? 'Generating Plan...' : 'Generate Plan'}
