@@ -8,7 +8,7 @@ import { Header } from '@/components/landing/header';
 import { Footer } from '@/components/landing/footer';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, UploadCloud, Loader2, User, Percent, Star, LayoutGrid } from 'lucide-react';
+import { ArrowLeft, UploadCloud, Loader2, User, Percent, Star, LayoutGrid, BarChart2 } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
@@ -24,6 +24,8 @@ import {
 import { ScheduleInterviewForm } from '@/components/dashboard/hr/schedule-interview-form';
 import { GenerateFollowUpEmailForm } from '@/components/dashboard/hr/generate-follow-up-email-form';
 import { CandidateDetailDialog } from '@/components/dashboard/hr/candidate-detail-dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { AnalyticsTab } from '@/components/dashboard/hr/analytics-tab';
 
 
 function JobPageSkeleton() {
@@ -95,7 +97,9 @@ export default function JobDetailPage() {
   };
 
   useEffect(() => {
-    fetchJobAndCandidates();
+    if (typeof jobId === 'string') {
+        fetchJobAndCandidates();
+    }
   }, [jobId]);
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -129,7 +133,7 @@ export default function JobDetailPage() {
           
           // Now, rank the new candidate
           setIsRanking(newCandidate.id); // Set ranking state for visual feedback
-          toast({ title: `AI Ranking in Progress...`, description: `${newCandidate.name} is being analyzed.` });
+          toast({ title: `AI Ranking in Progress...`, description: `${file.originalFilename || 'New Candidate'} is being analyzed.` });
 
           const rankRes = await fetch('/api/modules/hr/candidates/rank', {
               method: 'POST',
@@ -154,12 +158,12 @@ export default function JobDetailPage() {
             },
             body: JSON.stringify({
               ...rankingResult,
-              name: newCandidate.name, // The AI might extract a more accurate name
+              name: file.originalFilename, 
             })
           });
 
 
-          toast({ title: "Ranking Complete!", description: `${newCandidate.name} has been scored.` });
+          toast({ title: "Ranking Complete!", description: `${file.originalFilename || 'New Candidate'} has been scored.` });
 
       } catch (error) {
           console.error(error);
@@ -209,94 +213,105 @@ export default function JobDetailPage() {
                     </CardContent>
                 </Card>
 
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between">
-                      <div>
-                        <CardTitle>Candidates</CardTitle>
-                        <CardDescription>Upload and manage candidates for this job.</CardDescription>
-                      </div>
-                       <Button variant="outline" size="sm" asChild>
-                          <Link href={`/dashboard/agents/hr/${jobId}/pipeline`}>
-                            <LayoutGrid className="mr-2 h-4 w-4" />
-                            View Pipeline
-                          </Link>
-                       </Button>
-                    </CardHeader>
-                    <CardContent className="space-y-6">
-                        <div className="flex flex-col items-center justify-center space-y-2 rounded-lg border-2 border-dashed p-8 text-center">
-                            <UploadCloud className="h-12 w-12 text-muted-foreground" />
-                            <p className="font-medium">Drag & drop resumes here or click to upload</p>
-                            <p className="text-sm text-muted-foreground">PDF only</p>
-                             <Button asChild variant="outline" size="sm" className="relative">
-                                <label htmlFor="resume-upload" className="cursor-pointer">
-                                    {isUploading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Uploading...</> : 'Browse Files'}
-                                </label>
+                 <Tabs defaultValue="candidates" className="w-full">
+                    <TabsList className="grid w-full grid-cols-2">
+                        <TabsTrigger value="candidates">Candidates</TabsTrigger>
+                        <TabsTrigger value="analytics">Analytics</TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="candidates">
+                        <Card>
+                            <CardHeader className="flex flex-row items-center justify-between">
+                            <div>
+                                <CardTitle>Candidates</CardTitle>
+                                <CardDescription>Upload and manage candidates for this job.</CardDescription>
+                            </div>
+                            <Button variant="outline" size="sm" asChild>
+                                <Link href={`/dashboard/agents/hr/${jobId}/pipeline`}>
+                                    <LayoutGrid className="mr-2 h-4 w-4" />
+                                    View Pipeline
+                                </Link>
                             </Button>
-                            <Input id="resume-upload" type="file" multiple className="sr-only" onChange={handleFileUpload} disabled={isUploading}/>
-                        </div>
+                            </CardHeader>
+                            <CardContent className="space-y-6">
+                                <div className="flex flex-col items-center justify-center space-y-2 rounded-lg border-2 border-dashed p-8 text-center">
+                                    <UploadCloud className="h-12 w-12 text-muted-foreground" />
+                                    <p className="font-medium">Drag & drop resumes here or click to upload</p>
+                                    <p className="text-sm text-muted-foreground">PDF only</p>
+                                    <Button asChild variant="outline" size="sm" className="relative">
+                                        <label htmlFor="resume-upload" className="cursor-pointer">
+                                            {isUploading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Uploading...</> : 'Browse Files'}
+                                        </label>
+                                    </Button>
+                                    <Input id="resume-upload" type="file" multiple className="sr-only" onChange={handleFileUpload} disabled={isUploading}/>
+                                </div>
 
-                         <Table>
-                            <TableHeader>
-                                <TableRow>
-                                <TableHead><User className="h-4 w-4 inline-block mr-1" /> Name</TableHead>
-                                <TableHead><Percent className="h-4 w-4 inline-block mr-1" /> Match</TableHead>
-                                <TableHead><Star className="h-4 w-4 inline-block mr-1" /> Key Skills</TableHead>
-                                <TableHead>Status</TableHead>
-                                <TableHead className="text-right">Actions</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {candidates.length > 0 ? candidates.map(c => (
-                                    <TableRow key={c.id}>
-                                        <TableCell className="font-medium">
-                                          {c.name}
-                                          {(c.matchPercentage || 0) > 90 && <Badge variant="secondary" className="ml-2 bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300">Top Candidate</Badge>}
-                                          {isRanking === c.id && <Badge variant="outline" className="ml-2"><Loader2 className="mr-1 h-3 w-3 animate-spin"/>Ranking...</Badge>}
-                                        </TableCell>
-                                        <TableCell>
-                                          {c.matchPercentage !== undefined ? (
-                                             <TooltipProvider>
-                                              <Tooltip>
-                                                <TooltipTrigger asChild>
-                                                  <div className="flex items-center gap-1 cursor-help">
-                                                    <span>{c.matchPercentage}%</span>
-                                                    <div className="flex">
-                                                      {[...Array(5)].map((_, i) => (
-                                                        <Star key={i} className={`w-3 h-3 ${(c.matchPercentage || 0) >= (i+1)*20 ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300 dark:text-gray-600'}`} />
-                                                      ))}
-                                                    </div>
-                                                  </div>
-                                                </TooltipTrigger>
-                                                <TooltipContent>
-                                                  <p className="max-w-xs">{c.matchExplanation}</p>
-                                                </TooltipContent>
-                                              </Tooltip>
-                                            </TooltipProvider>
-                                          ) : (
-                                            <span className="text-muted-foreground">Not ranked</span>
-                                          )}
-                                        </TableCell>
-                                        <TableCell className="text-muted-foreground max-w-xs truncate">{c.matchingSkills?.join(', ') || 'N/A'}</TableCell>
-                                        <TableCell><Badge variant="outline">{c.status}</Badge></TableCell>
-                                        <TableCell className="text-right space-x-1">
-                                            <GenerateFollowUpEmailForm candidate={c} job={job} />
-                                            <ScheduleInterviewForm candidate={c} onInterviewScheduled={onInterviewScheduled}>
-                                              <Button variant="outline" size="sm">Schedule</Button>
-                                            </ScheduleInterviewForm>
-                                            <CandidateDetailDialog candidate={c} onUpdate={fetchJobAndCandidates} />
-                                        </TableCell>
-                                    </TableRow>
-                                )) : (
-                                    <TableRow>
-                                        <TableCell colSpan={5} className="h-24 text-center">
-                                            No candidates uploaded yet.
-                                        </TableCell>
-                                    </TableRow>
-                                )}
-                            </TableBody>
-                        </Table>
-                    </CardContent>
-                </Card>
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                        <TableHead><User className="h-4 w-4 inline-block mr-1" /> Name</TableHead>
+                                        <TableHead><Percent className="h-4 w-4 inline-block mr-1" /> Match</TableHead>
+                                        <TableHead><Star className="h-4 w-4 inline-block mr-1" /> Key Skills</TableHead>
+                                        <TableHead>Status</TableHead>
+                                        <TableHead className="text-right">Actions</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {candidates.length > 0 ? candidates.map(c => (
+                                            <TableRow key={c.id}>
+                                                <TableCell className="font-medium">
+                                                {c.name}
+                                                {(c.matchPercentage || 0) > 90 && <Badge variant="secondary" className="ml-2 bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300">Top Candidate</Badge>}
+                                                {isRanking === c.id && <Badge variant="outline" className="ml-2"><Loader2 className="mr-1 h-3 w-3 animate-spin"/>Ranking...</Badge>}
+                                                </TableCell>
+                                                <TableCell>
+                                                {c.matchPercentage !== undefined ? (
+                                                    <TooltipProvider>
+                                                    <Tooltip>
+                                                        <TooltipTrigger asChild>
+                                                        <div className="flex items-center gap-1 cursor-help">
+                                                            <span>{c.matchPercentage}%</span>
+                                                            <div className="flex">
+                                                            {[...Array(5)].map((_, i) => (
+                                                                <Star key={i} className={`w-3 h-3 ${(c.matchPercentage || 0) >= (i+1)*20 ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300 dark:text-gray-600'}`} />
+                                                            ))}
+                                                            </div>
+                                                        </div>
+                                                        </TooltipTrigger>
+                                                        <TooltipContent>
+                                                        <p className="max-w-xs">{c.matchExplanation}</p>
+                                                        </TooltipContent>
+                                                    </Tooltip>
+                                                    </TooltipProvider>
+                                                ) : (
+                                                    <span className="text-muted-foreground">Not ranked</span>
+                                                )}
+                                                </TableCell>
+                                                <TableCell className="text-muted-foreground max-w-xs truncate">{c.matchingSkills?.join(', ') || 'N/A'}</TableCell>
+                                                <TableCell><Badge variant="outline">{c.status}</Badge></TableCell>
+                                                <TableCell className="text-right space-x-1">
+                                                    <GenerateFollowUpEmailForm candidate={c} job={job} />
+                                                    <ScheduleInterviewForm candidate={c} onInterviewScheduled={onInterviewScheduled}>
+                                                    <Button variant="outline" size="sm">Schedule</Button>
+                                                    </ScheduleInterviewForm>
+                                                    <CandidateDetailDialog candidate={c} onUpdate={fetchJobAndCandidates} />
+                                                </TableCell>
+                                            </TableRow>
+                                        )) : (
+                                            <TableRow>
+                                                <TableCell colSpan={5} className="h-24 text-center">
+                                                    No candidates uploaded yet.
+                                                </TableCell>
+                                            </TableRow>
+                                        )}
+                                    </TableBody>
+                                </Table>
+                            </CardContent>
+                        </Card>
+                    </TabsContent>
+                    <TabsContent value="analytics">
+                       <AnalyticsTab jobId={jobId as string} />
+                    </TabsContent>
+                </Tabs>
             </div>
           )}
         </div>
