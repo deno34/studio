@@ -146,3 +146,22 @@ export const LogisticsPlanOutputSchema = z.object({
     suggestedVendor: z.string().describe("A recommended logistics partner for this task."),
 });
 export type LogisticsPlanOutput = z.infer<typeof LogisticsPlanOutputSchema>;
+
+
+// Operations / Scheduling Schemas
+export const TaskStatus = z.enum(['Upcoming', 'Completed', 'Overdue']);
+export type TaskStatusType = z.infer<typeof TaskStatus>;
+
+export const TaskSchema = z.object({
+  title: z.string().min(3, "Title must be at least 3 characters."),
+  type: z.enum(['Task', 'Meeting']),
+  status: TaskStatus,
+  dueDate: z.string().describe("The due date for the task in ISO 8601 format."),
+  participants: z.array(z.string()).optional().describe("A list of participants for the task or meeting."),
+});
+
+export interface Task extends z.infer<typeof TaskSchema> {
+    id: string;
+    userId: string;
+    createdAt: string;
+}
