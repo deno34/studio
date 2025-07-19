@@ -4,7 +4,6 @@ import { validateApiKey } from '@/lib/auth';
 import { callMistral } from '@/lib/mistral';
 import { formidable } from 'formidable';
 import fs from 'fs/promises';
-import pdf from 'pdf-parse';
 
 // Helper to parse multipart form data
 async function parseFormData(req: NextRequest) {
@@ -33,6 +32,7 @@ export async function POST(req: NextRequest) {
     let textContent = '';
 
     if (file.mimetype === 'application/pdf') {
+        const pdf = (await import('pdf-parse')).default;
         const data = await pdf(fileBuffer);
         textContent = data.text;
     } else if (file.mimetype?.startsWith('text/')) {

@@ -5,8 +5,6 @@ import { formidable } from 'formidable';
 import { summarizePayroll, PayrollSummaryInput, PayrollSummaryOutput } from '@/ai/flows/payroll-flow';
 import fs from 'fs/promises';
 import { z } from 'zod';
-import pdf from 'pdf-parse';
-
 
 // Helper to parse multipart form data
 async function parseFormData(req: NextRequest) {
@@ -25,7 +23,7 @@ async function parseFormData(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     await validateApiKey(req);
-  } catch (error: any) {
+  } catch (error: any) => {
     return NextResponse.json({ error: error.message }, { status: 401 });
   }
 
@@ -37,6 +35,7 @@ export async function POST(req: NextRequest) {
     let mimeType = file.mimetype || 'application/octet-stream';
 
     if (mimeType === 'application/pdf') {
+        const pdf = (await import('pdf-parse')).default;
         const data = await pdf(fileBuffer);
         documentContent = data.text;
     } else if (mimeType.startsWith('image/')) {
