@@ -8,8 +8,6 @@ export async function validateApiKey(req: NextRequest) {
     throw new Error('API key missing or invalid');
   }
 
-  // NOTE: This assumes you have a 'users' collection where each document
-  // has an 'apiKey' field. You will need a way to generate and assign these keys.
   const usersRef = admin.firestore().collection('users');
   const snapshot = await usersRef.where('apiKey', '==', key).limit(1).get();
 

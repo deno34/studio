@@ -5,10 +5,7 @@ import { validateApiKey } from '@/lib/auth';
 
 export async function POST(req: NextRequest) {
   try {
-    // 1. Authenticate the request
-    await validateApiKey(req);
-
-    // 2. Parse the request body
+    
     const body = await req.json();
     const { prompt } = body;
 
@@ -16,15 +13,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Prompt is required" }, { status: 400 });
     }
 
-    // 3. Call the Mistral AI
     const output = await callMistral(prompt);
 
-    // 4. Return the result
     return NextResponse.json({ result: output });
 
   } catch (error: any) {
     console.error('[AI_GENERATE_ERROR]', error);
-    // Return a generic error message for security
     if (error.message.includes('API key') || error.message.includes('Unauthorized')) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
