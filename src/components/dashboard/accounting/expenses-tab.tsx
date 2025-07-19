@@ -98,7 +98,7 @@ export function ExpensesTab() {
         title: "Expense Logged!",
         description: "Your expense has been successfully recorded.",
       });
-      form.reset();
+      form.reset({ note: "", amount: 0, category: "" });
       fetchExpenses(); // Refresh the list of expenses
 
     } catch (error) {
@@ -197,7 +197,7 @@ export function ExpensesTab() {
                                 render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Category</FormLabel>
-                                    <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value || ''}>
+                                    <Select onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
                                     <FormControl>
                                         <SelectTrigger>
                                             <SelectValue placeholder="Select a category" />
