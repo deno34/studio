@@ -1,5 +1,6 @@
 
 
+
 import {z} from 'zod';
 
 /**
@@ -244,3 +245,25 @@ export interface Client extends z.infer<typeof ClientSchema> {
     id: string;
     createdAt: string;
 }
+
+// CRM / Lead Follow-up Schemas
+export const LeadFollowupSuggestionInputSchema = z.object({
+    clients: z.array(z.object({
+        name: z.string(),
+        status: ClientStatus,
+        createdAt: z.string(),
+    })).describe("A list of all clients in the CRM."),
+    currentDate: z.string().describe("Today's date in YYYY-MM-DD format."),
+});
+export type LeadFollowupSuggestionInput = z.infer<typeof LeadFollowupSuggestionInputSchema>;
+
+export const LeadFollowupSuggestionSchema = z.object({
+  clientName: z.string().describe("The name of the client to follow up with."),
+  justification: z.string().describe("The reason for the follow-up suggestion."),
+});
+export type LeadFollowupSuggestion = z.infer<typeof LeadFollowupSuggestionSchema>;
+
+export const LeadFollowupSuggestionOutputSchema = z.object({
+  suggestions: z.array(LeadFollowupSuggestionSchema).describe('A prioritized list of follow-up suggestions for the day.'),
+});
+export type LeadFollowupSuggestionOutput = z.infer<typeof LeadFollowupSuggestionOutputSchema>;
