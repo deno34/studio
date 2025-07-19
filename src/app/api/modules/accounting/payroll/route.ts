@@ -2,7 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { validateApiKey } from '@/lib/auth';
 import { formidable } from 'formidable';
-import { payrollSummaryFlow, PayrollSummaryInput, PayrollSummaryOutput } from '@/ai/flows/payroll-flow';
+import { summarizePayroll, PayrollSummaryInput, PayrollSummaryOutput } from '@/ai/flows/payroll-flow';
 import fs from 'fs/promises';
 import { z } from 'zod';
 import pdf from 'pdf-parse';
@@ -40,11 +40,9 @@ export async function POST(req: NextRequest) {
         const data = await pdf(fileBuffer);
         documentContent = data.text;
     } else if (mimeType.startsWith('image/')) {
-        // For images, we will send the raw data URI to the multimodal model
         documentContent = `data:${mimeType};base64,${fileBuffer.toString('base64')}`;
     }
      else {
-        // Fallback for plain text if needed
         documentContent = fileBuffer.toString('utf-8');
     }
 
@@ -53,7 +51,7 @@ export async function POST(req: NextRequest) {
         mimeType: mimeType
     }
 
-    const result: PayrollSummaryOutput = await payrollSummaryFlow(input);
+    const result: PayrollSummaryOutput = await summarizePayroll(input);
 
     return NextResponse.json(result);
 

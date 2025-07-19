@@ -4,7 +4,7 @@
 /**
  * @fileOverview An AI flow for summarizing payroll documents.
  * 
- * - payrollSummaryFlow - A function that handles payslip analysis.
+ * - summarizePayroll - An exported wrapper function to call the flow.
  * - PayrollSummaryInput - The input type for the flow.
  * - PayrollSummaryOutput - The return type for the flow.
  */
@@ -31,6 +31,9 @@ const PayrollSummaryOutputSchema = z.object({
 });
 export type PayrollSummaryOutput = z.infer<typeof PayrollSummaryOutputSchema>;
 
+export async function summarizePayroll(input: PayrollSummaryInput): Promise<PayrollSummaryOutput> {
+  return payrollSummaryFlow(input);
+}
 
 const payrollPrompt = ai.definePrompt({
     name: 'payrollSummaryPrompt',
@@ -54,7 +57,7 @@ Return the data in the specified JSON format.
 `,
 });
 
-export const payrollSummaryFlow = ai.defineFlow(
+const payrollSummaryFlow = ai.defineFlow(
   {
     name: 'payrollSummaryFlow',
     inputSchema: PayrollSummaryInputSchema,

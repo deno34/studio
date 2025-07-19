@@ -4,7 +4,7 @@
 /**
  * @fileOverview An AI flow for generating financial reports.
  * 
- * - generateFinancialReportFlow - A function that handles report generation.
+ * - generateFinancialReport - An exported wrapper function to call the flow.
  * - FinancialReportInput - The input type for the flow.
  * - FinancialReportOutput - The return type for the flow.
  */
@@ -23,7 +23,6 @@ const ExpenseSchema = z.object({
 export const FinancialReportInputSchema = z.object({
   reportType: z.enum(['pnl', 'balance_sheet']).describe("The type of financial report to generate."),
   expenses: z.array(ExpenseSchema).describe("A list of all expenses for the period."),
-  // In the future, we would add invoices, assets, liabilities etc.
 });
 export type FinancialReportInput = z.infer<typeof FinancialReportInputSchema>;
 
@@ -31,6 +30,10 @@ export const FinancialReportOutputSchema = z.object({
   reportMarkdown: z.string().describe('The full financial report formatted as a Markdown string.'),
 });
 export type FinancialReportOutput = z.infer<typeof FinancialReportOutputSchema>;
+
+export async function generateFinancialReport(input: FinancialReportInput): Promise<FinancialReportOutput> {
+  return generateFinancialReportFlow(input);
+}
 
 const reportPrompt = ai.definePrompt({
     name: 'financialReportPrompt',
@@ -50,7 +53,7 @@ Based on the provided list of expenses, generate a clear and concise P&L report 
 1.  **Title**: "Profit & Loss Statement"
 2.  **Summary Section**: Provide a brief, one-paragraph natural language summary of the financial performance. Mention the total revenue (assumed to be 0), total expenses, and the resulting net loss.
 3.  **Detailed Breakdown**:
-    - **Revenue**: State "Total Revenue: KES 0.00"
+    - **Revenue**: State "Total Revenue:** KES 0.00"
     - **Expenses**:
         - List each expense category and its total amount.
         - Calculate and display "Total Expenses".
@@ -92,7 +95,7 @@ Please generate the full report based on this data.
 `,
 });
 
-export const generateFinancialReportFlow = ai.defineFlow(
+const generateFinancialReportFlow = ai.defineFlow(
   {
     name: 'generateFinancialReportFlow',
     inputSchema: FinancialReportInputSchema,

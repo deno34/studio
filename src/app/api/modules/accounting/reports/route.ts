@@ -2,7 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { validateApiKey } from '@/lib/auth';
 import admin from '@/lib/firebaseAdmin';
-import { generateFinancialReportFlow, FinancialReportInput } from '@/ai/flows/financial-report-flow';
+import { generateFinancialReport, FinancialReportInput } from '@/ai/flows/financial-report-flow';
 
 const db = admin.firestore();
 
@@ -19,8 +19,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Valid reportType (pnl or balance_sheet) is required' }, { status: 400 });
     }
 
-    // For now, we only support P&L which primarily needs expenses.
-    // In a real scenario, you'd fetch invoices for revenue as well.
     const expensesSnapshot = await db.collection('expenses').get();
     const expenses = expensesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as FinancialReportInput['expenses'];
 
@@ -29,7 +27,7 @@ export async function POST(req: NextRequest) {
         expenses,
     };
     
-    const result = await generateFinancialReportFlow(input);
+    const result = await generateFinancialReport(input);
     
     return NextResponse.json(result);
 
