@@ -16,7 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, UploadCloud, Loader2, Bot, PenSquare, FileText, User, Building, Smile, Frown, Meh } from 'lucide-react';
+import { ArrowLeft, UploadCloud, Loader2, Bot, PenSquare, FileText, User, Building, Smile, Frown, Meh, Search } from 'lucide-react';
 import { ContractParserOutput, DocumentSummaryOutput, DocumentWriterInputSchema, type DocumentWriterInput } from '@/lib/types';
 import { Badge } from '@/components/ui/badge';
 
@@ -182,6 +182,32 @@ function DocumentWriter() {
             </CardContent>
         </Card>
     )
+}
+
+function SmartSearch() {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Smart Search</CardTitle>
+        <CardDescription>Ask questions and get answers from all your uploaded documents.</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="flex w-full items-center space-x-2">
+            <Input type="text" placeholder="e.g., What is the termination clause in the Acme Inc contract?" />
+            <Button type="submit">
+                <Search className="h-4 w-4 mr-2" />
+                Ask
+            </Button>
+        </div>
+        <div className="mt-4 min-h-[150px] rounded-md border border-dashed flex items-center justify-center">
+            <p className="text-sm text-muted-foreground text-center">
+                Answers from your documents will appear here. <br/>
+                (Feature coming soon)
+            </p>
+        </div>
+      </CardContent>
+    </Card>
+  )
 }
 
 
@@ -402,6 +428,7 @@ export default function DocumentAIPage() {
           </div>
 
           <div className="space-y-8">
+            <SmartSearch />
             <Card>
                 <CardHeader>
                   <CardTitle>Contract Parser</CardTitle>
