@@ -17,10 +17,6 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { useToast } from '@/hooks/use-toast';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Loader2, ArrowLeft } from 'lucide-react';
-// import { getStorage, ref, uploadBytes, getDownloadURL, FirebaseStorage } from 'firebase/storage';
-// import { updateProfile } from 'firebase/auth';
-// import { getApp, FirebaseApp } from 'firebase/app';
-
 
 const profileFormSchema = z.object({
   displayName: z.string().min(2, { message: 'Name must be at least 2 characters.' }).max(50, { message: 'Name must be less than 50 characters.' }),
@@ -30,37 +26,31 @@ const profileFormSchema = z.object({
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
 
 export default function ProfilePage() {
-  const { user, loading } = useAuth();
+  const { user, loading, updateUserProfile } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
   const [isSaving, setIsSaving] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
-  // const [firebaseApp, setFirebaseApp] = useState<FirebaseApp | null>(null);
-
-  // useEffect(() => {
-    // This ensures getApp() is only called on the client side
-    // setFirebaseApp(getApp());
-  // }, []);
-
+  
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
     defaultValues: {
-      displayName: '', // user?.displayName || '',
+      displayName: '',
       photoFile: undefined,
     },
   });
 
-  // useEffect(() => {
-  //   if (!loading && !user) {
-  //     router.push('/login');
-  //   }
-  //   if (user) {
-  //     form.reset({
-  //       displayName: user.displayName || '',
-  //     });
-  //     setPreviewImage(user.photoURL);
-  //   }
-  // }, [user, loading, router, form]);
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push('/login');
+    }
+    if (user) {
+      form.reset({
+        displayName: user.displayName || '',
+      });
+      setPreviewImage(user.photoURL);
+    }
+  }, [user, loading, router, form]);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -75,30 +65,16 @@ export default function ProfilePage() {
   };
 
   const onSubmit = async (data: ProfileFormValues) => {
-    // if (!user || !firebaseApp) return;
+    if (!user) return;
     setIsSaving(true);
-    // let photoURL = user.photoURL;
 
     try {
-      // // Step 1: Upload image to Firebase Storage if a new one is provided
-      // if (data.photoFile) {
-      //   const storage: FirebaseStorage = getStorage(firebaseApp);
-      //   const storageRef = ref(storage, `profile-pictures/${user.uid}`);
-      //   await uploadBytes(storageRef, data.photoFile);
-      //   photoURL = await getDownloadURL(storageRef);
-      // }
-
-      // // Step 2: Update profile in Firebase Auth
-      // await updateProfile(user, {
-      //   displayName: data.displayName,
-      //   photoURL: photoURL,
-      // });
-
+      await updateUserProfile(data.displayName, data.photoFile);
       toast({
-        title: 'Profile updated (Simulated)',
+        title: 'Profile updated!',
         description: 'Your profile has been successfully updated.',
       });
-      // router.push('/dashboard');
+      router.push('/dashboard');
     } catch (error) {
       console.error('Error updating profile:', error);
       toast({
