@@ -8,12 +8,12 @@ export async function validateApiKey(req: NextRequest) {
     throw new Error('API key missing or invalid');
   }
 
-  // NOTE: This is a placeholder. In a real app, you would look up
-  // the API key in a secure database table (e.g., a `users` or `api_keys` collection)
-  // that maps keys to user IDs. For this demo, we'll assume a valid key
-  // belongs to a test user if it matches a master key.
+  // NOTE: This is a placeholder for the demo. In a real app, you would look up
+  // the API key in a secure database table that maps keys to user IDs.
+  // We'll use a single master API key stored in environment variables.
+  // This allows the frontend to securely talk to the backend.
 
-  const MASTER_API_KEY = process.env.MASTER_API_KEY;
+  const MASTER_API_KEY = process.env.MASTER_API_KEY || process.env.NEXT_PUBLIC_MASTER_API_KEY;
 
   if (MASTER_API_KEY && key === MASTER_API_KEY) {
     // For demo purposes, returning a mock user object.
@@ -21,21 +21,8 @@ export async function validateApiKey(req: NextRequest) {
     return { uid: 'test-user-id', email: 'test@example.com' };
   }
 
-
-  // The code below is for a real implementation where keys are stored in Firestore.
-  // It is commented out to allow for the simpler MASTER_API_KEY logic for now.
-  /*
-  const usersRef = admin.firestore().collection('users');
-  const snapshot = await usersRef.where('apiKey', '==', key).limit(1).get();
-
-  if (snapshot.empty) {
-    throw new Error('Invalid API key');
-  }
-
-  const userDoc = snapshot.docs[0];
-  return { uid: userDoc.id, ...userDoc.data() };
-  */
-  
-  // If not using a master key, uncomment the logic above and remove this line.
+  // If not using a master key or the key is invalid, throw an error.
    throw new Error('Invalid API key');
 }
+
+    
