@@ -112,3 +112,18 @@ export interface Candidate {
     matchingSkills?: string[];
     notes?: string;
 }
+
+// HR / Interview Summary Schemas
+export const InterviewSummaryInputSchema = z.object({
+  transcript: z.string().describe("The full text transcript of the interview conversation."),
+});
+export type InterviewSummaryInput = z.infer<typeof InterviewSummaryInputSchema>;
+
+export const InterviewSummaryOutputSchema = z.object({
+  keyPoints: z.array(z.string()).describe("A list of the main takeaways from the interview."),
+  strengths: z.array(z.string()).describe("A list of the candidate's perceived strengths."),
+  weaknesses: z.array(z.string()).describe("A list of the candidate's perceived weaknesses or areas of concern."),
+  recommendationScore: z.number().describe("A score from 1-10 recommending the candidate."),
+  recommendationJustification: z.string().describe("A brief justification for the recommendation score."),
+});
+export type InterviewSummaryOutput = z.infer<typeof InterviewSummaryOutputSchema>;
