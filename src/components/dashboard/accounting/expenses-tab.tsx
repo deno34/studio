@@ -12,7 +12,8 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
-import { PlusCircle, Loader2 } from "lucide-react";
+import { PlusCircle, Loader2, UploadCloud, FilePlus2 } from "lucide-react";
+import pdf from 'pdf-parse';
 
 const expenseFormSchema = z.object({
   note: z.string().min(2, { message: "Description must be at least 2 characters." }),
@@ -32,11 +33,24 @@ interface Expense {
     createdAt: string;
 }
 
+interface AnalysisResult {
+    vendor?: string;
+    date?: string;
+    total?: number;
+    items?: {name: string, price: number}[];
+    raw_text?: string;
+}
+
 export function ExpensesTab() {
   const { toast } = useToast();
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [fileName, setFileName] = useState("");
+  const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
+
 
   const form = useForm<ExpenseFormValues>({
     resolver: zodResolver(expenseFormSchema),
@@ -112,55 +126,114 @@ export function ExpensesTab() {
     }
   }
 
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setSelectedFile(file);
+      setFileName(file.name);
+      setAnalysisResult(null);
+    }
+  };
+
+  const handleAnalyzeReceipt = async () => {
+    if (!selectedFile) {
+        toast({ variant: "destructive", title: "No file selected." });
+        return;
+    }
+    
+    setIsAnalyzing(true);
+    setAnalysisResult(null);
+
+    try {
+        let textContent = "";
+        if (selectedFile.type === "application/pdf") {
+            const data = await pdf(await selectedFile.arrayBuffer());
+            textContent = data.text;
+        } else if (selectedFile.type.startsWith("text/")) {
+            textContent = await selectedFile.text();
+        } else {
+            // For images, we would need a different approach (multimodal model)
+            // For now, we only support text-based files.
+             toast({ variant: "destructive", title: "Unsupported File Type", description: "Currently, only PDF and text files can be analyzed." });
+             setIsAnalyzing(false);
+             return;
+        }
+
+        const response = await fetch('/api/modules/accounting/analyze', {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                'x-api-key': process.env.NEXT_PUBLIC_MASTER_API_KEY || '' 
+            },
+            body: JSON.stringify({ text: textContent }),
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to analyze receipt.');
+        }
+
+        const data = await response.json();
+        setAnalysisResult(data.analysis);
+        toast({ title: "Analysis Complete", description: "AI has extracted information from your receipt." });
+
+    } catch (error) {
+        console.error(error);
+        toast({ variant: "destructive", title: "Analysis Failed", description: error instanceof Error ? error.message : "An unknown error occurred." });
+    } finally {
+        setIsAnalyzing(false);
+    }
+  };
+
+  const handleAddAnalyzedExpense = () => {
+    if (!analysisResult) return;
+    
+    const expenseData: ExpenseFormValues = {
+        note: analysisResult.vendor || "Scanned Expense",
+        amount: analysisResult.total || 0,
+        category: "Other", // User can change this
+    };
+
+    form.reset(expenseData);
+    toast({ title: "Form Populated", description: "Expense form has been filled with analyzed data. Please review and submit." });
+  }
+
   return (
-    <div className="grid gap-8 md:grid-cols-3">
-        <div className="md:col-span-2">
+    <div className="space-y-8">
+        <div className="grid gap-8 md:grid-cols-2">
             <Card>
                 <CardHeader>
-                    <CardTitle>Recent Expenses</CardTitle>
-                    <CardDescription>A list of your most recent business expenses.</CardDescription>
+                    <CardTitle>Analyze Receipt</CardTitle>
+                    <CardDescription>Upload a receipt (PDF) to auto-fill the expense form.</CardDescription>
                 </CardHeader>
-                <CardContent>
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Date</TableHead>
-                                <TableHead>Description</TableHead>
-                                <TableHead>Category</TableHead>
-                                <TableHead className="text-right">Amount</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {isLoading ? (
-                                <TableRow>
-                                    <TableCell colSpan={4} className="text-center py-10">
-                                        <Loader2 className="mx-auto h-6 w-6 animate-spin text-muted-foreground" />
-                                    </TableCell>
-                                </TableRow>
-                            ) : expenses.length > 0 ? (
-                                expenses.map((expense) => (
-                                <TableRow key={expense.id}>
-                                    <TableCell>{new Date(expense.date).toLocaleDateString()}</TableCell>
-                                    <TableCell className="font-medium">{expense.note}</TableCell>
-                                    <TableCell>{expense.category}</TableCell>
-                                    <TableCell className="text-right">KES {expense.amount.toFixed(2)}</TableCell>
-                                </TableRow>
-                            ))
-                            ) : (
-                                <TableRow>
-                                    <TableCell colSpan={4} className="text-center h-24">No expenses found.</TableCell>
-                                </TableRow>
-                            )}
-                        </TableBody>
-                    </Table>
+                <CardContent className="space-y-4">
+                    <div className="flex flex-col items-center justify-center space-y-2 rounded-lg border-2 border-dashed p-8 text-center">
+                        <UploadCloud className="h-12 w-12 text-muted-foreground" />
+                        <p className="font-medium">{fileName || "Drag & drop or click to upload"}</p>
+                        <Button asChild variant="outline" size="sm" className="cursor-pointer">
+                            <label htmlFor="receipt-upload">Browse File</label>
+                        </Button>
+                        <Input id="receipt-upload" type="file" className="sr-only" onChange={handleFileChange} accept=".pdf,.txt"/>
+                    </div>
+                    <Button onClick={handleAnalyzeReceipt} disabled={isAnalyzing || !selectedFile} className="w-full">
+                        {isAnalyzing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                        {isAnalyzing ? "Analyzing..." : "Analyze Receipt"}
+                    </Button>
+                    {analysisResult && (
+                        <div className="mt-4 p-4 border rounded-md bg-muted/50 space-y-2 text-sm">
+                            <h4 className="font-semibold">Analysis Result:</h4>
+                            <p><strong>Vendor:</strong> {analysisResult.vendor || 'N/A'}</p>
+                            <p><strong>Total:</strong> KES {analysisResult.total?.toFixed(2) || 'N/A'}</p>
+                            <Button size="sm" className="w-full mt-2" onClick={handleAddAnalyzedExpense}>
+                                <FilePlus2 className="w-4 h-4 mr-2" /> Add as Expense
+                            </Button>
+                        </div>
+                    )}
                 </CardContent>
             </Card>
-        </div>
-        <div className="md:col-span-1">
-             <Card>
+            <Card>
                 <CardHeader>
                     <CardTitle>Log New Expense</CardTitle>
-                    <CardDescription>Quickly add a new expense.</CardDescription>
+                    <CardDescription>Manually add a new expense or analyze a receipt.</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <Form {...form}>
@@ -226,6 +299,47 @@ export function ExpensesTab() {
                 </CardContent>
             </Card>
         </div>
+
+        <Card>
+            <CardHeader>
+                <CardTitle>Recent Expenses</CardTitle>
+                <CardDescription>A list of your most recent business expenses.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>Date</TableHead>
+                            <TableHead>Description</TableHead>
+                            <TableHead>Category</TableHead>
+                            <TableHead className="text-right">Amount</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {isLoading ? (
+                            <TableRow>
+                                <TableCell colSpan={4} className="text-center py-10">
+                                    <Loader2 className="mx-auto h-6 w-6 animate-spin text-muted-foreground" />
+                                </TableCell>
+                            </TableRow>
+                        ) : expenses.length > 0 ? (
+                            expenses.map((expense) => (
+                            <TableRow key={expense.id}>
+                                <TableCell>{new Date(expense.date).toLocaleDateString()}</TableCell>
+                                <TableCell className="font-medium">{expense.note}</TableCell>
+                                <TableCell>{expense.category}</TableCell>
+                                <TableCell className="text-right">KES {expense.amount.toFixed(2)}</TableCell>
+                            </TableRow>
+                        ))
+                        ) : (
+                            <TableRow>
+                                <TableCell colSpan={4} className="text-center h-24">No expenses found.</TableCell>
+                            </TableRow>
+                        )}
+                    </TableBody>
+                </Table>
+            </CardContent>
+        </Card>
     </div>
   );
 }
