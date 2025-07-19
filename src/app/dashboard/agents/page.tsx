@@ -28,8 +28,8 @@ const agents = [
     name: 'Operations',
     description: 'Automates business workflows, logistics, and operational tasks.',
     icon: <Settings className="w-8 h-8" />,
-    status: 'Coming Soon',
-    href: '#',
+    status: 'Operational',
+    href: '/dashboard/agents/operations',
   },
   {
     name: 'Document AI',

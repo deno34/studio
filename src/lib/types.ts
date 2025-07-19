@@ -127,3 +127,21 @@ export const InterviewSummaryOutputSchema = z.object({
   recommendationJustification: z.string().describe("A brief justification for the recommendation score."),
 });
 export type InterviewSummaryOutput = z.infer<typeof InterviewSummaryOutputSchema>;
+
+// Operations / Logistics Schemas
+export const LogisticsPlanInputSchema = z.object({
+    origin: z.string().min(3, "Origin is required."),
+    destination: z.string().min(3, "Destination is required."),
+    goodsDescription: z.string().min(10, "Goods description is required."),
+    transportMode: z.enum(['Road', 'Air', 'Sea']),
+});
+export type LogisticsPlanInput = z.infer<typeof LogisticsPlanInputSchema>;
+
+export const LogisticsPlanOutputSchema = z.object({
+    summary: z.string().describe("A brief summary of the logistics plan."),
+    recommendedRoute: z.string().describe("The suggested route for the shipment."),
+    estimatedCost: z.string().describe("The estimated cost for the shipment (e.g., 'KES 80,000 - 95,000')."),
+    estimatedTime: z.string().describe("The estimated delivery time (e.g., '3-4 business days')."),
+    suggestedVendor: z.string().describe("A recommended logistics partner for this task."),
+});
+export type LogisticsPlanOutput = z.infer<typeof LogisticsPlanOutputSchema>;
