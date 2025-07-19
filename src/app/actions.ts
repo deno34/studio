@@ -4,7 +4,7 @@
 import { EarlyAccessRequest, EarlyAccessRequestSchema } from '@/lib/types';
 import { initializeApp, getApps, getApp, FirebaseApp } from "firebase/app";
 import { getFirestore, addDoc, collection } from "firebase/firestore";
-import { firebaseConfig } from '@/lib/firebaseConfig';
+import { getFirebaseConfig } from '@/lib/firebaseConfig';
 
 
 // This function is intended to be called from Server Components or other Server Actions.
@@ -13,6 +13,7 @@ function getDb() {
   const appName = 'server-actions-app'; // Unique name for the server-side app
   let app: FirebaseApp;
   if (!getApps().some(app => app.name === appName)) {
+    const firebaseConfig = getFirebaseConfig();
     app = initializeApp(firebaseConfig, appName);
   } else {
     app = getApp(appName);

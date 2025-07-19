@@ -12,7 +12,6 @@ import {
   signOut,
   sendEmailVerification,
   updateProfile,
-  type Auth
 } from 'firebase/auth';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { auth, googleProvider } from '@/lib/firebase/client'; // Import the initialized auth instance & google provider
@@ -82,8 +81,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         photoURL
     });
 
-    // Manually update the user state to reflect changes immediately
-    setUser({ ...auth.currentUser });
+    // Create a new user object to force re-render
+    setUser(JSON.parse(JSON.stringify(auth.currentUser)));
   }
 
   const handleSignOut = async () => {

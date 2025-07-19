@@ -2,14 +2,18 @@
 'use client';
 
 import { initializeApp, getApps, getApp, type FirebaseApp } from 'firebase/app';
-import {
-  getAuth,
-  GoogleAuthProvider,
-} from 'firebase/auth';
-import { firebaseConfig } from '@/lib/firebaseConfig';
+import { getAuth, GoogleAuthProvider } from 'firebase/auth';
+import { getFirebaseConfig } from '@/lib/firebaseConfig';
 
+// This function ensures that we initialize Firebase only once.
+function initializeClientApp(): FirebaseApp {
+  if (getApps().length) {
+    return getApp();
+  }
+  const firebaseConfig = getFirebaseConfig();
+  return initializeApp(firebaseConfig);
+}
 
-// Initialize Firebase
-const app: FirebaseApp = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+const app: FirebaseApp = initializeClientApp();
 export const auth = getAuth(app);
 export const googleProvider = new GoogleAuthProvider();
