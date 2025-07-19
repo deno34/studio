@@ -111,7 +111,7 @@ export default function HRAgentPage() {
                           <TableCell><Badge variant={job.status === 'Open' ? 'default' : 'secondary'}>{job.status}</Badge></TableCell>
                           <TableCell>{new Date(job.createdAt).toLocaleDateString()}</TableCell>
                            <TableCell className="text-right">
-                            <Button variant="ghost" size="sm" asChild>
+                            <Button variant="outline" size="sm" asChild>
                               <Link href={`/dashboard/agents/hr/${job.id}`}>View</Link>
                             </Button>
                            </TableCell>
@@ -120,7 +120,7 @@ export default function HRAgentPage() {
                     ) : (
                       <TableRow>
                         <TableCell colSpan={5} className="h-24 text-center">
-                          No job postings yet.
+                          No job postings yet. Create one to get started.
                         </TableCell>
                       </TableRow>
                     )}

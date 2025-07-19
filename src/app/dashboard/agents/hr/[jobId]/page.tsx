@@ -14,12 +14,20 @@ import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import type { JobPosting } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Badge } from '@/components/ui/badge';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 // Mock data for candidates - this will be replaced with real data
 const mockCandidates = [
-  { id: '1', name: 'Alice Johnson', match: 92, skills: 'React, Node.js, TypeScript', status: 'Interviewing' },
-  { id: '2', name: 'Bob Williams', match: 85, skills: 'Python, Django, AWS', status: 'Shortlisted' },
-  { id: '3', name: 'Charlie Brown', match: 78, skills: 'Java, Spring, Kubernetes', status: 'New' },
+  { id: '1', name: 'Alice Johnson', match: 92, skills: 'React, Node.js, TypeScript', status: 'Interviewing', explanation: 'Excellent match for all core skills and 5+ years of relevant experience.' },
+  { id: '2', name: 'Bob Williams', match: 85, skills: 'Python, Django, AWS', status: 'Shortlisted', explanation: 'Strong backend skills and AWS certification. Lacks frontend experience.' },
+  { id: '3', name: 'Charlie Brown', match: 78, skills: 'Java, Spring, Kubernetes', status: 'New', explanation: 'Solid Java experience but does not match the preferred tech stack.' },
+  { id: '4', name: 'Diana Prince', match: 95, skills: 'AI, PyTorch, LLMs, Vector DBs', status: 'New', explanation: 'Perfectly aligns with all required and desired skills for the Senior AI Engineer role.' },
 ];
 
 function JobPageSkeleton() {
@@ -57,6 +65,9 @@ export default function JobDetailPage() {
   const [job, setJob] = useState<JobPosting | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
+
+  // Sort candidates by match percentage descending
+  const sortedCandidates = [...mockCandidates].sort((a, b) => b.match - a.match);
 
   useEffect(() => {
     if (typeof jobId === 'string') {
@@ -156,12 +167,33 @@ export default function JobDetailPage() {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {mockCandidates.length > 0 ? mockCandidates.map(c => (
+                                {sortedCandidates.length > 0 ? sortedCandidates.map(c => (
                                     <TableRow key={c.id}>
-                                        <TableCell className="font-medium">{c.name}</TableCell>
-                                        <TableCell>{c.match}%</TableCell>
+                                        <TableCell className="font-medium">
+                                          {c.name}
+                                          {c.match > 90 && <Badge variant="secondary" className="ml-2 bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300">Top Candidate</Badge>}
+                                        </TableCell>
+                                        <TableCell>
+                                          <TooltipProvider>
+                                            <Tooltip>
+                                              <TooltipTrigger asChild>
+                                                <div className="flex items-center gap-1 cursor-help">
+                                                  <span>{c.match}%</span>
+                                                  <div className="flex">
+                                                    {[...Array(5)].map((_, i) => (
+                                                      <Star key={i} className={`w-3 h-3 ${c.match >= (i+1)*20 ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300 dark:text-gray-600'}`} />
+                                                    ))}
+                                                  </div>
+                                                </div>
+                                              </TooltipTrigger>
+                                              <TooltipContent>
+                                                <p className="max-w-xs">{c.explanation}</p>
+                                              </TooltipContent>
+                                            </Tooltip>
+                                          </TooltipProvider>
+                                        </TableCell>
                                         <TableCell className="text-muted-foreground">{c.skills}</TableCell>
-                                        <TableCell>{c.status}</TableCell>
+                                        <TableCell><Badge variant="outline">{c.status}</Badge></TableCell>
                                         <TableCell className="text-right">
                                             <Button variant="ghost" size="sm">View Details</Button>
                                         </TableCell>
