@@ -7,7 +7,7 @@ import { Footer } from '@/components/landing/footer';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, FileText, DollarSign, Users, Landmark, TrendingUp, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, FileText, DollarSign, Users, Landmark, AlertTriangle } from 'lucide-react';
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from 'recharts';
 import { InvoicesTab } from '@/components/dashboard/accounting/invoices-tab';
 import { ExpensesTab } from '@/components/dashboard/accounting/expenses-tab';
@@ -30,13 +30,19 @@ const budgetData = [
   { name: 'Utilities', spent: 800, budget: 1000 },
 ];
 
-const budgetProgress = [
-    { category: "Transport", spent: 3200, limit: 5000 },
-    { category: "Food & Entertainment", spent: 3100, limit: 3000 },
-    { category: "Software & Subscriptions", spent: 850, limit: 1200 },
-]
+// For now, budget limits are hardcoded. In the future, this would come from a user setting in Firestore.
+const budgetLimits = {
+    "Transport": 5000,
+    "Food & Entertainment": 3000,
+    "Software": 1200,
+    "Marketing": 6000,
+    "Utilities": 1000,
+    "Travel": 4000,
+    "Other": 1000,
+};
 
 export default function AccountingAgentPage() {
+
   return (
     <div className="flex flex-col min-h-dvh bg-background text-foreground">
       <Header />
@@ -76,7 +82,7 @@ export default function AccountingAgentPage() {
                     </div>
 
                     {/* Tabs for Tools */}
-                    <Tabs defaultValue="invoices" className="w-full">
+                    <Tabs defaultValue="expenses" className="w-full">
                         <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 md:grid-cols-5">
                             <TabsTrigger value="invoices">Invoices</TabsTrigger>
                             <TabsTrigger value="expenses">Expenses</TabsTrigger>
@@ -114,7 +120,7 @@ export default function AccountingAgentPage() {
                             <ResponsiveContainer width="100%" height={200}>
                                 <BarChart data={budgetData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
                                     <XAxis dataKey="name" stroke="#888888" fontSize={12} tickLine={false} axisLine={false}/>
-                                    <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `$${value/1000}k`}/>
+                                    <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `KES ${value/1000}k`}/>
                                     <Tooltip
                                         cursor={{ fill: 'hsla(var(--muted))' }}
                                         contentStyle={{ backgroundColor: 'hsl(var(--background))', border: '1px solid hsl(var(--border))' }}
@@ -125,35 +131,6 @@ export default function AccountingAgentPage() {
                             </ResponsiveContainer>
                         </CardContent>
                     </Card>
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Budget Remaining</CardTitle>
-                            <CardDescription>Tracking your spending by category.</CardDescription>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                           {budgetProgress.map(item => {
-                                const isOverBudget = item.spent > item.limit;
-                                const percentage = (item.spent / item.limit) * 100;
-                                return (
-                                    <div key={item.category}>
-                                        <div className="flex justify-between items-center mb-1">
-                                            <span className="text-sm font-medium">{item.category}</span>
-                                             <span className={`text-sm ${isOverBudget ? 'text-destructive font-bold' : 'text-muted-foreground'}`}>
-                                                ${item.spent.toLocaleString()} / ${item.limit.toLocaleString()}
-                                            </span>
-                                        </div>
-                                        <Progress value={Math.min(percentage, 100)} className={isOverBudget ? '[&>div]:bg-destructive' : ''} />
-                                        {isOverBudget && (
-                                             <p className="text-xs text-destructive mt-1 flex items-center">
-                                                <AlertTriangle className="w-3 h-3 mr-1" />
-                                                You've exceeded your budget for this category!
-                                            </p>
-                                        )}
-                                    </div>
-                                )
-                           })}
-                        </CardContent>
-                    </Card>
                 </div>
             </div>
         </div>
@@ -162,3 +139,5 @@ export default function AccountingAgentPage() {
     </div>
   );
 }
+
+    
