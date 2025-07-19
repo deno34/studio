@@ -3,3 +3,4 @@
 import './flows/payroll-flow';
 import './flows/financial-report-flow';
 import './flows/candidate-ranking-flow';
+import './flows/follow-up-email-flow';

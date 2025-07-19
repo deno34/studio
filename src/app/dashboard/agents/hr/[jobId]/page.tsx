@@ -22,6 +22,8 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { ScheduleInterviewForm } from '@/components/dashboard/hr/schedule-interview-form';
+import { GenerateFollowUpEmailForm } from '@/components/dashboard/hr/generate-follow-up-email-form';
+
 
 function JobPageSkeleton() {
     return (
@@ -67,16 +69,20 @@ export default function JobDetailPage() {
       setIsLoading(true);
       try {
         // In a real app, you might fetch these in parallel
-        const jobRes = await fetch(`/api/modules/hr/jobs/${jobId}`, {
-            headers: { 'x-api-key': process.env.NEXT_PUBLIC_MASTER_API_KEY! }
-        });
+        // For simplicity, we'll fetch them sequentially
+        const [jobRes, candidatesRes] = await Promise.all([
+             fetch(`/api/modules/hr/jobs/${jobId}`, { 
+                headers: { 'x-api-key': process.env.NEXT_PUBLIC_MASTER_API_KEY! }
+             }),
+             fetch(`/api/modules/hr/candidates?jobId=${jobId}`, { 
+                headers: { 'x-api-key': process.env.NEXT_PUBLIC_MASTER_API_KEY! }
+             })
+        ]);
+        
         if (!jobRes.ok) throw new Error('Failed to fetch job details');
         const jobData = await jobRes.json();
         setJob(jobData);
 
-        const candidatesRes = await fetch(`/api/modules/hr/candidates?jobId=${jobId}`, {
-            headers: { 'x-api-key': process.env.NEXT_PUBLIC_MASTER_API_KEY! }
-        });
         if (!candidatesRes.ok) throw new Error('Failed to fetch candidates');
         const candidatesData = await candidatesRes.json();
         setCandidates(candidatesData.sort((a: Candidate, b: Candidate) => (b.matchPercentage || 0) - (a.matchPercentage || 0)));
@@ -138,7 +144,7 @@ export default function JobDetailPage() {
         if (!rankRes.ok) {
             throw new Error('Ranking process failed');
         }
-
+        
         toast({ title: "Ranking Complete!", description: "Candidate has been scored." });
 
 
@@ -199,7 +205,7 @@ export default function JobDetailPage() {
                         <div className="flex flex-col items-center justify-center space-y-2 rounded-lg border-2 border-dashed p-8 text-center">
                             <UploadCloud className="h-12 w-12 text-muted-foreground" />
                             <p className="font-medium">Drag & drop resumes here or click to upload</p>
-                            <p className="text-sm text-muted-foreground">PDF, DOC, DOCX</p>
+                            <p className="text-sm text-muted-foreground">PDF only</p>
                              <Button asChild variant="outline" size="sm" className="relative">
                                 <label htmlFor="resume-upload" className="cursor-pointer">
                                     {isUploading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Uploading...</> : 'Browse Files'}
@@ -251,7 +257,8 @@ export default function JobDetailPage() {
                                         </TableCell>
                                         <TableCell className="text-muted-foreground max-w-xs truncate">{c.matchingSkills?.join(', ') || 'N/A'}</TableCell>
                                         <TableCell><Badge variant="outline">{c.status}</Badge></TableCell>
-                                        <TableCell className="text-right space-x-2">
+                                        <TableCell className="text-right space-x-1">
+                                            <GenerateFollowUpEmailForm candidate={c} job={job} />
                                             <ScheduleInterviewForm candidate={c} onInterviewScheduled={onInterviewScheduled}>
                                               <Button variant="outline" size="sm">Schedule</Button>
                                             </ScheduleInterviewForm>
