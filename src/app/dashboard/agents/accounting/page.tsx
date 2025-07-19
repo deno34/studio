@@ -5,14 +5,43 @@ import Link from 'next/link';
 import { Header } from '@/components/landing/header';
 import { Footer } from '@/components/landing/footer';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Construction } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ArrowLeft, FileText, DollarSign, Users, Landmark, TrendingUp, AlertTriangle } from 'lucide-react';
+import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from 'recharts';
+import { InvoicesTab } from '@/components/dashboard/accounting/invoices-tab';
+import { ExpensesTab } from '@/components/dashboard/accounting/expenses-tab';
+import { PayrollTab } from '@/components/dashboard/accounting/payroll-tab';
+import { TaxesTab } from '@/components/dashboard/accounting/taxes-tab';
+import { ReportsTab } from '@/components/dashboard/accounting/reports-tab';
+import { Progress } from '@/components/ui/progress';
+
+const summaryCards = [
+    { title: "Total Invoices", value: "KES 450,000", icon: <FileText className="w-6 h-6 text-muted-foreground" /> },
+    { title: "Total Expenses", value: "KES 123,000", icon: <DollarSign className="w-6 h-6 text-muted-foreground" /> },
+    { title: "Payroll Total", value: "KES 320,000", icon: <Users className="w-6 h-6 text-muted-foreground" /> },
+    { title: "Taxes Logged", value: "14 Entries", icon: <Landmark className="w-6 h-6 text-muted-foreground" /> },
+];
+
+const budgetData = [
+  { name: 'Marketing', spent: 4500, budget: 6000 },
+  { name: 'Software', spent: 1800, budget: 2000 },
+  { name: 'Travel', spent: 2500, budget: 4000 },
+  { name: 'Utilities', spent: 800, budget: 1000 },
+];
+
+const budgetProgress = [
+    { category: "Transport", spent: 3200, limit: 5000 },
+    { category: "Food & Entertainment", spent: 3100, limit: 3000 },
+    { category: "Software & Subscriptions", spent: 850, limit: 1200 },
+]
 
 export default function AccountingAgentPage() {
   return (
     <div className="flex flex-col min-h-dvh bg-background text-foreground">
       <Header />
-      <main className="flex-1 bg-muted/30 py-12">
-        <div className="container max-w-5xl px-4">
+      <main className="flex-1 bg-muted/30 py-8 md:py-12">
+        <div className="container max-w-7xl px-4">
             <Button variant="ghost" asChild className="mb-6">
                 <Link href="/dashboard/agents">
                 <ArrowLeft className="mr-2 h-4 w-4" />
@@ -27,18 +56,106 @@ export default function AccountingAgentPage() {
                 </p>
             </div>
 
-            <div className="text-center py-20 bg-background rounded-lg border border-dashed">
-                <div className="p-4 rounded-full bg-primary/10 mb-4 inline-block">
-                    <Construction className="w-12 h-12 text-primary" />
-                </div>
-                <h2 className="text-2xl font-semibold">Under Construction</h2>
-                <p className="text-muted-foreground mt-2">
-                    We're building the interface for the Accounting Agent.
-                    <br />
-                    The API endpoints are active, and the UI is coming soon!
-                </p>
-            </div>
+            <div className="grid gap-8 lg:grid-cols-3">
+                {/* Main Content Area */}
+                <div className="lg:col-span-2 space-y-8">
+                    {/* Summary Cards */}
+                    <div className="grid gap-6 sm:grid-cols-2">
+                        {summaryCards.map(card => (
+                            <Card key={card.title}>
+                                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                    <CardTitle className="text-sm font-medium">{card.title}</CardTitle>
+                                    {card.icon}
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="text-2xl font-bold">{card.value}</div>
+                                    <p className="text-xs text-muted-foreground">+20.1% from last month</p>
+                                </CardContent>
+                            </Card>
+                        ))}
+                    </div>
 
+                    {/* Tabs for Tools */}
+                    <Tabs defaultValue="invoices" className="w-full">
+                        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 md:grid-cols-5">
+                            <TabsTrigger value="invoices">Invoices</TabsTrigger>
+                            <TabsTrigger value="expenses">Expenses</TabsTrigger>
+                            <TabsTrigger value="payroll">Payroll</TabsTrigger>
+                            <TabsTrigger value="tax">Taxes</TabsTrigger>
+                            <TabsTrigger value="reports">Reports</TabsTrigger>
+                        </TabsList>
+                        <TabsContent value="invoices">
+                           <InvoicesTab />
+                        </TabsContent>
+                        <TabsContent value="expenses">
+                            <ExpensesTab />
+                        </TabsContent>
+                        <TabsContent value="payroll">
+                            <PayrollTab />
+                        </TabsContent>
+                         <TabsContent value="tax">
+                            <TaxesTab />
+                        </TabsContent>
+                         <TabsContent value="reports">
+                            <ReportsTab />
+                        </TabsContent>
+                    </Tabs>
+
+                </div>
+
+                {/* Sidebar Area */}
+                <div className="lg:col-span-1 space-y-8">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Budget Overview</CardTitle>
+                            <CardDescription>Monthly expenses vs. budget.</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <ResponsiveContainer width="100%" height={200}>
+                                <BarChart data={budgetData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+                                    <XAxis dataKey="name" stroke="#888888" fontSize={12} tickLine={false} axisLine={false}/>
+                                    <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `$${value/1000}k`}/>
+                                    <Tooltip
+                                        cursor={{ fill: 'hsla(var(--muted))' }}
+                                        contentStyle={{ backgroundColor: 'hsl(var(--background))', border: '1px solid hsl(var(--border))' }}
+                                    />
+                                    <Bar dataKey="spent" fill="hsl(var(--primary))" name="Spent" radius={[4, 4, 0, 0]} />
+                                    <Bar dataKey="budget" fill="hsla(var(--primary) / 0.2)" name="Budget" radius={[4, 4, 0, 0]} />
+                                </BarChart>
+                            </ResponsiveContainer>
+                        </CardContent>
+                    </Card>
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Budget Remaining</CardTitle>
+                            <CardDescription>Tracking your spending by category.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                           {budgetProgress.map(item => {
+                                const isOverBudget = item.spent > item.limit;
+                                const percentage = (item.spent / item.limit) * 100;
+                                return (
+                                    <div key={item.category}>
+                                        <div className="flex justify-between items-center mb-1">
+                                            <span className="text-sm font-medium">{item.category}</span>
+                                             <span className={`text-sm ${isOverBudget ? 'text-destructive font-bold' : 'text-muted-foreground'}`}>
+                                                ${item.spent.toLocaleString()} / ${item.limit.toLocaleString()}
+                                            </span>
+                                        </div>
+                                        <Progress value={Math.min(percentage, 100)} className={isOverBudget ? '[&>div]:bg-destructive' : ''} />
+                                        {isOverBudget && (
+                                             <p className="text-xs text-destructive mt-1 flex items-center">
+                                                <AlertTriangle className="w-3 h-3 mr-1" />
+                                                You've exceeded your budget for this category!
+                                            </p>
+                                        )}
+                                    </div>
+                                )
+                           })}
+                        </CardContent>
+                    </Card>
+                </div>
+            </div>
         </div>
       </main>
       <Footer />
