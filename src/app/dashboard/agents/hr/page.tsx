@@ -110,7 +110,7 @@ export default function HRAgentPage() {
                           <TableCell>{job.location}</TableCell>
                           <TableCell><Badge variant={job.status === 'Open' ? 'default' : 'secondary'}>{job.status}</Badge></TableCell>
                           <TableCell>{new Date(job.createdAt).toLocaleDateString()}</TableCell>
-                           <TableCell>
+                           <TableCell className="text-right">
                             <Button variant="ghost" size="sm" asChild>
                               <Link href={`/dashboard/agents/hr/${job.id}`}>View</Link>
                             </Button>
