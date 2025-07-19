@@ -13,6 +13,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { MoreHorizontal, PlusCircle, Trash2, Loader2, FileText, ExternalLink } from "lucide-react";
+import { Badge } from '@/components/ui/badge';
 
 // Mock data, to be replaced with data fetched from Firestore
 const invoices = [
