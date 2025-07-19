@@ -13,7 +13,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { PlusCircle, Loader2, UploadCloud, FilePlus2 } from "lucide-react";
-import pdf from 'pdf-parse';
 
 const expenseFormSchema = z.object({
   note: z.string().min(2, { message: "Description must be at least 2 characters." }),
@@ -144,32 +143,21 @@ export function ExpensesTab() {
     setIsAnalyzing(true);
     setAnalysisResult(null);
 
-    try {
-        let textContent = "";
-        if (selectedFile.type === "application/pdf") {
-            const data = await pdf(await selectedFile.arrayBuffer());
-            textContent = data.text;
-        } else if (selectedFile.type.startsWith("text/")) {
-            textContent = await selectedFile.text();
-        } else {
-            // For images, we would need a different approach (multimodal model)
-            // For now, we only support text-based files.
-             toast({ variant: "destructive", title: "Unsupported File Type", description: "Currently, only PDF and text files can be analyzed." });
-             setIsAnalyzing(false);
-             return;
-        }
+    const formData = new FormData();
+    formData.append("file", selectedFile);
 
+    try {
         const response = await fetch('/api/modules/accounting/analyze', {
             method: 'POST',
             headers: { 
-                'Content-Type': 'application/json',
                 'x-api-key': process.env.NEXT_PUBLIC_MASTER_API_KEY || '' 
             },
-            body: JSON.stringify({ text: textContent }),
+            body: formData,
         });
 
         if (!response.ok) {
-            throw new Error('Failed to analyze receipt.');
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Failed to analyze receipt.');
         }
 
         const data = await response.json();

@@ -1,6 +1,24 @@
+
 import { NextRequest, NextResponse } from 'next/server';
 import { validateApiKey } from '@/lib/auth';
 import { callMistral } from '@/lib/mistral';
+import { formidable } from 'formidable';
+import fs from 'fs/promises';
+import pdf from 'pdf-parse';
+
+// Helper to parse multipart form data
+async function parseFormData(req: NextRequest) {
+  const form = formidable({});
+  const [fields, files] = await form.parse(req as any);
+  
+  const file = files.file?.[0];
+
+  if (!file) {
+    throw new Error('No file uploaded.');
+  }
+  
+  return { file };
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -10,12 +28,24 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const { text } = await req.json();
-    if (!text) {
-      return NextResponse.json({ error: 'Text for analysis is required' }, { status: 400 });
+    const { file } = await parseFormData(req);
+    const fileBuffer = await fs.readFile(file.filepath);
+    let textContent = '';
+
+    if (file.mimetype === 'application/pdf') {
+        const data = await pdf(fileBuffer);
+        textContent = data.text;
+    } else if (file.mimetype?.startsWith('text/')) {
+        textContent = fileBuffer.toString('utf-8');
+    } else {
+        return NextResponse.json({ error: 'Unsupported file type. Please upload a PDF or text file.' }, { status: 400 });
     }
 
-    const result = await callMistral(`Analyze this receipt or financial document and extract key information like vendor, date, total amount, and items in a structured JSON format: \n\n${text}`);
+    if (!textContent) {
+        return NextResponse.json({ error: 'Could not extract text from the document.' }, { status: 400 });
+    }
+
+    const result = await callMistral(`Analyze this receipt or financial document and extract key information like vendor, date, total amount, and items in a structured JSON format: \n\n${textContent}`);
 
     // Attempt to parse the string response from Mistral into JSON
     try {
