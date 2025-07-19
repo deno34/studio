@@ -64,7 +64,7 @@ export function ExpensesTab() {
     setIsLoading(true);
     try {
       const response = await fetch('/api/modules/accounting/expenses', {
-        headers: { 'x-api-key': process.env.NEXT_PUBLIC_MASTER_API_KEY || '' }
+        headers: { 'x-api-key': process.env.NEXT_PUBLIC_MASTER_API_KEY! }
       });
       if (!response.ok) {
         throw new Error('Failed to fetch expenses.');
@@ -94,7 +94,7 @@ export function ExpensesTab() {
         method: 'POST',
         headers: { 
             'Content-Type': 'application/json',
-            'x-api-key': process.env.NEXT_PUBLIC_MASTER_API_KEY || '' 
+            'x-api-key': process.env.NEXT_PUBLIC_MASTER_API_KEY!
         },
         body: JSON.stringify({
             ...values,
@@ -150,7 +150,7 @@ export function ExpensesTab() {
         const response = await fetch('/api/modules/accounting/analyze', {
             method: 'POST',
             headers: { 
-                'x-api-key': process.env.NEXT_PUBLIC_MASTER_API_KEY || '' 
+                'x-api-key': process.env.NEXT_PUBLIC_MASTER_API_KEY!
             },
             body: formData,
         });
