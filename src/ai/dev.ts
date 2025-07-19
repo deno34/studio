@@ -9,4 +9,4 @@ import './flows/logistics-flow';
 import './flows/daily-planner-flow';
 import './flows/restock-suggestion-flow';
 import './flows/lead-followup-flow';
-
+import './flows/contract-parser-flow';

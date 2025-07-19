@@ -267,3 +267,22 @@ export const LeadFollowupSuggestionOutputSchema = z.object({
   suggestions: z.array(LeadFollowupSuggestionSchema).describe('A prioritized list of follow-up suggestions for the day.'),
 });
 export type LeadFollowupSuggestionOutput = z.infer<typeof LeadFollowupSuggestionOutputSchema>;
+
+// Document AI / Contract Parser Schemas
+export const ContractParserInputSchema = z.object({
+  contractText: z.string().describe("The full text content extracted from the contract document."),
+});
+export type ContractParserInput = z.infer<typeof ContractParserInputSchema>;
+
+export const ContractParserOutputSchema = z.object({
+  parties: z.array(z.string()).describe("The names of the parties involved in the contract."),
+  effectiveDate: z.string().optional().describe("The date the contract becomes effective."),
+  terminationDate: z.string().optional().describe("The date the contract terminates."),
+  jurisdiction: z.string().optional().describe("The governing law or jurisdiction."),
+  keyObligations: z.array(z.object({
+    party: z.string().describe("The party responsible for the obligation."),
+    obligation: z.string().describe("A summary of the key obligation."),
+  })).describe("A list of key responsibilities and duties for each party."),
+  isContract: z.boolean().describe("Whether the document appears to be a legal contract."),
+});
+export type ContractParserOutput = z.infer<typeof ContractParserOutputSchema>;

@@ -35,8 +35,8 @@ const agents = [
     name: 'Document AI',
     description: 'Analyzes receipts, contracts, and other documents to extract key information.',
     icon: <ScanText className="w-8 h-8" />,
-    status: 'Coming Soon',
-    href: '#',
+    status: 'Operational',
+    href: '/dashboard/agents/document-ai',
   },
   {
     name: 'Business Intelligence',
