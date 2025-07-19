@@ -3,6 +3,7 @@
 
 
 
+
 import {z} from 'zod';
 
 /**
@@ -304,3 +305,20 @@ export const DocumentWriterOutputSchema = z.object({
   draftContent: z.string().describe("The AI-generated document draft in Markdown format."),
 });
 export type DocumentWriterOutput = z.infer<typeof DocumentWriterOutputSchema>;
+
+
+// Document AI / Document Summarizer Schemas
+export const DocumentSummaryInputSchema = z.object({
+  documentText: z.string().describe("The full text content extracted from the document."),
+});
+export type DocumentSummaryInput = z.infer<typeof DocumentSummaryInputSchema>;
+
+export const DocumentSummaryOutputSchema = z.object({
+  summaryPoints: z.array(z.string()).describe("A bulleted list of key takeaways."),
+  sentiment: z.enum(['Positive', 'Negative', 'Neutral']).describe("The overall sentiment of the document."),
+  entities: z.object({
+    people: z.array(z.string()).describe("A list of people mentioned."),
+    companies: z.array(z.string()).describe("A list of companies or organizations mentioned."),
+  }).describe("Key entities identified in the document."),
+});
+export type DocumentSummaryOutput = z.infer<typeof DocumentSummaryOutputSchema>;

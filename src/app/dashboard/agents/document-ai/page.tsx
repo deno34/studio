@@ -16,8 +16,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, UploadCloud, Loader2, Bot, PenSquare } from 'lucide-react';
-import { ContractParserOutput, DocumentWriterInputSchema, type DocumentWriterInput } from '@/lib/types';
+import { ArrowLeft, UploadCloud, Loader2, Bot, PenSquare, FileText, User, Building, Smile, Frown, Meh } from 'lucide-react';
+import { ContractParserOutput, DocumentSummaryOutput, DocumentWriterInputSchema, type DocumentWriterInput } from '@/lib/types';
+import { Badge } from '@/components/ui/badge';
 
 
 function AnalysisDisplay({ analysis }: { analysis: ContractParserOutput }) {
@@ -98,13 +99,13 @@ function DocumentWriter() {
     };
     
     return (
-        <div className="grid gap-6 lg:grid-cols-2">
-            <Card>
-                <CardHeader>
-                    <CardTitle>Document Writer</CardTitle>
-                    <CardDescription>Generate drafts for emails, reports, and more.</CardDescription>
-                </CardHeader>
-                <CardContent>
+        <Card>
+            <CardHeader>
+                <CardTitle>Document Writer</CardTitle>
+                <CardDescription>Generate drafts for emails, reports, and more.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <div className="grid gap-6 lg:grid-cols-2">
                     <Form {...form}>
                         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                             <FormField
@@ -154,46 +155,167 @@ function DocumentWriter() {
                             </Button>
                         </form>
                     </Form>
-                </CardContent>
-            </Card>
-            <Card>
-                 <CardHeader>
-                    <CardTitle>Generated Draft</CardTitle>
-                    <CardDescription>The AI-generated content will appear here.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    {isGenerating && (
-                        <div className="space-y-3">
-                            <Skeleton className="h-5 w-2/5" />
-                            <Skeleton className="h-4 w-full" />
-                            <Skeleton className="h-4 w-full" />
-                            <Skeleton className="h-4 w-4/6" />
-                             <Skeleton className="h-4 w-full mt-4" />
-                            <Skeleton className="h-4 w-5/6" />
-                        </div>
-                    )}
-                    {draftContent && (
-                        <div className="space-y-2">
-                            <Textarea
-                                className="min-h-[250px] bg-muted/50"
-                                value={draftContent}
-                                onChange={(e) => setDraftContent(e.target.value)}
-                            />
-                            <h3 className="text-sm font-semibold pt-2">Markdown Preview</h3>
-                            <div className="prose prose-sm dark:prose-invert max-w-none p-4 border rounded-md min-h-[100px]">
-                                <ReactMarkdown>{draftContent}</ReactMarkdown>
+                     <div className="min-h-[200px]">
+                        {isGenerating ? (
+                            <div className="space-y-3">
+                                <Skeleton className="h-5 w-2/5" />
+                                <Skeleton className="h-4 w-full" />
+                                <Skeleton className="h-4 w-full" />
+                                <Skeleton className="h-4 w-4/6" />
+                                <Skeleton className="h-4 w-full mt-4" />
+                                <Skeleton className="h-4 w-5/6" />
                             </div>
-                        </div>
-                    )}
-                     {!isGenerating && !draftContent && (
-                        <div className="flex h-full min-h-[300px] items-center justify-center rounded-md border border-dashed">
-                            <p className="text-sm text-muted-foreground text-center">Fill out the form to generate a new document.</p>
-                        </div>
-                    )}
-                </CardContent>
-            </Card>
-        </div>
+                        ) : draftContent ? (
+                            <div className="space-y-2">
+                                <h3 className="text-sm font-semibold pt-2">Generated Draft</h3>
+                                <div className="prose prose-sm dark:prose-invert max-w-none p-4 border rounded-md min-h-[100px] bg-muted/50">
+                                    <ReactMarkdown>{draftContent}</ReactMarkdown>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="flex h-full min-h-[300px] items-center justify-center rounded-md border border-dashed">
+                                <p className="text-sm text-muted-foreground text-center">Generated draft will appear here.</p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </CardContent>
+        </Card>
     )
+}
+
+
+function DocumentSummarizer() {
+  const { toast } = useToast();
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [fileName, setFileName] = useState('');
+  const [isSummarizing, setIsSummarizing] = useState(false);
+  const [summary, setSummary] = useState<DocumentSummaryOutput | null>(null);
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      if (file.type !== 'application/pdf' && !file.type.startsWith('text/')) {
+        toast({
+          variant: 'destructive',
+          title: 'Unsupported File Type',
+          description: 'Please upload a PDF or text file.',
+        });
+        return;
+      }
+      setSelectedFile(file);
+      setFileName(file.name);
+      setSummary(null);
+    }
+  };
+
+  const handleSummarize = async () => {
+    if (!selectedFile) {
+      toast({ variant: 'destructive', title: 'No file selected.' });
+      return;
+    }
+    setIsSummarizing(true);
+    setSummary(null);
+    
+    const formData = new FormData();
+    formData.append('file', selectedFile);
+
+    try {
+      const response = await fetch('/api/modules/document/summarize', {
+        method: 'POST',
+        headers: {
+          'x-api-key': process.env.NEXT_PUBLIC_MASTER_API_KEY!,
+        },
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to summarize document.');
+      }
+      
+      const result = await response.json();
+      setSummary(result);
+      toast({ title: 'Summary Complete!', description: 'Document summary has been generated.' });
+
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Summarization Failed',
+        description: error instanceof Error ? error.message : 'An unknown error occurred.',
+      });
+    } finally {
+      setIsSummarizing(false);
+    }
+  };
+
+  const sentimentIcon = {
+    Positive: <Smile className="h-4 w-4 text-green-500" />,
+    Negative: <Frown className="h-4 w-4 text-red-500" />,
+    Neutral: <Meh className="h-4 w-4 text-yellow-500" />,
+  }
+
+  return (
+    <Card>
+        <CardHeader>
+          <CardTitle>Document Summarizer</CardTitle>
+          <CardDescription>Upload a document (PDF or TXT) to get an AI summary.</CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-6 lg:grid-cols-2">
+            <div className="space-y-4">
+                 <div className="flex flex-col items-center justify-center space-y-2 rounded-lg border-2 border-dashed p-8 text-center">
+                    <UploadCloud className="h-12 w-12 text-muted-foreground" />
+                    <p className="font-medium">{fileName || 'Drag & drop or click to upload'}</p>
+                    <p className="text-sm text-muted-foreground">PDF or TXT</p>
+                    <Button asChild variant="outline" size="sm" className="cursor-pointer">
+                      <label htmlFor="summary-upload">Browse File</label>
+                    </Button>
+                    <Input id="summary-upload" type="file" className="sr-only" onChange={handleFileChange} accept=".pdf,.txt" />
+                  </div>
+                  <Button onClick={handleSummarize} disabled={isSummarizing || !selectedFile} className="w-full">
+                    {isSummarizing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <FileText className="mr-2 h-4 w-4" />}
+                    {isSummarizing ? 'Analyzing...' : 'Analyze & Summarize'}
+                  </Button>
+            </div>
+             <div className="min-h-[250px] space-y-4">
+                  {isSummarizing ? (
+                      <div className="space-y-4 pt-4">
+                          <Skeleton className="h-6 w-1/4" />
+                          <Skeleton className="h-4 w-3/4" />
+                          <Skeleton className="h-4 w-1/2" />
+                          <Skeleton className="h-6 w-1/3 mt-4" />
+                          <Skeleton className="h-10 w-full" />
+                      </div>
+                  ) : summary ? (
+                      <div className="space-y-4 text-sm">
+                          <div>
+                            <h4 className="font-semibold flex items-center gap-2">Sentiment: 
+                                <Badge variant="outline">{summary.sentiment} {sentimentIcon[summary.sentiment as keyof typeof sentimentIcon]} </Badge>
+                            </h4>
+                          </div>
+                          <div>
+                              <h4 className="font-semibold">Key Points</h4>
+                              <ul className="list-disc list-inside text-muted-foreground">
+                                  {summary.summaryPoints.map((p, i) => <li key={i}>{p}</li>)}
+                              </ul>
+                          </div>
+                          <div>
+                              <h4 className="font-semibold">Entities Mentioned</h4>
+                               <div className="flex flex-wrap gap-2 mt-2">
+                                {summary.entities.people.length > 0 && summary.entities.people.map((p,i) => <Badge variant="secondary" key={`p-${i}`}><User className="w-3 h-3 mr-1.5"/>{p}</Badge>)}
+                                {summary.entities.companies.length > 0 && summary.entities.companies.map((c,i) => <Badge variant="secondary" key={`c-${i}`}><Building className="w-3 h-3 mr-1.5"/>{c}</Badge>)}
+                               </div>
+                          </div>
+                      </div>
+                  ) : (
+                      <div className="flex h-full items-center justify-center text-center text-sm text-muted-foreground rounded-md border border-dashed">
+                          <p>Summary will appear here.</p>
+                      </div>
+                  )}
+            </div>
+        </CardContent>
+    </Card>
+  )
 }
 
 export default function DocumentAIPage() {
@@ -280,57 +402,53 @@ export default function DocumentAIPage() {
           </div>
 
           <div className="space-y-8">
-            <div className="grid gap-8 lg:grid-cols-2">
-              <Card>
+            <Card>
                 <CardHeader>
                   <CardTitle>Contract Parser</CardTitle>
                   <CardDescription>Upload a contract (PDF) to extract key details.</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex flex-col items-center justify-center space-y-2 rounded-lg border-2 border-dashed p-8 text-center">
-                    <UploadCloud className="h-12 w-12 text-muted-foreground" />
-                    <p className="font-medium">{fileName || 'Drag & drop or click to upload'}</p>
-                    <p className="text-sm text-muted-foreground">PDF only</p>
-                    <Button asChild variant="outline" size="sm" className="cursor-pointer">
-                      <label htmlFor="contract-upload">Browse File</label>
-                    </Button>
-                    <Input id="contract-upload" type="file" className="sr-only" onChange={handleFileChange} accept=".pdf" />
-                  </div>
-                  <Button onClick={handleAnalyze} disabled={isAnalyzing || !selectedFile} className="w-full">
-                    {isAnalyzing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Bot className="mr-2 h-4 w-4" />}
-                    {isAnalyzing ? 'Analyzing...' : 'Analyze Contract'}
-                  </Button>
-                </CardContent>
-              </Card>
+                <CardContent className="grid gap-8 lg:grid-cols-2">
+                    <div className="space-y-4">
+                        <div className="flex flex-col items-center justify-center space-y-2 rounded-lg border-2 border-dashed p-8 text-center">
+                            <UploadCloud className="h-12 w-12 text-muted-foreground" />
+                            <p className="font-medium">{fileName || 'Drag & drop or click to upload'}</p>
+                            <p className="text-sm text-muted-foreground">PDF only</p>
+                            <Button asChild variant="outline" size="sm" className="cursor-pointer">
+                            <label htmlFor="contract-upload">Browse File</label>
+                            </Button>
+                            <Input id="contract-upload" type="file" className="sr-only" onChange={handleFileChange} accept=".pdf" />
+                        </div>
+                        <Button onClick={handleAnalyze} disabled={isAnalyzing || !selectedFile} className="w-full">
+                            {isAnalyzing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Bot className="mr-2 h-4 w-4" />}
+                            {isAnalyzing ? 'Analyzing...' : 'Analyze Contract'}
+                        </Button>
+                    </div>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Extracted Information</CardTitle>
-                  <CardDescription>The AI-parsed details from your document will appear here.</CardDescription>
-                </CardHeader>
-                <CardContent className="min-h-[300px]">
-                  {isAnalyzing && (
-                      <div className="space-y-4">
-                          <Skeleton className="h-6 w-1/4" />
-                          <Skeleton className="h-4 w-3/4" />
-                          <Skeleton className="h-4 w-1/2" />
-                          <Skeleton className="h-6 w-1/3 mt-4" />
-                          <Skeleton className="h-10 w-full" />
-                          <Skeleton className="h-10 w-full" />
-                      </div>
-                  )}
-                  {analysisResult && (
-                      <AnalysisDisplay analysis={analysisResult} />
-                  )}
-                  {!isAnalyzing && !analysisResult && (
-                      <div className="flex h-full items-center justify-center text-center text-sm text-muted-foreground">
-                          <p>Upload a contract and click "Analyze" to see the results.</p>
-                      </div>
-                  )}
+                    <div className="min-h-[300px]">
+                        <h3 className="font-semibold mb-2">Extracted Information</h3>
+                        <div className="border rounded-md p-4 min-h-[inherit] bg-muted/50">
+                        {isAnalyzing ? (
+                            <div className="space-y-4">
+                                <Skeleton className="h-6 w-1/4" />
+                                <Skeleton className="h-4 w-3/4" />
+                                <Skeleton className="h-4 w-1/2" />
+                                <Skeleton className="h-6 w-1/3 mt-4" />
+                                <Skeleton className="h-10 w-full" />
+                                <Skeleton className="h-10 w-full" />
+                            </div>
+                        ) : analysisResult ? (
+                            <AnalysisDisplay analysis={analysisResult} />
+                        ) : (
+                            <div className="flex h-full items-center justify-center text-center text-sm text-muted-foreground">
+                                <p>Upload a contract and click "Analyze" to see the results.</p>
+                            </div>
+                        )}
+                        </div>
+                    </div>
                 </CardContent>
-              </Card>
-            </div>
-             <DocumentWriter />
+            </Card>
+            <DocumentWriter />
+            <DocumentSummarizer />
           </div>
         </div>
       </main>
