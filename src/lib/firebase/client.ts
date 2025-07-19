@@ -1,3 +1,4 @@
+
 'use client';
 
 import { initializeApp, getApps, getApp, type FirebaseApp } from 'firebase/app';
@@ -11,4 +12,4 @@ import { firebaseConfig } from '@/lib/firebaseConfig';
 // Initialize Firebase
 const app: FirebaseApp = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 export const auth = getAuth(app);
-auth.provider = new GoogleAuthProvider();
+export const googleProvider = new GoogleAuthProvider();

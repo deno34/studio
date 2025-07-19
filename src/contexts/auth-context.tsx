@@ -15,7 +15,7 @@ import {
   type Auth
 } from 'firebase/auth';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { auth } from '@/lib/firebase/client'; // Import the initialized auth instance
+import { auth, googleProvider } from '@/lib/firebase/client'; // Import the initialized auth instance & google provider
 
 
 interface AuthContextType {
@@ -58,7 +58,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }
 
   const handleSignInWithGoogle = async () => {
-    return signInWithPopup(auth, auth.provider);
+    return signInWithPopup(auth, googleProvider);
   }
   
   const handleSendVerificationEmail = async (user: User) => {
