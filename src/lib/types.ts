@@ -176,3 +176,29 @@ export const DailyPlannerOutputSchema = z.object({
     planMarkdown: z.string().describe("The full daily plan formatted as a Markdown string."),
 });
 export type DailyPlannerOutput = z.infer<typeof DailyPlannerOutputSchema>;
+
+// Operations / Inventory Schemas
+export const VendorSchema = z.object({
+    name: z.string().min(2, "Vendor name is required."),
+    contactPerson: z.string().optional(),
+    email: z.string().email().optional(),
+});
+export interface Vendor extends z.infer<typeof VendorSchema> {
+    id: string;
+    createdAt: string;
+}
+
+export const InventoryItemSchema = z.object({
+    name: z.string().min(2, "Item name is required."),
+    sku: z.string().min(3, "SKU must be at least 3 characters."),
+    stockLevel: z.coerce.number().min(0, "Stock level cannot be negative."),
+    reorderLevel: z.coerce.number().min(0, "Reorder level cannot be negative."),
+    vendorId: z.string().optional(),
+    location: z.string().optional(),
+});
+
+export interface InventoryItem extends z.infer<typeof InventoryItemSchema> {
+    id: string;
+    createdAt: string;
+    updatedAt: string;
+}
