@@ -6,19 +6,17 @@ import { useRouter } from 'next/navigation';
 import { 
   type User, 
   onAuthStateChanged,
-  getAuth,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signInWithPopup,
-  GoogleAuthProvider,
   signOut,
-  type Auth,
   sendEmailVerification,
-  updateProfile
+  updateProfile,
+  type Auth
 } from 'firebase/auth';
-import { initializeApp, getApps, getApp, type FirebaseApp } from 'firebase/app';
-import { firebaseConfig } from '@/lib/firebaseConfig';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { auth } from '@/lib/firebase/client'; // Import the initialized auth instance
+
 
 interface AuthContextType {
   user: User | null;
@@ -36,18 +34,11 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [auth, setAuth] = useState<Auth | null>(null);
   const router = useRouter();
 
   useEffect(() => {
-    // Ensure Firebase is initialized only on the client side
-    const app: FirebaseApp = !getApps().length ? initializeApp(firebaseConfig) : getApp();
-    const authInstance = getAuth(app);
-    setAuth(authInstance);
-    
-    const unsubscribe = onAuthStateChanged(authInstance, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
-        // Optional: you could fetch additional user data from Firestore here
         setUser(user);
       } else {
         setUser(null);
@@ -59,34 +50,28 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const handleSignInWithEmail = async (email, password) => {
-    if (!auth) throw new Error("Auth not initialized");
     return signInWithEmailAndPassword(auth, email, password);
   }
   
   const handleSignUpWithEmail = async (email, password) => {
-    if (!auth) throw new Error("Auth not initialized");
     return createUserWithEmailAndPassword(auth, email, password);
   }
 
   const handleSignInWithGoogle = async () => {
-    if (!auth) throw new Error("Auth not initialized");
-    const googleProvider = new GoogleAuthProvider();
-    return signInWithPopup(auth, googleProvider);
+    return signInWithPopup(auth, auth.provider);
   }
   
   const handleSendVerificationEmail = async (user: User) => {
-    if (!auth) throw new Error("Auth not initialized");
     return sendEmailVerification(user);
   }
 
   const handleUpdateProfile = async (displayName: string, photoFile?: File) => {
-    if (!auth?.currentUser) throw new Error("User not authenticated");
+    if (!auth.currentUser) throw new Error("User not authenticated");
     
     let photoURL = auth.currentUser.photoURL;
 
     if (photoFile) {
-        const app = getApp();
-        const storage = getStorage(app);
+        const storage = getStorage(auth.app);
         const storageRef = ref(storage, `profile-pictures/${auth.currentUser.uid}`);
         await uploadBytes(storageRef, photoFile);
         photoURL = await getDownloadURL(storageRef);
@@ -102,7 +87,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }
 
   const handleSignOut = async () => {
-    if (!auth) throw new Error("Auth not initialized");
     await signOut(auth);
     router.push('/');
   };

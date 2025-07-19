@@ -48,7 +48,9 @@ export default function ProfilePage() {
       form.reset({
         displayName: user.displayName || '',
       });
-      setPreviewImage(user.photoURL);
+      if (user.photoURL) {
+        setPreviewImage(user.photoURL);
+      }
     }
   }, [user, loading, router, form]);
 
