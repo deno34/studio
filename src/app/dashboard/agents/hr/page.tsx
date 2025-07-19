@@ -7,6 +7,7 @@ import { Footer } from '@/components/landing/footer';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft, PlusCircle } from 'lucide-react';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 export default function HRAgentPage() {
   return (
@@ -41,10 +42,26 @@ export default function HRAgentPage() {
                 </Button>
               </CardHeader>
               <CardContent>
-                <div className="flex flex-col items-center justify-center text-center p-12 border-2 border-dashed rounded-lg">
-                  <h3 className="text-lg font-semibold">No job postings yet</h3>
-                  <p className="text-sm text-muted-foreground mt-2">Click "Create Job Post" to get started.</p>
-                </div>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Title</TableHead>
+                      <TableHead>Location</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Posted Date</TableHead>
+                      <TableHead>
+                        <span className="sr-only">Actions</span>
+                      </TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    <TableRow>
+                      <TableCell colSpan={5} className="h-24 text-center">
+                        No job postings yet.
+                      </TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
               </CardContent>
             </Card>
           </div>
