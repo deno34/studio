@@ -48,9 +48,8 @@ export function ExpensesTab() {
   });
 
   const fetchExpenses = async () => {
+    setIsLoading(true);
     try {
-      // NOTE: For this demo, we assume a master API key is set in environment variables.
-      // In a real app, you would manage user-specific API keys.
       const response = await fetch('/api/modules/accounting/expenses', {
         headers: { 'x-api-key': process.env.NEXT_PUBLIC_MASTER_API_KEY || '' }
       });
@@ -134,8 +133,8 @@ export function ExpensesTab() {
                         <TableBody>
                             {isLoading ? (
                                 <TableRow>
-                                    <TableCell colSpan={4} className="text-center">
-                                        <Loader2 className="mx-auto h-6 w-6 animate-spin" />
+                                    <TableCell colSpan={4} className="text-center py-10">
+                                        <Loader2 className="mx-auto h-6 w-6 animate-spin text-muted-foreground" />
                                     </TableCell>
                                 </TableRow>
                             ) : expenses.length > 0 ? (
@@ -149,7 +148,7 @@ export function ExpensesTab() {
                             ))
                             ) : (
                                 <TableRow>
-                                    <TableCell colSpan={4} className="text-center">No expenses found.</TableCell>
+                                    <TableCell colSpan={4} className="text-center h-24">No expenses found.</TableCell>
                                 </TableRow>
                             )}
                         </TableBody>
@@ -198,7 +197,7 @@ export function ExpensesTab() {
                                 render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Category</FormLabel>
-                                    <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
+                                    <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value || ''}>
                                     <FormControl>
                                         <SelectTrigger>
                                             <SelectValue placeholder="Select a category" />
@@ -208,8 +207,9 @@ export function ExpensesTab() {
                                         <SelectItem value="Marketing">Marketing</SelectItem>
                                         <SelectItem value="Software">Software</SelectItem>
                                         <SelectItem value="Travel">Travel</SelectItem>
-                                        <SelectItem value="Food">Food</SelectItem>
+                                        <SelectItem value="Food & Entertainment">Food & Entertainment</SelectItem>
                                         <SelectItem value="Utilities">Utilities</SelectItem>
+                                        <SelectItem value="Transport">Transport</SelectItem>
                                         <SelectItem value="Other">Other</SelectItem>
                                     </SelectContent>
                                     </Select>
@@ -229,5 +229,3 @@ export function ExpensesTab() {
     </div>
   );
 }
-
-    
