@@ -19,10 +19,10 @@ const agents = [
   },
   {
     name: 'Human Resources (HR)',
-    description: 'Manages payroll summarization, employee onboarding, and HR documents.',
+    description: 'Manages job postings, resume screening, and the candidate pipeline.',
     icon: <Users className="w-8 h-8" />,
-    status: 'Coming Soon',
-    href: '#',
+    status: 'Operational',
+    href: '/dashboard/agents/hr',
   },
   {
     name: 'Operations',
