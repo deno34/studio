@@ -16,7 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, UploadCloud, Loader2, Bot, PenSquare, FileText, User, Building, Smile, Frown, Meh, Search } from 'lucide-react';
+import { ArrowLeft, UploadCloud, Loader2, Bot, PenSquare, FileText, User, Building, Smile, Frown, Meh, Search, Volume2 } from 'lucide-react';
 import { ContractParserOutput, DocumentSummaryOutput, DocumentWriterInputSchema, type DocumentWriterInput } from '@/lib/types';
 import { Badge } from '@/components/ui/badge';
 
@@ -217,6 +217,9 @@ function DocumentSummarizer() {
   const [fileName, setFileName] = useState('');
   const [isSummarizing, setIsSummarizing] = useState(false);
   const [summary, setSummary] = useState<DocumentSummaryOutput | null>(null);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const audioRef = React.useRef<HTMLAudioElement | null>(null);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -232,6 +235,7 @@ function DocumentSummarizer() {
       setSelectedFile(file);
       setFileName(file.name);
       setSummary(null);
+      setAudioUrl(null);
     }
   };
 
@@ -242,6 +246,7 @@ function DocumentSummarizer() {
     }
     setIsSummarizing(true);
     setSummary(null);
+    setAudioUrl(null);
     
     const formData = new FormData();
     formData.append('file', selectedFile);
@@ -274,6 +279,51 @@ function DocumentSummarizer() {
       setIsSummarizing(false);
     }
   };
+
+  const handleTextToSpeech = async () => {
+    if (!summary) return;
+    setIsSpeaking(true);
+    setAudioUrl(null);
+    try {
+      const textToSpeak = `
+        Sentiment: ${summary.sentiment}. 
+        Key Points: ${summary.summaryPoints.join('. ')}.
+        Entities Mentioned: People: ${summary.entities.people.join(', ') || 'none'}. Companies: ${summary.entities.companies.join(', ') || 'none'}.
+      `;
+
+      const response = await fetch('/api/modules/document/text-to-speech', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': process.env.NEXT_PUBLIC_MASTER_API_KEY!,
+        },
+        body: JSON.stringify({ text: textToSpeak }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to generate audio.');
+      }
+      
+      const result = await response.json();
+      setAudioUrl(result.audioDataUri);
+
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Audio Generation Failed',
+        description: error instanceof Error ? error.message : 'An unknown error occurred.',
+      });
+    } finally {
+      setIsSpeaking(false);
+    }
+  }
+  
+  React.useEffect(() => {
+    if (audioUrl && audioRef.current) {
+      audioRef.current.play();
+    }
+  }, [audioUrl]);
 
   const sentimentIcon = {
     Positive: <Smile className="h-4 w-4 text-green-500" />,
@@ -314,10 +364,15 @@ function DocumentSummarizer() {
                       </div>
                   ) : summary ? (
                       <div className="space-y-4 text-sm">
-                          <div>
+                          <div className="flex items-center justify-between">
                             <h4 className="font-semibold flex items-center gap-2">Sentiment: 
                                 <Badge variant="outline">{summary.sentiment} {sentimentIcon[summary.sentiment as keyof typeof sentimentIcon]} </Badge>
                             </h4>
+                            <Button onClick={handleTextToSpeech} disabled={isSpeaking} size="sm" variant="outline">
+                                {isSpeaking ? <Loader2 className="h-4 w-4 animate-spin mr-2"/> : <Volume2 className="h-4 w-4 mr-2"/>}
+                                Listen
+                            </Button>
+                            {audioUrl && <audio ref={audioRef} src={audioUrl} className="hidden" />}
                           </div>
                           <div>
                               <h4 className="font-semibold">Key Points</h4>

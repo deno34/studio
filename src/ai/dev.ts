@@ -12,5 +12,6 @@ import './flows/lead-followup-flow';
 import './flows/contract-parser-flow';
 import './flows/document-writer-flow';
 import './flows/document-summary-flow';
+import './flows/tts-flow';
 
 
