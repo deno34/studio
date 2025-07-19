@@ -201,4 +201,29 @@ export interface InventoryItem extends z.infer<typeof InventoryItemSchema> {
     id: string;
     createdAt: string;
     updatedAt: string;
+    userId: string;
 }
+
+// Operations / Restock Suggestion Schemas
+export const RestockSuggestionInputSchema = z.object({
+  inventoryItems: z.array(z.object({
+    name: z.string(),
+    sku: z.string(),
+    stockLevel: z.number(),
+    reorderLevel: z.number(),
+  })).describe("A list of all inventory items."),
+});
+export type RestockSuggestionInput = z.infer<typeof RestockSuggestionInputSchema>;
+
+export const RestockSuggestionSchema = z.object({
+  itemName: z.string().describe("The name of the item to reorder."),
+  sku: z.string().describe("The SKU of the item to reorder."),
+  quantityToReorder: z.number().describe("The suggested quantity to reorder."),
+  justification: z.string().describe("The reason for the restock suggestion."),
+});
+export type RestockSuggestion = z.infer<typeof RestockSuggestionSchema>;
+
+export const RestockSuggestionOutputSchema = z.object({
+  suggestions: z.array(RestockSuggestionSchema).describe('A list of restock suggestions. Should be empty if no items need restocking.'),
+});
+export type RestockSuggestionOutput = z.infer<typeof RestockSuggestionOutputSchema>;

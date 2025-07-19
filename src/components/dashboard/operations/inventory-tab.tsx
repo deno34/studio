@@ -1,12 +1,14 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from '@/components/ui/badge';
-import { PlusCircle } from 'lucide-react';
+import { PlusCircle, Loader2, Bot, AlertTriangle, Lightbulb } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { type InventoryItem, type RestockSuggestion } from '@/lib/types';
 
 // Mock data, to be replaced with data fetched from Firestore
 const mockInventory = [
@@ -19,6 +21,38 @@ const mockInventory = [
 export function InventoryTab() {
   const [inventory, setInventory] = useState(mockInventory);
   const [isLoading, setIsLoading] = useState(false);
+  const [isSuggesting, setIsSuggesting] = useState(false);
+  const [suggestions, setSuggestions] = useState<RestockSuggestion[]>([]);
+  const { toast } = useToast();
+
+  const handleGetSuggestions = async () => {
+    setIsSuggesting(true);
+    setSuggestions([]);
+    try {
+      const response = await fetch('/api/modules/operations/inventory/suggest-restock', {
+         headers: { 'x-api-key': process.env.NEXT_PUBLIC_MASTER_API_KEY! }
+      });
+      if (!response.ok) {
+        throw new Error('Failed to get restock suggestions.');
+      }
+      const data = await response.json();
+      setSuggestions(data.suggestions || []);
+       toast({
+        title: "Analysis Complete",
+        description: data.suggestions?.length > 0 
+          ? `Found ${data.suggestions.length} restock suggestions.`
+          : "All inventory levels look good!"
+      });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error instanceof Error ? error.message : "Could not fetch suggestions."
+      });
+    } finally {
+      setIsSuggesting(false);
+    }
+  };
 
   return (
     <div className="space-y-4 mt-4">
@@ -73,9 +107,35 @@ export function InventoryTab() {
                 <CardDescription>AI-powered recommendations for inventory restocking.</CardDescription>
             </CardHeader>
             <CardContent>
-                <p className="text-sm text-center text-muted-foreground py-8">
-                    Restock suggestions from the AI will appear here based on sales velocity and stock levels.
-                </p>
+                <Button onClick={handleGetSuggestions} disabled={isSuggesting} className="w-full mb-4">
+                  {isSuggesting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Bot className="mr-2 h-4 w-4" />}
+                  {isSuggesting ? 'Analyzing Inventory...' : 'Get AI Restock Suggestions'}
+                </Button>
+
+                <div className="space-y-4">
+                  {isSuggesting && <div className="flex justify-center py-8"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>}
+                  
+                  {suggestions.length > 0 && (
+                     <div className="space-y-3">
+                        {suggestions.map((suggestion, index) => (
+                          <div key={index} className="flex items-start gap-3 rounded-lg border p-3">
+                            <Lightbulb className="w-5 h-5 mt-1 text-primary"/>
+                            <div>
+                              <p className="font-semibold">{suggestion.itemName} (SKU: {suggestion.sku})</p>
+                              <p className="text-sm">Suggestion: <span className="font-bold">Reorder {suggestion.quantityToReorder} units</span>.</p>
+                              <p className="text-xs text-muted-foreground">{suggestion.justification}</p>
+                            </div>
+                          </div>
+                        ))}
+                     </div>
+                  )}
+
+                  {!isSuggesting && suggestions.length === 0 && (
+                      <p className="text-sm text-center text-muted-foreground py-8">
+                          Click the button above to generate restock suggestions from the AI.
+                      </p>
+                  )}
+                </div>
             </CardContent>
         </Card>
     </div>
