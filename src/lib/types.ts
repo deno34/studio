@@ -227,3 +227,20 @@ export const RestockSuggestionOutputSchema = z.object({
   suggestions: z.array(RestockSuggestionSchema).describe('A list of restock suggestions. Should be empty if no items need restocking.'),
 });
 export type RestockSuggestionOutput = z.infer<typeof RestockSuggestionOutputSchema>;
+
+
+// CRM / Client Schemas
+export const ClientStatus = z.enum(['Lead', 'Contacted', 'Proposal', 'Closed (Won)', 'Closed (Lost)']);
+export type ClientStatusType = z.infer<typeof ClientStatus>;
+
+export const ClientSchema = z.object({
+    name: z.string().min(2, "Client name is required."),
+    email: z.string().email("Invalid email address."),
+    company: z.string().optional(),
+    status: ClientStatus,
+});
+
+export interface Client extends z.infer<typeof ClientSchema> {
+    id: string;
+    createdAt: string;
+}
