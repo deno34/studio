@@ -57,11 +57,11 @@ export default function DashboardPage() {
     { href: '#', label: 'Billing', icon: <CreditCard className="w-4 h-4 mr-2" /> },
   ];
 
-  useEffect(() => {
-    if (!loading && !user) {
-      router.push('/login');
-    }
-  }, [user, loading, router]);
+  // useEffect(() => {
+  //   if (!loading && !user) {
+  //     router.push('/login');
+  //   }
+  // }, [user, loading, router]);
 
   if (loading || !user) {
     return <DashboardSkeleton />;

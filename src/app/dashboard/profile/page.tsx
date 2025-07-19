@@ -17,9 +17,9 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { useToast } from '@/hooks/use-toast';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Loader2, ArrowLeft } from 'lucide-react';
-import { getStorage, ref, uploadBytes, getDownloadURL, FirebaseStorage } from 'firebase/storage';
-import { updateProfile } from 'firebase/auth';
-import { getApp, FirebaseApp } from 'firebase/app';
+// import { getStorage, ref, uploadBytes, getDownloadURL, FirebaseStorage } from 'firebase/storage';
+// import { updateProfile } from 'firebase/auth';
+// import { getApp, FirebaseApp } from 'firebase/app';
 
 
 const profileFormSchema = z.object({
@@ -35,32 +35,32 @@ export default function ProfilePage() {
   const { toast } = useToast();
   const [isSaving, setIsSaving] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
-  const [firebaseApp, setFirebaseApp] = useState<FirebaseApp | null>(null);
+  // const [firebaseApp, setFirebaseApp] = useState<FirebaseApp | null>(null);
 
-  useEffect(() => {
+  // useEffect(() => {
     // This ensures getApp() is only called on the client side
-    setFirebaseApp(getApp());
-  }, []);
+    // setFirebaseApp(getApp());
+  // }, []);
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
     defaultValues: {
-      displayName: user?.displayName || '',
+      displayName: '', // user?.displayName || '',
       photoFile: undefined,
     },
   });
 
-  useEffect(() => {
-    if (!loading && !user) {
-      router.push('/login');
-    }
-    if (user) {
-      form.reset({
-        displayName: user.displayName || '',
-      });
-      setPreviewImage(user.photoURL);
-    }
-  }, [user, loading, router, form]);
+  // useEffect(() => {
+  //   if (!loading && !user) {
+  //     router.push('/login');
+  //   }
+  //   if (user) {
+  //     form.reset({
+  //       displayName: user.displayName || '',
+  //     });
+  //     setPreviewImage(user.photoURL);
+  //   }
+  // }, [user, loading, router, form]);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -75,30 +75,30 @@ export default function ProfilePage() {
   };
 
   const onSubmit = async (data: ProfileFormValues) => {
-    if (!user || !firebaseApp) return;
+    // if (!user || !firebaseApp) return;
     setIsSaving(true);
-    let photoURL = user.photoURL;
+    // let photoURL = user.photoURL;
 
     try {
-      // Step 1: Upload image to Firebase Storage if a new one is provided
-      if (data.photoFile) {
-        const storage: FirebaseStorage = getStorage(firebaseApp);
-        const storageRef = ref(storage, `profile-pictures/${user.uid}`);
-        await uploadBytes(storageRef, data.photoFile);
-        photoURL = await getDownloadURL(storageRef);
-      }
+      // // Step 1: Upload image to Firebase Storage if a new one is provided
+      // if (data.photoFile) {
+      //   const storage: FirebaseStorage = getStorage(firebaseApp);
+      //   const storageRef = ref(storage, `profile-pictures/${user.uid}`);
+      //   await uploadBytes(storageRef, data.photoFile);
+      //   photoURL = await getDownloadURL(storageRef);
+      // }
 
-      // Step 2: Update profile in Firebase Auth
-      await updateProfile(user, {
-        displayName: data.displayName,
-        photoURL: photoURL,
-      });
+      // // Step 2: Update profile in Firebase Auth
+      // await updateProfile(user, {
+      //   displayName: data.displayName,
+      //   photoURL: photoURL,
+      // });
 
       toast({
-        title: 'Profile updated',
+        title: 'Profile updated (Simulated)',
         description: 'Your profile has been successfully updated.',
       });
-      router.push('/dashboard');
+      // router.push('/dashboard');
     } catch (error) {
       console.error('Error updating profile:', error);
       toast({
@@ -111,13 +111,31 @@ export default function ProfilePage() {
     }
   };
 
-  if (loading || !user) {
+  if (loading) {
     return (
         <div className="flex items-center justify-center min-h-screen">
             <Loader2 className="h-8 w-8 animate-spin" />
         </div>
     )
   }
+  
+    if (!user) {
+     return (
+        <div className="flex flex-col min-h-dvh bg-background text-foreground">
+            <Header />
+            <main className="flex-1 flex items-center justify-center text-center">
+                <div>
+                    <h1 className="text-2xl font-bold">Please log in to view your profile.</h1>
+                    <Button asChild className="mt-4">
+                        <Link href="/login">Go to Login</Link>
+                    </Button>
+                </div>
+            </main>
+            <Footer />
+        </div>
+     )
+    }
+
 
   return (
     <div className="flex flex-col min-h-dvh bg-background text-foreground">
@@ -182,7 +200,7 @@ export default function ProfilePage() {
                     )}
                   />
 
-                  <Button type="submit" disabled={isSaving || !firebaseApp}>
+                  <Button type="submit" disabled={isSaving}>
                     {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     Save Changes
                   </Button>

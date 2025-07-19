@@ -5,18 +5,18 @@ import { createContext, useContext, useEffect, useState, ReactNode } from 'react
 import { useRouter } from 'next/navigation';
 import { 
   type User, 
-  onAuthStateChanged,
-  getAuth,
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  signInWithPopup,
-  GoogleAuthProvider,
-  signOut,
-  type Auth,
-  sendEmailVerification
+  // onAuthStateChanged,
+  // getAuth,
+  // signInWithEmailAndPassword,
+  // createUserWithEmailAndPassword,
+  // signInWithPopup,
+  // GoogleAuthProvider,
+  // signOut,
+  // type Auth,
+  // sendEmailVerification
 } from 'firebase/auth';
-import { initializeApp, getApps, getApp, type FirebaseApp } from 'firebase/app';
-import { firebaseConfig } from '@/lib/firebaseConfig';
+// import { initializeApp, getApps, getApp, type FirebaseApp } from 'firebase/app';
+// import { firebaseConfig } from '@/lib/firebaseConfig';
 
 interface AuthContextType {
   user: User | null;
@@ -32,52 +32,46 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [auth, setAuth] = useState<Auth | null>(null);
+  const [loading, setLoading] = useState(false); // Set loading to false
+  // const [auth, setAuth] = useState<Auth | null>(null);
   const router = useRouter();
 
-  useEffect(() => {
-    const app: FirebaseApp = !getApps().length ? initializeApp(firebaseConfig) : getApp();
-    const authInstance = getAuth(app);
-    setAuth(authInstance);
+  // useEffect(() => {
+    // const app: FirebaseApp = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+    // const authInstance = getAuth(app);
+    // setAuth(authInstance);
     
-    const unsubscribe = onAuthStateChanged(authInstance, (user) => {
-      setUser(user);
-      setLoading(false);
-    });
+    // const unsubscribe = onAuthStateChanged(authInstance, (user) => {
+    //   setUser(user);
+    //   setLoading(false);
+    // });
     
-    return () => unsubscribe();
-  }, []);
+    // return () => unsubscribe();
+  // }, []);
 
-  const handleSignInWithEmail = (email, password) => {
-    if (!auth) throw new Error("Auth not initialized");
-    return signInWithEmailAndPassword(auth, email, password);
+  const handleSignInWithEmail = async (email, password) => {
+    console.log("Firebase is disabled");
+    return Promise.resolve();
   }
   
-  const handleSignUpWithEmail = (email, password) => {
-    if (!auth) throw new Error("Auth not initialized");
-    return createUserWithEmailAndPassword(auth, email, password);
+  const handleSignUpWithEmail = async (email, password) => {
+     console.log("Firebase is disabled");
+    return Promise.resolve();
   }
 
-  const handleSignInWithGoogle = () => {
-    if (!auth) throw new Error("Auth not initialized");
-    const provider = new GoogleAuthProvider();
-    return signInWithPopup(auth, provider);
+  const handleSignInWithGoogle = async () => {
+    console.log("Firebase is disabled");
+    return Promise.resolve();
   }
   
-  const handleSendVerificationEmail = (user: User) => {
-    if (!auth) throw new Error("Auth not initialized");
-    return sendEmailVerification(user);
+  const handleSendVerificationEmail = async (user: User) => {
+     console.log("Firebase is disabled");
+    return Promise.resolve();
   }
 
   const handleSignOut = async () => {
-    if (!auth) throw new Error("Auth not initialized");
-    try {
-      await signOut(auth);
-      router.push('/');
-    } catch (error) {
-      console.error("Error signing out: ", error);
-    }
+    console.log("Firebase is disabled");
+    router.push('/');
   };
 
   const value = { 
