@@ -51,8 +51,8 @@ export default function DashboardPage() {
 
   const navItems = [
     { href: '/dashboard', label: 'Overview', icon: <LayoutDashboard className="w-4 h-4 mr-2" /> },
+    { href: '/dashboard/agents', label: 'My Agents', icon: <Bot className="w-4 h-4 mr-2" /> },
     { href: '#', label: 'My APIs', icon: <KeyRound className="w-4 h-4 mr-2" /> },
-    { href: '#', label: 'My Agents', icon: <Bot className="w-4 h-4 mr-2" /> },
     { href: '#', label: 'Docs', icon: <FileText className="w-4 h-4 mr-2" /> },
     { href: '#', label: 'Billing', icon: <CreditCard className="w-4 h-4 mr-2" /> },
   ];
@@ -104,15 +104,17 @@ export default function DashboardPage() {
                         <p className="text-xs text-muted-foreground">Manage your API credentials</p>
                     </CardContent>
                  </Card>
-                 <Card>
-                    <CardHeader className="flex flex-row items-center justify-between pb-2">
-                        <CardTitle className="text-sm font-medium">Agents Running</CardTitle>
-                        <Bot className="w-4 h-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">3 / 5</div>
-                        <p className="text-xs text-muted-foreground">Using Pro Plan capacity</p>
-                    </CardContent>
+                 <Card className="hover:border-primary/50 transition-colors">
+                    <Link href="/dashboard/agents">
+                        <CardHeader className="flex flex-row items-center justify-between pb-2">
+                            <CardTitle className="text-sm font-medium">Agents Running</CardTitle>
+                            <Bot className="w-4 h-4 text-muted-foreground" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold">1 / 5 Active</div>
+                            <p className="text-xs text-muted-foreground">Manage your AI agents</p>
+                        </CardContent>
+                    </Link>
                  </Card>
                  <Card>
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
