@@ -110,4 +110,5 @@ export interface Candidate {
     matchPercentage?: number;
     matchExplanation?: string;
     matchingSkills?: string[];
+    notes?: string;
 }

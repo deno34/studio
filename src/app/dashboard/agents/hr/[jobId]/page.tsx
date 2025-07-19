@@ -8,7 +8,7 @@ import { Header } from '@/components/landing/header';
 import { Footer } from '@/components/landing/footer';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, UploadCloud, Loader2, FileText, User, Percent, Star, LayoutGrid } from 'lucide-react';
+import { ArrowLeft, UploadCloud, Loader2, User, Percent, Star, LayoutGrid } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/tooltip"
 import { ScheduleInterviewForm } from '@/components/dashboard/hr/schedule-interview-form';
 import { GenerateFollowUpEmailForm } from '@/components/dashboard/hr/generate-follow-up-email-form';
+import { CandidateDetailDialog } from '@/components/dashboard/hr/candidate-detail-dialog';
 
 
 function JobPageSkeleton() {
@@ -68,8 +69,6 @@ export default function JobDetailPage() {
       if (typeof jobId !== 'string') return;
       setIsLoading(true);
       try {
-        // In a real app, you might fetch these in parallel
-        // For simplicity, we'll fetch them sequentially
         const [jobRes, candidatesRes] = await Promise.all([
              fetch(`/api/modules/hr/jobs/${jobId}`, { 
                 headers: { 'x-api-key': process.env.NEXT_PUBLIC_MASTER_API_KEY! }
@@ -97,7 +96,7 @@ export default function JobDetailPage() {
 
   useEffect(() => {
     fetchJobAndCandidates();
-  }, [jobId, toast]);
+  }, [jobId]);
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
@@ -106,56 +105,71 @@ export default function JobDetailPage() {
     setIsUploading(true);
     toast({ title: "Upload started...", description: `${files.length} resumes are being processed.` });
 
-    try {
-        const formData = new FormData();
-        formData.append('jobId', jobId);
-        for (const file of files) {
-            formData.append('file', file);
-        }
+    for (const file of files) {
+      try {
+          const formData = new FormData();
+          formData.append('jobId', jobId);
+          formData.append('file', file);
 
-        const res = await fetch('/api/modules/hr/candidates', {
-            method: 'POST',
-            headers: { 'x-api-key': process.env.NEXT_PUBLIC_MASTER_API_KEY! },
-            body: formData,
-        });
+          const res = await fetch('/api/modules/hr/candidates', {
+              method: 'POST',
+              headers: { 'x-api-key': process.env.NEXT_PUBLIC_MASTER_API_KEY! },
+              body: formData,
+          });
 
-        if (!res.ok) {
-            const errorData = await res.json();
-            throw new Error(errorData.error || 'Upload failed');
-        }
+          if (!res.ok) {
+              const errorData = await res.json();
+              throw new Error(errorData.error || `Upload failed for ${file.name}`);
+          }
 
-        const result = await res.json();
-        
-        toast({ title: "Upload Successful!", description: "Resumes have been added." });
-        
-        // Now, rank the new candidate(s)
-        setIsRanking(result.candidate.id); // Set ranking state for visual feedback
-        toast({ title: "AI Ranking in Progress...", description: "Your new candidate is being analyzed." });
+          const result = await res.json();
+          const newCandidate = result.candidate;
+          
+          toast({ title: `Uploaded ${file.name}`, description: "Resume has been added." });
+          
+          // Now, rank the new candidate
+          setIsRanking(newCandidate.id); // Set ranking state for visual feedback
+          toast({ title: `AI Ranking in Progress...`, description: `${newCandidate.name} is being analyzed.` });
 
-        const rankRes = await fetch('/api/modules/hr/candidates/rank', {
-            method: 'POST',
-            headers: { 
-                'Content-Type': 'application/json',
-                'x-api-key': process.env.NEXT_PUBLIC_MASTER_API_KEY! 
+          const rankRes = await fetch('/api/modules/hr/candidates/rank', {
+              method: 'POST',
+              headers: { 
+                  'Content-Type': 'application/json',
+                  'x-api-key': process.env.NEXT_PUBLIC_MASTER_API_KEY! 
+              },
+              body: JSON.stringify({ jobId, resumeText: newCandidate.resumeText }),
+          });
+
+          if (!rankRes.ok) {
+              throw new Error(`Ranking process failed for ${file.name}`);
+          }
+          const rankingResult = await rankRes.json();
+          
+          // Update candidate in Firestore with ranking result
+          await fetch(`/api/modules/hr/candidates/${newCandidate.id}`, {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+              'x-api-key': process.env.NEXT_PUBLIC_MASTER_API_KEY!
             },
-            body: JSON.stringify({ jobId, resumeText: result.candidate.resumeText, candidateId: result.candidate.id }),
-        });
-
-        if (!rankRes.ok) {
-            throw new Error('Ranking process failed');
-        }
-        
-        toast({ title: "Ranking Complete!", description: "Candidate has been scored." });
+            body: JSON.stringify({
+              ...rankingResult,
+              name: newCandidate.name, // The AI might extract a more accurate name
+            })
+          });
 
 
-    } catch (error) {
-        console.error(error);
-        toast({ variant: 'destructive', title: 'An error occurred', description: error instanceof Error ? error.message : "Could not process resumes." });
-    } finally {
-        setIsUploading(false);
-        setIsRanking(null);
-        fetchJobAndCandidates(); // Refresh data
+          toast({ title: "Ranking Complete!", description: `${newCandidate.name} has been scored.` });
+
+      } catch (error) {
+          console.error(error);
+          toast({ variant: 'destructive', title: 'An error occurred', description: error instanceof Error ? error.message : `Could not process ${file.name}` });
+      } finally {
+          setIsRanking(null);
+          fetchJobAndCandidates(); // Refresh data after each file
+      }
     }
+    setIsUploading(false);
   };
 
   const onInterviewScheduled = () => {
@@ -163,7 +177,6 @@ export default function JobDetailPage() {
       title: 'Interview Scheduled!',
       description: "The interview has been successfully scheduled (mocked).",
     });
-    // In a real app, you might want to refresh the candidate's status here
     fetchJobAndCandidates();
   };
 
@@ -270,7 +283,7 @@ export default function JobDetailPage() {
                                             <ScheduleInterviewForm candidate={c} onInterviewScheduled={onInterviewScheduled}>
                                               <Button variant="outline" size="sm">Schedule</Button>
                                             </ScheduleInterviewForm>
-                                            <Button variant="ghost" size="sm">View</Button>
+                                            <CandidateDetailDialog candidate={c} onUpdate={fetchJobAndCandidates} />
                                         </TableCell>
                                     </TableRow>
                                 )) : (
