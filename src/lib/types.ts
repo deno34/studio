@@ -76,3 +76,33 @@ export interface JobPosting extends JobPostingFormValues {
     createdAt: string;
     userId: string;
 }
+
+// HR / Candidate Schemas
+export const CandidateRankingInputSchema = z.object({
+  jobTitle: z.string(),
+  jobDescription: z.string(),
+  resumeText: z.string(),
+});
+export type CandidateRankingInput = z.infer<typeof CandidateRankingInputSchema>;
+
+export const CandidateRankingOutputSchema = z.object({
+  matchPercentage: z.number().describe("A score from 0-100 indicating the candidate's match to the job."),
+  explanation: z.string().describe("A brief justification for the match score."),
+  matchingSkills: z.array(z.string()).describe("A list of key skills the candidate has that match the job requirements."),
+});
+export type CandidateRankingOutput = z.infer<typeof CandidateRankingOutputSchema>;
+
+export interface Candidate {
+    id: string;
+    jobId: string;
+    name: string;
+    email: string;
+    phone?: string;
+    resumeUrl: string;
+    resumeText: string;
+    createdAt: string;
+    status: 'New' | 'Shortlisted' | 'Interviewing' | 'Offer' | 'Hired' | 'Rejected';
+    matchPercentage?: number;
+    matchExplanation?: string;
+    matchingSkills?: string[];
+}
