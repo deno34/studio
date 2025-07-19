@@ -2,6 +2,7 @@
 
 
 
+
 import {z} from 'zod';
 
 /**
@@ -287,3 +288,19 @@ export const ContractParserOutputSchema = z.object({
   isContract: z.boolean().describe("Whether the document appears to be a legal contract."),
 });
 export type ContractParserOutput = z.infer<typeof ContractParserOutputSchema>;
+
+// Document AI / Document Writer Schemas
+export const DocumentWriterInputSchema = z.object({
+  documentType: z.enum(['Email', 'Report', 'Proposal', 'Memo']),
+  purpose: z.string().min(10, "Purpose must be at least 10 characters."),
+  audience: z.string().min(3, "Audience must be at least 3 characters."),
+  keywords: z.string().optional(),
+  tone: z.enum(['Professional', 'Casual', 'Formal', 'Friendly']),
+  length: z.enum(['Short', 'Medium', 'Long']),
+});
+export type DocumentWriterInput = z.infer<typeof DocumentWriterInputSchema>;
+
+export const DocumentWriterOutputSchema = z.object({
+  draftContent: z.string().describe("The AI-generated document draft in Markdown format."),
+});
+export type DocumentWriterOutput = z.infer<typeof DocumentWriterOutputSchema>;
