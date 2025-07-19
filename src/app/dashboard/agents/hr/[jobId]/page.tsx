@@ -8,7 +8,7 @@ import { Header } from '@/components/landing/header';
 import { Footer } from '@/components/landing/footer';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, UploadCloud, Loader2, User, Percent, Star, LayoutGrid, BarChart2 } from 'lucide-react';
+import { ArrowLeft, UploadCloud, Loader2, User, Percent, Star, LayoutGrid, Download } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
@@ -184,6 +184,39 @@ export default function JobDetailPage() {
     fetchJobAndCandidates();
   };
 
+  const handleExportCSV = () => {
+    if (candidates.length === 0) {
+      toast({ variant: 'destructive', title: 'No candidates to export.' });
+      return;
+    }
+
+    const headers = ['Name', 'Status', 'Match Percentage', 'Key Skills', 'Match Explanation', 'Resume URL'];
+    const rows = candidates.map(c => [
+      `"${c.name}"`,
+      c.status,
+      c.matchPercentage || 'N/A',
+      `"${c.matchingSkills?.join(', ') || 'N/A'}"`,
+      `"${(c.matchExplanation || '').replace(/"/g, '""')}"`,
+      c.resumeUrl
+    ]);
+
+    const csvContent = [headers.join(','), ...rows.map(row => row.join(','))].join('\n');
+    
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    if (link.href) {
+      URL.revokeObjectURL(link.href);
+    }
+    const url = URL.createObjectURL(blob);
+    link.href = url;
+    link.setAttribute('download', `${job?.title.replace(/ /g, '_')}_candidates.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    toast({ title: 'Export successful!', description: 'Candidate data has been downloaded as a CSV file.' });
+  };
+
   return (
     <div className="flex flex-col min-h-dvh bg-background text-foreground">
       <Header />
@@ -225,12 +258,18 @@ export default function JobDetailPage() {
                                 <CardTitle>Candidates</CardTitle>
                                 <CardDescription>Upload and manage candidates for this job.</CardDescription>
                             </div>
-                            <Button variant="outline" size="sm" asChild>
-                                <Link href={`/dashboard/agents/hr/${jobId}/pipeline`}>
-                                    <LayoutGrid className="mr-2 h-4 w-4" />
-                                    View Pipeline
-                                </Link>
-                            </Button>
+                            <div className="flex items-center gap-2">
+                              <Button variant="outline" size="sm" asChild>
+                                  <Link href={`/dashboard/agents/hr/${jobId}/pipeline`}>
+                                      <LayoutGrid className="mr-2 h-4 w-4" />
+                                      View Pipeline
+                                  </Link>
+                              </Button>
+                              <Button variant="outline" size="sm" onClick={handleExportCSV}>
+                                <Download className="mr-2 h-4 w-4" />
+                                Export CSV
+                              </Button>
+                            </div>
                             </CardHeader>
                             <CardContent className="space-y-6">
                                 <div className="flex flex-col items-center justify-center space-y-2 rounded-lg border-2 border-dashed p-8 text-center">
