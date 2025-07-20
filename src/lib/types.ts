@@ -329,7 +329,7 @@ export type ForecastingInput = z.infer<typeof ForecastingInputSchema>;
 
 export const ForecastPointSchema = z.object({
   date: z.string().describe("The date for the data point."),
-  value: z.number().describe("The historical value for the data point."),
+  value: z.number().optional().describe("The historical value for the data point."),
   forecast: z.number().optional().describe("The forecasted value for the data point."),
 });
 export type ForecastPoint = z.infer<typeof ForecastPointSchema>;
@@ -359,3 +359,18 @@ export const DashboardGeneratorOutputSchema = z.object({
   cards: z.array(DashboardCardSchema).describe("A list of KPI cards to be displayed on the dashboard."),
 });
 export type DashboardGeneratorOutput = z.infer<typeof DashboardGeneratorOutputSchema>;
+
+// Business Intelligence / KPI Summary Schemas
+export const KpiSummaryInputSchema = z.object({
+  kpiName: z.string().describe("The name of the KPI being analyzed."),
+  kpiData: z.array(z.number()).describe("A time-series array of the KPI's value over the last N periods."),
+});
+export type KpiSummaryInput = z.infer<typeof KpiSummaryInputSchema>;
+
+export const KpiSummaryOutputSchema = z.object({
+  status: z.enum(['Improving', 'Warning', 'Stable']).describe("The overall status of the KPI trend."),
+  summary: z.string().describe("A one-sentence summary of the KPI's performance."),
+  cause: z.string().describe("A likely cause or reason behind the observed trend."),
+  action: z.string().describe("A single, actionable recommendation based on the analysis."),
+});
+export type KpiSummaryOutput = z.infer<typeof KpiSummaryOutputSchema>;

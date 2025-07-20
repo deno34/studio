@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ArrowLeft } from 'lucide-react';
 import { ForecastingTab } from '@/components/dashboard/bi/forecasting-tab';
 import { DashboardBuilderTab } from '@/components/dashboard/bi/dashboard-builder-tab';
+import { KpiSummaryTab } from '@/components/dashboard/bi/kpi-summary-tab';
 
 export default function BIAgentPage() {
   return (
@@ -34,7 +35,7 @@ export default function BIAgentPage() {
             <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="forecasting">Forecasting</TabsTrigger>
               <TabsTrigger value="dashboard_gen">Dashboard Builder</TabsTrigger>
-              <TabsTrigger value="kpi_summary" disabled>KPI Summary</TabsTrigger>
+              <TabsTrigger value="kpi_summary">KPI Summary</TabsTrigger>
               <TabsTrigger value="visualize" disabled>Visualize</TabsTrigger>
               <TabsTrigger value="market_watch" disabled>Market Watch</TabsTrigger>
             </TabsList>
@@ -43,6 +44,9 @@ export default function BIAgentPage() {
             </TabsContent>
              <TabsContent value="dashboard_gen">
               <DashboardBuilderTab />
+            </TabsContent>
+             <TabsContent value="kpi_summary">
+              <KpiSummaryTab />
             </TabsContent>
           </Tabs>
         </div>
