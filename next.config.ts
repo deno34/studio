@@ -1,5 +1,6 @@
 
 import type {NextConfig} from 'next';
+import 'dotenv/config'
 
 const nextConfig: NextConfig = {
   /* config options here */
@@ -23,6 +24,12 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'storage.googleapis.com',
+        port: '',
+        pathname: '/**',
+      }
     ],
   },
   env: {
@@ -32,6 +39,7 @@ const nextConfig: NextConfig = {
     NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
     NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
     NEXT_PUBLIC_FIREBASE_APP_ID: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+    NEXT_PUBLIC_MASTER_API_KEY: process.env.MASTER_API_KEY,
   },
   webpack: (config, { isServer }) => {
     config.externals.push('wav');

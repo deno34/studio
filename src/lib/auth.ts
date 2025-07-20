@@ -18,11 +18,10 @@ export async function validateApiKey(req: NextRequest) {
   if (MASTER_API_KEY && key === MASTER_API_KEY) {
     // For demo purposes, returning a mock user object.
     // In a real implementation, you'd fetch the user data from Firestore.
+    // A better approach would be to validate a user's session token here.
     return { uid: 'test-user-id', email: 'test@example.com' };
   }
 
   // If not using a master key or the key is invalid, throw an error.
    throw new Error('Invalid API key');
 }
-
-    

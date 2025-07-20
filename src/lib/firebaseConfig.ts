@@ -1,14 +1,12 @@
 
 export function getFirebaseConfig() {
   const firebaseConfig = {
-    apiKey: "AIzaSyAVMkl7ZKj1QyU2tRKlLRrSkHI8aBNT0Ug",
-    authDomain: "find-me-d9858.firebaseapp.com",
-    databaseURL: "https://find-me-d9858-default-rtdb.firebaseio.com",
-    projectId: "find-me-d9858",
-    storageBucket: "find-me-d9858.appspot.com",
-    messagingSenderId: "988807644256",
-    appId: "1:988807644256:web:02629da7d353afbf822f05",
-    measurementId: "G-38C4M26XC3"
+    apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+    authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+    storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+    appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
   };
 
   // Basic validation to ensure all keys are present

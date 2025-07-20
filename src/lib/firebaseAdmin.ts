@@ -6,7 +6,7 @@ if (!admin.apps.length) {
     const serviceAccount: admin.ServiceAccount = {
       projectId: process.env.FIREBASE_PROJECT_ID,
       clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-      privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+      privateKey: (process.env.FIREBASE_PRIVATE_KEY || '').replace(/\\n/g, '\n'),
     };
 
     if (!serviceAccount.projectId || !serviceAccount.clientEmail || !serviceAccount.privateKey) {
@@ -20,6 +20,9 @@ if (!admin.apps.length) {
     console.log('Firebase Admin SDK initialized successfully.');
   } catch (error) {
     console.error('Firebase Admin SDK initialization error:', error);
+    // In a production environment, you might want to handle this more gracefully
+    // For development, throwing the error makes it visible.
+    throw new Error('Could not initialize Firebase Admin SDK. Please check your server-side environment variables.');
   }
 }
 
