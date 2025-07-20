@@ -13,6 +13,7 @@ import { CreateJobPostForm } from '@/components/dashboard/hr/create-job-post-for
 import type { JobPosting } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
+import { AskAI } from '@/components/dashboard/hr/ask-ai';
 
 export default function HRAgentPage() {
   const [jobPostings, setJobPostings] = useState<JobPosting[]>([]);
@@ -70,6 +71,7 @@ export default function HRAgentPage() {
           </div>
 
           <div className="space-y-8">
+            <AskAI />
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
                 <div>
