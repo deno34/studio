@@ -11,7 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
-import { LayoutDashboard, KeyRound, Bot, FileText, CreditCard, ChevronRight, BarChart3, ShieldCheck, PlusCircle } from 'lucide-react';
+import { LayoutDashboard, KeyRound, Bot, FileText, CreditCard, ChevronRight, BarChart3, ShieldCheck, PlusCircle, Building } from 'lucide-react';
 
 function DashboardSkeleton() {
   return (
@@ -51,6 +51,7 @@ export default function DashboardPage() {
 
   const navItems = [
     { href: '/dashboard', label: 'Overview', icon: <LayoutDashboard className="w-4 h-4 mr-2" /> },
+    { href: '/dashboard/businesses', label: 'My Businesses', icon: <Building className="w-4 h-4 mr-2" /> },
     { href: '/dashboard/agents', label: 'My Agents', icon: <Bot className="w-4 h-4 mr-2" /> },
     { href: '#', label: 'My APIs', icon: <KeyRound className="w-4 h-4 mr-2" /> },
     { href: '#', label: 'Docs', icon: <FileText className="w-4 h-4 mr-2" /> },
