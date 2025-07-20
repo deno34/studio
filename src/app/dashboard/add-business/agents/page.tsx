@@ -3,13 +3,13 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Header } from '@/components/landing/header';
 import { Footer } from '@/components/landing/footer';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, ArrowRight, Check, Bot, Calculator, Users, Settings, ScanText, BarChart3 } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Check, Bot, Calculator, Users, Settings, ScanText, BarChart3, Loader2 } from 'lucide-react';
 import { OnboardingStepper } from '@/components/dashboard/add-business/onboarding-stepper';
 import { cn } from '@/lib/utils';
 
@@ -24,8 +24,11 @@ const availableAgents = [
 
 export default function AgentSelectionPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const businessId = searchParams.get('businessId');
   const { toast } = useToast();
   const [selectedAgents, setSelectedAgents] = useState<string[]>(['accounting', 'hr', 'operations']);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const toggleAgent = (agentId: string) => {
     setSelectedAgents(prev =>
@@ -33,15 +36,44 @@ export default function AgentSelectionPage() {
     );
   };
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
+     if (!businessId) {
+      toast({ variant: 'destructive', title: 'Error', description: 'Business ID is missing. Please go back and create a profile.' });
+      return;
+    }
     if (selectedAgents.length === 0) {
       toast({ variant: 'destructive', title: 'No agents selected', description: 'Please select at least one agent to continue.' });
       return;
     }
-    // In a real app, save selected agents to state/DB
-    console.log('Selected Agents:', selectedAgents);
-    toast({ title: 'Agents Selected!', description: 'Next, you can upload some initial documents.' });
-    router.push('/dashboard/add-business/documents');
+
+    setIsSubmitting(true);
+    try {
+        const response = await fetch(`/api/modules/business/${businessId}/agents`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'x-api-key': process.env.NEXT_PUBLIC_MASTER_API_KEY!,
+            },
+            body: JSON.stringify({ agents: selectedAgents }),
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Failed to save selected agents.');
+        }
+        
+        toast({ title: 'Agents Selected!', description: 'Next, you can upload some initial documents.' });
+        router.push(`/dashboard/add-business/documents?businessId=${businessId}`);
+
+    } catch (error) {
+         toast({
+            variant: 'destructive',
+            title: 'Error saving agents',
+            description: error instanceof Error ? error.message : 'An unknown error occurred.',
+        });
+    } finally {
+        setIsSubmitting(false);
+    }
   };
 
   return (
@@ -50,7 +82,7 @@ export default function AgentSelectionPage() {
       <main className="flex-1 bg-muted/30 py-12">
         <div className="container max-w-4xl px-4">
           <Button variant="ghost" asChild className="mb-4">
-            <Link href="/dashboard/add-business">
+            <Link href={`/dashboard/add-business?businessId=${businessId || ''}`}>
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Profile
             </Link>
@@ -90,9 +122,9 @@ export default function AgentSelectionPage() {
                 </div>
 
                 <div className="flex justify-end mt-8">
-                    <Button onClick={handleContinue}>
-                      Continue
-                      <ArrowRight className="ml-2 h-4 w-4" />
+                    <Button onClick={handleContinue} disabled={isSubmitting}>
+                      {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Continue'}
+                      {!isSubmitting && <ArrowRight className="ml-2 h-4 w-4" />}
                     </Button>
                 </div>
             </CardContent>

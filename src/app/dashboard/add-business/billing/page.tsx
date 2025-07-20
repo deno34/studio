@@ -2,7 +2,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Header } from '@/components/landing/header';
 import { Footer } from '@/components/landing/footer';
 import { Button } from '@/components/ui/button';
@@ -58,10 +58,13 @@ const tiers = [
 
 export default function BillingPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const businessId = searchParams.get('businessId');
 
   const handleFinish = () => {
     // Here you would process payment, provision resources, etc.
     // For now, just navigate to the dashboard.
+    console.log('Finalizing setup for businessId:', businessId);
     router.push('/dashboard');
   }
 
@@ -71,7 +74,7 @@ export default function BillingPage() {
       <main className="flex-1 bg-muted/30 py-12">
         <div className="container max-w-4xl px-4">
           <Button variant="ghost" asChild className="mb-4">
-            <Link href="/dashboard/add-business/documents">
+            <Link href={`/dashboard/add-business/documents?businessId=${businessId || ''}`}>
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Documents
             </Link>

@@ -3,7 +3,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Header } from '@/components/landing/header';
 import { Footer } from '@/components/landing/footer';
 import { Button } from '@/components/ui/button';
@@ -15,6 +15,8 @@ import { useDropzone } from 'react-dropzone';
 
 export default function DocumentUploadPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const businessId = searchParams.get('businessId');
   const { toast } = useToast();
   const [files, setFiles] = useState<File[]>([]);
   const [isUploading, setIsUploading] = useState(false);
@@ -37,16 +39,17 @@ export default function DocumentUploadPage() {
   const handleContinue = async () => {
     setIsUploading(true);
     // In a real app, this would upload files and trigger AI categorization.
-    console.log('Uploading files:', files.map(f => f.name));
+    // This involves creating a new API endpoint.
+    console.log('Uploading files for businessId:', businessId, files.map(f => f.name));
     await new Promise(resolve => setTimeout(resolve, 1500));
     
     toast({ title: 'Setup Almost Complete!', description: `Let's finalize your plan.` });
-    router.push('/dashboard/add-business/billing');
+    router.push(`/dashboard/add-business/billing?businessId=${businessId}`);
     setIsUploading(false);
   };
   
   const handleSkip = () => {
-     router.push('/dashboard/add-business/billing');
+     router.push(`/dashboard/add-business/billing?businessId=${businessId}`);
   }
 
   return (
@@ -55,7 +58,7 @@ export default function DocumentUploadPage() {
       <main className="flex-1 bg-muted/30 py-12">
         <div className="container max-w-4xl px-4">
           <Button variant="ghost" asChild className="mb-4">
-            <Link href="/dashboard/add-business/agents">
+            <Link href={`/dashboard/add-business/agents?businessId=${businessId || ''}`}>
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Agents
             </Link>
