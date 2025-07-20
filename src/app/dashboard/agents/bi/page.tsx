@@ -12,6 +12,7 @@ import { DashboardBuilderTab } from '@/components/dashboard/bi/dashboard-builder
 import { KpiSummaryTab } from '@/components/dashboard/bi/kpi-summary-tab';
 import { VisualizeTab } from '@/components/dashboard/bi/visualize-tab';
 import { MarketWatchTab } from '@/components/dashboard/bi/market-watch-tab';
+import { AskAI } from '@/components/dashboard/bi/ask-ai';
 
 export default function BIAgentPage() {
   return (
@@ -33,30 +34,34 @@ export default function BIAgentPage() {
             </p>
           </div>
 
-          <Tabs defaultValue="forecasting" className="w-full">
-            <TabsList className="grid w-full grid-cols-5">
-              <TabsTrigger value="forecasting">Forecasting</TabsTrigger>
-              <TabsTrigger value="dashboard_gen">Dashboard Builder</TabsTrigger>
-              <TabsTrigger value="kpi_summary">KPI Summary</TabsTrigger>
-              <TabsTrigger value="visualize">Visualize</TabsTrigger>
-              <TabsTrigger value="market_watch">Market Watch</TabsTrigger>
-            </TabsList>
-            <TabsContent value="forecasting">
-              <ForecastingTab />
-            </TabsContent>
-             <TabsContent value="dashboard_gen">
-              <DashboardBuilderTab />
-            </TabsContent>
-             <TabsContent value="kpi_summary">
-              <KpiSummaryTab />
-            </TabsContent>
-            <TabsContent value="visualize">
-              <VisualizeTab />
-            </TabsContent>
-            <TabsContent value="market_watch">
-              <MarketWatchTab />
-            </TabsContent>
-          </Tabs>
+          <div className="space-y-8">
+            <AskAI />
+
+            <Tabs defaultValue="forecasting" className="w-full">
+              <TabsList className="grid w-full grid-cols-5">
+                <TabsTrigger value="forecasting">Forecasting</TabsTrigger>
+                <TabsTrigger value="dashboard_gen">Dashboard Builder</TabsTrigger>
+                <TabsTrigger value="kpi_summary">KPI Summary</TabsTrigger>
+                <TabsTrigger value="visualize">Visualize</TabsTrigger>
+                <TabsTrigger value="market_watch">Market Watch</TabsTrigger>
+              </TabsList>
+              <TabsContent value="forecasting">
+                <ForecastingTab />
+              </TabsContent>
+              <TabsContent value="dashboard_gen">
+                <DashboardBuilderTab />
+              </TabsContent>
+              <TabsContent value="kpi_summary">
+                <KpiSummaryTab />
+              </TabsContent>
+              <TabsContent value="visualize">
+                <VisualizeTab />
+              </TabsContent>
+              <TabsContent value="market_watch">
+                <MarketWatchTab />
+              </TabsContent>
+            </Tabs>
+          </div>
         </div>
       </main>
       <Footer />
