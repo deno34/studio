@@ -1,37 +1,37 @@
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Zap, BrainCircuit, Bot, Clock, Combine, Search } from "lucide-react"
+import { Users, ScanText, Bot, Settings, Calculator, BrainCircuit } from "lucide-react"
 
 export function ProductFeatures() {
   const features = [
     {
-      icon: <Bot className="w-8 h-8 text-primary" />,
-      title: "Automates Repetitive Tasks",
-      description: "From data entry to customer emails, Nerida handles the grunt work so your team can focus on high-impact projects."
+      icon: <Users className="w-8 h-8 text-primary" />,
+      title: "Intelligent HR Agent",
+      description: "Automate your hiring pipeline, from parsing resumes and ranking candidates to generating interview summaries and follow-up emails."
+    },
+    {
+      icon: <ScanText className="w-8 h-8 text-primary" />,
+      title: "Document AI Agent",
+      description: "Extract key data from contracts, summarize long reports, get audio summaries via TTS, and draft new documents with precision."
+    },
+    {
+      icon: <Calculator className="w-8 h-8 text-primary" />,
+      title: "Smart Accounting Agent",
+      description: "Manage finances with AI-powered expense tracking, payroll analysis, invoice generation, and automated P&L statement creation."
+    },
+    {
+      icon: <Settings className="w-8 h-8 text-primary" />,
+      title: "Automated Operations Agent",
+      description: "Streamline your business with an AI that manages logistics, suggests inventory restocks, prioritizes CRM follow-ups, and plans your day."
     },
     {
       icon: <BrainCircuit className="w-8 h-8 text-primary" />,
-      title: "Writes Business Strategies",
-      description: "Analyzes market data to draft reports, marketing plans, and strategic documents, giving you a powerful starting point."
-    },
-    {
-      icon: <Search className="w-8 h-8 text-primary" />,
-      title: "Understands Human Intent",
-      description: "Goes beyond keywords to grasp the context and nuance of any request, ensuring accurate and relevant outcomes."
-    },
-    {
-      icon: <Clock className="w-8 h-8 text-primary" />,
-      title: "Works 24/7, Tirelessly",
-      description: "Your AI employee never sleeps, providing round-the-clock productivity for your global operations and customers."
-    },
-    {
-      icon: <Combine className="w-8 h-8 text-primary" />,
-      title: "Integrates With Your Tools",
-      description: "Connects seamlessly with your existing CRM, ERP, Slack, and other essential software to create unified workflows."
+      title: "Centralized AI Brain",
+      description: "At the core, Nerida Brain provides the context-aware reasoning and proactive intelligence that powers every agent on the platform."
     },
      {
-      icon: <Zap className="w-8 h-8 text-primary" />,
-      title: "Proactive & Autonomous",
-      description: "Not just a tool, but a team member. Nerida can initiate tasks, identify opportunities, and solve problems on its own."
+      icon: <Bot className="w-8 h-8 text-primary" />,
+      title: "Modular and Extensible",
+      description: "Built for developers with an API-first design, allowing you to create custom logic and integrate agents into any application."
     }
   ]
 
