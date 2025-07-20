@@ -74,3 +74,48 @@ export async function generateInvoicePdf(data: InvoiceData): Promise<Buffer> {
   const pdfBytes = await pdfDoc.save();
   return Buffer.from(pdfBytes);
 }
+
+
+// A more generic PDF generator for reports from Markdown
+export async function generateReportPdf(markdownContent: string): Promise<Buffer> {
+    const pdfDoc = await PDFDocument.create();
+    const page = pdfDoc.addPage([595, 842]); // A4 size
+    const { width, height } = page.getSize();
+    const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+    const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+    const codeFont = await pdfDoc.embedFont(StandardFonts.Courier);
+
+    let y = height - 50;
+
+    // Very basic Markdown parser
+    const lines = markdownContent.split('\n');
+    for (const line of lines) {
+        if (y < 40) {
+            // Add a new page if content overflows
+            const newPage = pdfDoc.addPage([595, 842]);
+            page.setRotation(0); // Resetting to current page
+            Object.assign(page, newPage);
+            y = height - 50;
+        }
+
+        if (line.startsWith('# ')) {
+            page.drawText(line.substring(2), { x: 50, y, font: boldFont, size: 24 });
+            y -= 30;
+        } else if (line.startsWith('### ')) {
+            page.drawText(line.substring(4), { x: 50, y, font: boldFont, size: 14 });
+            y -= 20;
+        } else if (line.startsWith('- ')) {
+            page.drawText(`• ${line.substring(2)}`, { x: 60, y, font, size: 11 });
+            y -= 15;
+        } else if (line.startsWith('---')) {
+             page.drawLine({ start: { x: 50, y: y }, end: { x: width - 50, y: y }, thickness: 1, color: rgb(0.8, 0.8, 0.8) });
+             y -= 15;
+        } else {
+            page.drawText(line, { x: 50, y, font, size: 11 });
+            y -= 15;
+        }
+    }
+
+    const pdfBytes = await pdfDoc.save();
+    return Buffer.from(pdfBytes);
+}

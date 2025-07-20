@@ -4,7 +4,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { FileText, BarChart2, Loader2 } from "lucide-react";
+import { FileText, BarChart2, Loader2, Download } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
@@ -63,6 +63,39 @@ export function ReportsTab() {
     }
   };
 
+  const handleExportPdf = async () => {
+    if (!report) {
+      toast({ variant: 'destructive', title: 'No report to export.' });
+      return;
+    }
+    toast({ title: "Generating PDF..." });
+    try {
+       const response = await fetch('/api/modules/accounting/reports/export', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': process.env.NEXT_PUBLIC_MASTER_API_KEY || ''
+        },
+        body: JSON.stringify({ markdownContent: report }),
+      });
+       if (!response.ok) throw new Error('Failed to generate PDF');
+
+       const blob = await response.blob();
+       const url = window.URL.createObjectURL(blob);
+       const a = document.createElement('a');
+       a.href = url;
+       a.download = "financial_report.pdf";
+       document.body.appendChild(a);
+       a.click();
+       a.remove();
+       window.URL.revokeObjectURL(url);
+
+    } catch(error) {
+      console.error(error);
+      toast({ variant: 'destructive', title: 'Error exporting PDF' });
+    }
+  }
+
 
   return (
     <Card>
@@ -71,24 +104,28 @@ export function ReportsTab() {
         <CardDescription>Generate AI-powered financial reports from your accounting data.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="grid gap-4 sm:grid-cols-2">
-            <Button size="lg" variant="outline" className="h-auto py-4" onClick={() => handleGenerateReport('pnl')} disabled={isLoading}>
+        <div className="flex gap-4">
+            <Button size="lg" variant="outline" className="h-auto py-4 flex-1" onClick={() => handleGenerateReport('pnl')} disabled={isLoading}>
                 <div className="flex flex-col items-center gap-2">
                     {isLoading ? <Loader2 className="w-8 h-8 animate-spin" /> : <FileText className="w-8 h-8" />}
                     <span className="font-semibold">{isLoading ? "Generating..." : "Generate Profit & Loss"}</span>
-                    <span className="text-xs text-muted-foreground">For a selected period</span>
                 </div>
             </Button>
-            <Button size="lg" variant="outline" className="h-auto py-4" onClick={() => handleGenerateReport('balance_sheet')} disabled={true}>
+            <Button size="lg" variant="outline" className="h-auto py-4 flex-1" onClick={() => handleGenerateReport('balance_sheet')} disabled={true}>
                  <div className="flex flex-col items-center gap-2">
                     <BarChart2 className="w-8 h-8" />
                     <span className="font-semibold">Generate Balance Sheet</span>
-                    <span className="text-xs text-muted-foreground">As of a specific date</span>
                 </div>
             </Button>
         </div>
-         <div className="p-4 bg-muted/50 rounded-lg min-h-[200px] prose prose-sm dark:prose-invert max-w-none">
-            <h4 className="font-semibold not-prose">Generated Report Preview</h4>
+         <div className="p-4 bg-muted/50 rounded-lg min-h-[200px] prose prose-sm dark:prose-invert max-w-none relative">
+            <div className="flex items-center justify-between not-prose mb-2">
+                <h4 className="font-semibold">Generated Report Preview</h4>
+                <Button variant="outline" size="sm" onClick={handleExportPdf} disabled={!report || isLoading}>
+                    <Download className="w-4 h-4 mr-2" />
+                    Export as PDF
+                </Button>
+            </div>
             {isLoading && (
               <div className="flex justify-center items-center h-full">
                 <p>The AI is analyzing your financial data. Please wait...</p>
