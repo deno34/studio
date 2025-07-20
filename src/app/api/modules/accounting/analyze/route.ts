@@ -2,22 +2,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { validateApiKey } from '@/lib/auth';
 import { callMistral } from '@/lib/mistral';
-import { formidable } from 'formidable';
-import fs from 'fs/promises';
-
-// Helper to parse multipart form data
-async function parseFormData(req: NextRequest) {
-  const form = formidable({});
-  const [fields, files] = await form.parse(req as any);
-  
-  const file = files.file?.[0];
-
-  if (!file) {
-    throw new Error('No file uploaded.');
-  }
-  
-  return { file };
-}
 
 export async function POST(req: NextRequest) {
   try {
@@ -27,15 +11,21 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const { file } = await parseFormData(req);
-    const fileBuffer = await fs.readFile(file.filepath);
+    const formData = await req.formData();
+    const file = formData.get('file') as File | null;
+
+    if (!file) {
+      return NextResponse.json({ error: 'No file uploaded.' }, { status: 400 });
+    }
+    
+    const fileBuffer = Buffer.from(await file.arrayBuffer());
     let textContent = '';
 
-    if (file.mimetype === 'application/pdf') {
+    if (file.type === 'application/pdf') {
         const pdf = (await import('pdf-parse')).default;
         const data = await pdf(fileBuffer);
         textContent = data.text;
-    } else if (file.mimetype?.startsWith('text/')) {
+    } else if (file.type?.startsWith('text/')) {
         textContent = fileBuffer.toString('utf-8');
     } else {
         return NextResponse.json({ error: 'Unsupported file type. Please upload a PDF or text file.' }, { status: 400 });

@@ -3,33 +3,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { validateApiKey } from '@/lib/auth';
 import admin from '@/lib/firebaseAdmin';
 import { v4 as uuidv4 } from 'uuid';
-import { formidable, type File } from 'formidable';
-import fs from 'fs/promises';
 import { uploadFile } from '@/lib/storage';
 import { BusinessSchema, type Business } from '@/lib/types';
 import * as z from 'zod';
 
 const db = admin.firestore();
-
-// Formidable middleware to parse multipart/form-data
-async function parseFormData(req: NextRequest): Promise<{ fields: z.infer<typeof BusinessSchema>, file?: File }> {
-  const form = formidable({});
-  const [fields, files] = await form.parse(req as any);
-  
-  const validation = BusinessSchema.safeParse({
-    name: fields.name?.[0],
-    description: fields.description?.[0],
-    industry: fields.industry?.[0],
-  });
-
-  if (!validation.success) {
-    throw new z.ZodError(validation.error.issues);
-  }
-
-  const file = files.logo?.[0];
-  
-  return { fields: validation.data, file };
-}
 
 // POST a new business profile
 export async function POST(req: NextRequest) {
@@ -41,21 +19,30 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const { fields, file } = await parseFormData(req);
+    const formData = await req.formData();
+    const name = formData.get('name') as string;
+    const description = formData.get('description') as string;
+    const industry = formData.get('industry') as string;
+    const logoFile = formData.get('logo') as File | null;
 
+    const validation = BusinessSchema.safeParse({ name, description, industry });
+    if (!validation.success) {
+      return NextResponse.json({ error: 'Invalid data provided.', details: validation.error.flatten() }, { status: 400 });
+    }
+    
     const businessId = uuidv4();
     let logoUrl = '';
 
-    if (file) {
-      const fileBuffer = await fs.readFile(file.filepath);
-      const fileName = `businesses/${businessId}/logo-${file.originalFilename}`;
-      logoUrl = await uploadFile(fileBuffer, fileName, file.mimetype || 'application/octet-stream');
+    if (logoFile) {
+      const fileBuffer = Buffer.from(await logoFile.arrayBuffer());
+      const fileName = `businesses/${businessId}/logo-${logoFile.name}`;
+      logoUrl = await uploadFile(fileBuffer, fileName, logoFile.type || 'application/octet-stream');
     }
 
-    const businessData = {
+    const businessData: Business = {
       id: businessId,
-      ...fields,
-      logoUrl: logoUrl,
+      ...validation.data,
+      logoUrl,
       userId: user.uid,
       createdAt: new Date().toISOString(),
       selectedAgents: [], // Initially no agents are selected

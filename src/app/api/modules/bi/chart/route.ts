@@ -1,7 +1,5 @@
 
 import { NextRequest, NextResponse } from 'next/server';
-import { formidable } from 'formidable';
-import fs from 'fs/promises';
 import Papa from 'papaparse';
 import { validateApiKey } from '@/lib/auth';
 import { generateChartData } from '@/ai/flows/chart-generator-flow';
@@ -12,29 +10,6 @@ const formSchema = z.object({
   chartType: z.enum(['bar', 'line', 'pie']),
 });
 
-// Helper to parse multipart form data
-async function parseFormData(req: NextRequest) {
-  const form = formidable({});
-  const [fields, files] = await form.parse(req as any);
-
-  const { prompt, chartType } = formSchema.parse({
-    prompt: fields.prompt?.[0],
-    chartType: fields.chartType?.[0],
-  });
-  
-  const file = files.file?.[0];
-
-  if (!file) {
-    throw new Error('No file uploaded.');
-  }
-
-  if (file.mimetype !== 'text/csv' && file.mimetype !== 'application/json') {
-    throw new Error('Unsupported file type. Please upload a CSV or JSON file.');
-  }
-  
-  return { file, prompt, chartType };
-}
-
 export async function POST(req: NextRequest) {
   try {
     await validateApiKey(req);
@@ -43,11 +18,29 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const { file, prompt, chartType } = await parseFormData(req);
-    const fileContent = await fs.readFile(file.filepath, 'utf-8');
+    const formData = await req.formData();
+    const prompt = formData.get('prompt') as string | null;
+    const chartType = formData.get('chartType') as 'bar' | 'line' | 'pie' | null;
+    const file = formData.get('file') as File | null;
+    
+    const validation = formSchema.safeParse({ prompt, chartType });
+
+    if (!validation.success) {
+      return NextResponse.json({ error: 'Invalid form data.', details: validation.error.flatten() }, { status: 400 });
+    }
+
+    if (!file) {
+      return NextResponse.json({ error: 'No file uploaded.' }, { status: 400 });
+    }
+
+    if (file.type !== 'text/csv' && file.type !== 'application/json') {
+      return NextResponse.json({ error: 'Unsupported file type. Please upload a CSV or JSON file.' }, { status: 400 });
+    }
+
+    const fileContent = await file.text();
 
     let data: object[];
-    if (file.mimetype === 'text/csv') {
+    if (file.type === 'text/csv') {
         const parsedCsv = await new Promise<object[]>((resolve, reject) => {
             Papa.parse(fileContent, {
                 header: true,
@@ -71,8 +64,8 @@ export async function POST(req: NextRequest) {
     
     const result = await generateChartData({
       data: jsonData,
-      prompt,
-      chartType,
+      prompt: validation.data.prompt,
+      chartType: validation.data.chartType,
     });
     
     return NextResponse.json(result);

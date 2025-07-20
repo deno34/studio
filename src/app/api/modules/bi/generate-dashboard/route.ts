@@ -1,7 +1,5 @@
 
 import { NextRequest, NextResponse } from 'next/server';
-import { formidable } from 'formidable';
-import fs from 'fs/promises';
 import Papa from 'papaparse';
 import { validateApiKey } from '@/lib/auth';
 import { generateDashboardData } from '@/ai/flows/dashboard-generator-flow';
@@ -11,28 +9,6 @@ const formSchema = z.object({
   prompt: z.string().min(1, 'Prompt is required'),
 });
 
-// Helper to parse multipart form data
-async function parseFormData(req: NextRequest) {
-  const form = formidable({});
-  const [fields, files] = await form.parse(req as any);
-
-  const { prompt } = formSchema.parse({
-    prompt: fields.prompt?.[0],
-  });
-  
-  const file = files.file?.[0];
-
-  if (!file) {
-    throw new Error('No file uploaded.');
-  }
-
-  if (file.mimetype !== 'text/csv') {
-    throw new Error('Unsupported file type. Please upload a CSV file.');
-  }
-  
-  return { file, prompt };
-}
-
 export async function POST(req: NextRequest) {
   try {
     await validateApiKey(req);
@@ -41,8 +17,24 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const { file, prompt } = await parseFormData(req);
-    const fileContent = await fs.readFile(file.filepath, 'utf-8');
+    const formData = await req.formData();
+    const prompt = formData.get('prompt') as string | null;
+    const file = formData.get('file') as File | null;
+    
+    const validation = formSchema.safeParse({ prompt });
+    if (!validation.success) {
+      return NextResponse.json({ error: 'Invalid form data.', details: validation.error.flatten() }, { status: 400 });
+    }
+
+    if (!file) {
+      return NextResponse.json({ error: 'No file uploaded.' }, { status: 400 });
+    }
+
+    if (file.type !== 'text/csv') {
+      return NextResponse.json({ error: 'Unsupported file type. Please upload a CSV file.' }, { status: 400 });
+    }
+    
+    const fileContent = await file.text();
 
     const parsedCsv = await new Promise((resolve, reject) => {
         Papa.parse(fileContent, {
@@ -62,7 +54,7 @@ export async function POST(req: NextRequest) {
     
     const result = await generateDashboardData({
       data: jsonData,
-      prompt,
+      prompt: validation.data.prompt,
     });
     
     return NextResponse.json(result);

@@ -3,30 +3,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { validateApiKey } from '@/lib/auth';
 import admin from '@/lib/firebaseAdmin';
 import { uploadFile } from '@/lib/storage';
-import { formidable } from 'formidable';
-import fs from 'fs/promises';
 import { v4 as uuidv4 } from 'uuid';
 import type { Candidate } from '@/lib/types';
 
 const db = admin.firestore();
-
-// Helper to parse multipart form data
-async function parseFormData(req: NextRequest) {
-  const form = formidable({});
-  const [fields, files] = await form.parse(req as any);
-  
-  const file = files.file?.[0];
-  const jobId = fields.jobId?.[0];
-
-  if (!file) {
-    throw new Error('No file uploaded.');
-  }
-  if (!jobId) {
-    throw new Error('No jobId provided.');
-  }
-  
-  return { file, jobId };
-}
 
 // POST a new candidate from a resume upload
 export async function POST(req: NextRequest) {
@@ -38,12 +18,22 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const { file, jobId } = await parseFormData(req);
-    const fileBuffer = await fs.readFile(file.filepath);
+    const formData = await req.formData();
+    const file = formData.get('file') as File | null;
+    const jobId = formData.get('jobId') as string | null;
+
+    if (!file) {
+      return NextResponse.json({ error: 'No file uploaded.' }, { status: 400 });
+    }
+    if (!jobId) {
+      return NextResponse.json({ error: 'No jobId provided.' }, { status: 400 });
+    }
+
+    const fileBuffer = Buffer.from(await file.arrayBuffer());
     let resumeText = '';
 
     // Extract text from PDF
-    if (file.mimetype === 'application/pdf') {
+    if (file.type === 'application/pdf') {
         const pdf = (await import('pdf-parse')).default;
         const data = await pdf(fileBuffer);
         resumeText = data.text;
@@ -56,8 +46,8 @@ export async function POST(req: NextRequest) {
     }
 
     // Upload original resume to Firebase Storage
-    const fileName = `resumes/${jobId}/${uuidv4()}-${file.originalFilename}`;
-    const downloadUrl = await uploadFile(fileBuffer, fileName, file.mimetype || 'application/pdf');
+    const fileName = `resumes/${jobId}/${uuidv4()}-${file.name}`;
+    const downloadUrl = await uploadFile(fileBuffer, fileName, file.type || 'application/pdf');
 
     // Create candidate record in Firestore
     const candidateId = uuidv4();
@@ -65,7 +55,7 @@ export async function POST(req: NextRequest) {
         id: candidateId,
         jobId: jobId,
         // The AI will extract the name later, for now we use the file name
-        name: file.originalFilename || 'Unnamed Candidate',
+        name: file.name || 'Unnamed Candidate',
         email: '', // AI will extract this
         resumeUrl: downloadUrl,
         resumeText: resumeText,
@@ -80,6 +70,7 @@ export async function POST(req: NextRequest) {
         candidate: {
             id: candidateId,
             resumeText: resumeText,
+            name: file.name || 'Unnamed Candidate',
         }
     }, { status: 201 });
 

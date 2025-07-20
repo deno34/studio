@@ -1,24 +1,8 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { validateApiKey } from '@/lib/auth';
-import { formidable } from 'formidable';
-import fs from 'fs/promises';
 import { parseContract } from '@/ai/flows/contract-parser-flow';
 import { ContractParserInput } from '@/lib/types';
-
-// Helper to parse multipart form data
-async function parseFormData(req: NextRequest) {
-  const form = formidable({});
-  const [fields, files] = await form.parse(req as any);
-  
-  const file = files.file?.[0];
-
-  if (!file) {
-    throw new Error('No file uploaded.');
-  }
-  
-  return { file };
-}
 
 export async function POST(req: NextRequest) {
   try {
@@ -28,11 +12,16 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const { file } = await parseFormData(req);
-    const fileBuffer = await fs.readFile(file.filepath);
+    const formData = await req.formData();
+    const file = formData.get('file') as File | null;
+    if (!file) {
+      return NextResponse.json({ error: 'No file uploaded.' }, { status: 400 });
+    }
+
+    const fileBuffer = Buffer.from(await file.arrayBuffer());
     let textContent = '';
 
-    if (file.mimetype === 'application/pdf') {
+    if (file.type === 'application/pdf') {
         const pdf = (await import('pdf-parse')).default;
         const data = await pdf(fileBuffer);
         textContent = data.text;

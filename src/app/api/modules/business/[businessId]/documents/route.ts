@@ -3,28 +3,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { validateApiKey } from '@/lib/auth';
 import admin from '@/lib/firebaseAdmin';
 import { v4 as uuidv4 } from 'uuid';
-import { formidable, type File } from 'formidable';
-import fs from 'fs/promises';
 import { uploadFile } from '@/lib/storage';
 import { type Document } from '@/lib/types';
 import { categorizeDocument } from '@/ai/flows/document-categorizer-flow';
-import * as z from 'zod';
 
 const db = admin.firestore();
-
-// Formidable middleware to parse multipart/form-data
-async function parseFormData(req: NextRequest): Promise<{ file: File }> {
-  const form = formidable({});
-  const [fields, files] = await form.parse(req as any);
-  
-  const file = files.file?.[0];
-  if (!file) {
-      throw new Error("No file uploaded.");
-  }
-  
-  return { file };
-}
-
 
 // POST a new document for a business
 export async function POST(
@@ -44,25 +27,31 @@ export async function POST(
   }
 
   try {
-    const { file } = await parseFormData(req);
-    const fileBuffer = await fs.readFile(file.filepath);
+    const formData = await req.formData();
+    const file = formData.get('file') as File | null;
+
+    if (!file) {
+      return NextResponse.json({ error: 'No file uploaded.' }, { status: 400 });
+    }
+    
+    const fileBuffer = Buffer.from(await file.arrayBuffer());
 
     // AI Categorization Step
     let textContent = '';
     let aiCategory = 'General Document'; // Default category
 
     try {
-        if (file.mimetype === 'application/pdf') {
+        if (file.type === 'application/pdf') {
             const pdf = (await import('pdf-parse')).default;
             const data = await pdf(fileBuffer);
             textContent = data.text;
-        } else if (file.mimetype?.startsWith('text/')) {
+        } else if (file.type?.startsWith('text/')) {
             textContent = fileBuffer.toString('utf-8');
         }
 
         if (textContent) {
             const result = await categorizeDocument({
-                fileName: file.originalFilename || 'document',
+                fileName: file.name || 'document',
                 fileContent: textContent
             });
             aiCategory = result.category;
@@ -73,8 +62,8 @@ export async function POST(
     }
     
     // Store file in Firebase Storage
-    const filePath = `businesses/${businessId}/documents/${uuidv4()}-${file.originalFilename}`;
-    const downloadUrl = await uploadFile(fileBuffer, filePath, file.mimetype || 'application/octet-stream');
+    const filePath = `businesses/${businessId}/documents/${uuidv4()}-${file.name}`;
+    const downloadUrl = await uploadFile(fileBuffer, filePath, file.type || 'application/octet-stream');
     
     // Store metadata in Firestore
     const docId = uuidv4();
@@ -82,9 +71,9 @@ export async function POST(
       id: docId,
       businessId,
       userId: user.uid,
-      fileName: file.originalFilename || 'Untitled',
+      fileName: file.name || 'Untitled',
       fileUrl: downloadUrl,
-      contentType: file.mimetype || 'application/octet-stream',
+      contentType: file.type || 'application/octet-stream',
       category: aiCategory, // Use the AI-determined category
       createdAt: new Date().toISOString(),
       status: 'Categorized', // Status is now 'Categorized'

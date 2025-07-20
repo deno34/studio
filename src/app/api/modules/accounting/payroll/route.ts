@@ -1,26 +1,8 @@
 
-'use server';
-
 import { NextRequest, NextResponse } from 'next/server';
 import { validateApiKey } from '@/lib/auth';
-import { formidable } from 'formidable';
 import { summarizePayroll } from '@/ai/flows/payroll-flow';
 import { PayrollSummaryInput, PayrollSummaryOutput } from '@/lib/types';
-import fs from 'fs/promises';
-
-// Helper to parse multipart form data
-async function parseFormData(req: NextRequest) {
-  const form = formidable({});
-  const [fields, files] = await form.parse(req as any);
-  
-  const file = files.file?.[0];
-
-  if (!file) {
-    throw new Error('No file uploaded.');
-  }
-  
-  return { file };
-}
 
 export async function POST(req: NextRequest) {
   try {
@@ -30,11 +12,16 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const { file } = await parseFormData(req);
+    const formData = await req.formData();
+    const file = formData.get('file') as File | null;
 
-    const fileBuffer = await fs.readFile(file.filepath);
+    if (!file) {
+      return NextResponse.json({ error: 'No file uploaded.' }, { status: 400 });
+    }
+
+    const fileBuffer = Buffer.from(await file.arrayBuffer());
     let documentContent: string;
-    let mimeType = file.mimetype || 'application/octet-stream';
+    let mimeType = file.type || 'application/octet-stream';
 
     if (mimeType === 'application/pdf') {
         const pdf = (await import('pdf-parse')).default;
