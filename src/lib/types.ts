@@ -330,7 +330,7 @@ export type ForecastingInput = z.infer<typeof ForecastingInputSchema>;
 export const ForecastPointSchema = z.object({
   date: z.string().describe("The date for the data point."),
   value: z.number().describe("The historical value for the data point."),
-  forecast?: z.number().describe("The forecasted value for the data point."),
+  forecast: z.number().describe("The forecasted value for the data point.").optional(),
 });
 export type ForecastPoint = z.infer<typeof ForecastPointSchema>;
 
