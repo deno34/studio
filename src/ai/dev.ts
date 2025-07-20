@@ -14,3 +14,5 @@ import './flows/document-writer-flow';
 import './flows/document-summary-flow';
 import './flows/tts-flow';
 import './flows/forecasting-flow';
+import './flows/dashboard-generator-flow';
+

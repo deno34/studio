@@ -330,7 +330,7 @@ export type ForecastingInput = z.infer<typeof ForecastingInputSchema>;
 export const ForecastPointSchema = z.object({
   date: z.string().describe("The date for the data point."),
   value: z.number().describe("The historical value for the data point."),
-  forecast: z.number().describe("The forecasted value for the data point.").optional(),
+  forecast: z.number().optional().describe("The forecasted value for the data point."),
 });
 export type ForecastPoint = z.infer<typeof ForecastPointSchema>;
 
@@ -339,3 +339,23 @@ export const ForecastingOutputSchema = z.object({
   analysis: z.string().describe("A text-based analysis of the forecast, including trends, anomalies, and insights."),
 });
 export type ForecastingOutput = z.infer<typeof ForecastingOutputSchema>;
+
+
+// Business Intelligence / Dashboard Generator Schemas
+export const DashboardGeneratorInputSchema = z.object({
+  data: z.string().describe("The dataset as a JSON string."),
+  prompt: z.string().describe("The user's prompt describing what they want to see in the dashboard."),
+});
+export type DashboardGeneratorInput = z.infer<typeof DashboardGeneratorInputSchema>;
+
+export const DashboardCardSchema = z.object({
+  title: z.string().describe("The title of the KPI card."),
+  value: z.string().describe("The main value or metric to display on the card."),
+  insight: z.string().describe("A brief, one-sentence insight about the metric."),
+});
+export type DashboardCard = z.infer<typeof DashboardCardSchema>;
+
+export const DashboardGeneratorOutputSchema = z.object({
+  cards: z.array(DashboardCardSchema).describe("A list of KPI cards to be displayed on the dashboard."),
+});
+export type DashboardGeneratorOutput = z.infer<typeof DashboardGeneratorOutputSchema>;

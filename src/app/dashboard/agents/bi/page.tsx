@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ArrowLeft } from 'lucide-react';
 import { ForecastingTab } from '@/components/dashboard/bi/forecasting-tab';
+import { DashboardBuilderTab } from '@/components/dashboard/bi/dashboard-builder-tab';
 
 export default function BIAgentPage() {
   return (
@@ -32,13 +33,16 @@ export default function BIAgentPage() {
           <Tabs defaultValue="forecasting" className="w-full">
             <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="forecasting">Forecasting</TabsTrigger>
-              <TabsTrigger value="dashboard_gen" disabled>Dashboard Builder</TabsTrigger>
+              <TabsTrigger value="dashboard_gen">Dashboard Builder</TabsTrigger>
               <TabsTrigger value="kpi_summary" disabled>KPI Summary</TabsTrigger>
               <TabsTrigger value="visualize" disabled>Visualize</TabsTrigger>
               <TabsTrigger value="market_watch" disabled>Market Watch</TabsTrigger>
             </TabsList>
             <TabsContent value="forecasting">
               <ForecastingTab />
+            </TabsContent>
+             <TabsContent value="dashboard_gen">
+              <DashboardBuilderTab />
             </TabsContent>
           </Tabs>
         </div>
