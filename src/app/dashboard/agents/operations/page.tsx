@@ -12,6 +12,7 @@ import { SchedulingTab } from '@/components/dashboard/operations/scheduling-tab'
 import { PlannerTab } from '@/components/dashboard/operations/planner-tab';
 import { InventoryTab } from '@/components/dashboard/operations/inventory-tab';
 import { CrmTab } from '@/components/dashboard/operations/crm-tab';
+import { AskAI } from '@/components/dashboard/operations/ask-ai';
 
 export default function OperationsAgentPage() {
   return (
@@ -32,31 +33,34 @@ export default function OperationsAgentPage() {
               Your AI assistant for logistics, scheduling, and inventory.
             </p>
           </div>
-
-          <Tabs defaultValue="logistics" className="w-full">
-            <TabsList className="grid w-full grid-cols-5">
-              <TabsTrigger value="logistics">Logistics</TabsTrigger>
-              <TabsTrigger value="scheduling">Scheduling</TabsTrigger>
-              <TabsTrigger value="planner">Daily Planner</TabsTrigger>
-              <TabsTrigger value="inventory">Inventory</TabsTrigger>
-              <TabsTrigger value="crm">CRM</TabsTrigger>
-            </TabsList>
-            <TabsContent value="logistics">
-              <LogisticsTab />
-            </TabsContent>
-            <TabsContent value="scheduling">
-              <SchedulingTab />
-            </TabsContent>
-            <TabsContent value="planner">
-                <PlannerTab />
-            </TabsContent>
-             <TabsContent value="inventory">
-                <InventoryTab />
-            </TabsContent>
-            <TabsContent value="crm">
-                <CrmTab />
-            </TabsContent>
-          </Tabs>
+          
+          <div className="space-y-8">
+            <AskAI />
+            <Tabs defaultValue="logistics" className="w-full">
+              <TabsList className="grid w-full grid-cols-5">
+                <TabsTrigger value="logistics">Logistics</TabsTrigger>
+                <TabsTrigger value="scheduling">Scheduling</TabsTrigger>
+                <TabsTrigger value="planner">Daily Planner</TabsTrigger>
+                <TabsTrigger value="inventory">Inventory</TabsTrigger>
+                <TabsTrigger value="crm">CRM</TabsTrigger>
+              </TabsList>
+              <TabsContent value="logistics">
+                <LogisticsTab />
+              </TabsContent>
+              <TabsContent value="scheduling">
+                <SchedulingTab />
+              </TabsContent>
+              <TabsContent value="planner">
+                  <PlannerTab />
+              </TabsContent>
+              <TabsContent value="inventory">
+                  <InventoryTab />
+              </TabsContent>
+              <TabsContent value="crm">
+                  <CrmTab />
+              </TabsContent>
+            </Tabs>
+          </div>
         </div>
       </main>
       <Footer />
