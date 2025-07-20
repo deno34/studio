@@ -18,8 +18,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast"
 import { Lock, Loader2 } from "lucide-react"
 import { useState } from "react"
-import { EarlyAccessRequestSchema } from "@/lib/types"
-import { saveEarlyAccessRequest } from "@/app/actions"
+import { EarlyAccessRequestSchema, type EarlyAccessRequest } from "@/lib/types"
+import { collection, addDoc } from "firebase/firestore";
+import { auth } from '@/lib/firebase/client'; // Assuming client-side db instance is exported from here
+import { getFirestore } from "firebase/firestore"
+
 
 const formSchema = EarlyAccessRequestSchema;
 
@@ -36,11 +39,30 @@ export function EarlyAccess() {
       timeline: "",
     },
   })
+  
+  // Client-side data saving function
+  async function saveRequest(values: EarlyAccessRequest) {
+    try {
+        const db = getFirestore(auth.app);
+        await addDoc(collection(db, "earlyAccessRequests"), {
+            ...values,
+            createdAt: new Date().toISOString(),
+        });
+        return { success: true };
+    } catch (error) {
+        console.error("Error writing document: ", error);
+        if (error instanceof Error) {
+            return { success: false, message: error.message };
+        }
+        return { success: false, message: "An unknown error occurred." };
+    }
+  }
+
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true)
     try {
-      const result = await saveEarlyAccessRequest(values)
+      const result = await saveRequest(values)
 
       if (result.success) {
         toast({

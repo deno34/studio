@@ -1,50 +1,11 @@
+// This file is no longer needed for the early access form,
+// as the logic has been moved to the client-side component
+// to simplify the data saving process and avoid server-side Firebase initialization issues.
+// It is kept for now to avoid breaking imports but can be removed later if no other server actions are added.
 
 'use server';
 
-import { EarlyAccessRequest, EarlyAccessRequestSchema } from '@/lib/types';
-import { initializeApp, getApps, getApp, FirebaseApp } from "firebase/app";
-import { getFirestore, addDoc, collection } from "firebase/firestore";
-import { getFirebaseConfig } from '@/lib/firebaseConfig';
-
-
-// This function is intended to be called from Server Components or other Server Actions.
-// The client-side AuthProvider handles its own initialization.
-function getDb() {
-  const appName = 'server-actions-app'; // Unique name for the server-side app
-  let app: FirebaseApp;
-  if (!getApps().some(app => app.name === appName)) {
-    const firebaseConfig = getFirebaseConfig();
-    app = initializeApp(firebaseConfig, appName);
-  } else {
-    app = getApp(appName);
-  }
-  return getFirestore(app);
-}
-
-
-export async function saveEarlyAccessRequest(values: EarlyAccessRequest) {
-  const parsed = EarlyAccessRequestSchema.safeParse(values);
-
-  if (!parsed.success) {
-    return {
-      success: false,
-      message: 'Invalid data provided.',
-    };
-  }
-
-  try {
-    const db = getDb();
-    await addDoc(collection(db, 'earlyAccessRequests'), parsed.data);
-    return {
-      success: true,
-      message: 'Registration successful!',
-    };
-  } catch (error) {
-    console.error('Error saving to Firestore:', error);
-    // Provide a more generic error message to the user
-    return {
-      success: false,
-      message: 'An unexpected error occurred while saving your request.',
-    };
-  }
+export async function placeholderAction() {
+  // This function can be removed if the file is no longer needed.
+  return { success: true };
 }
