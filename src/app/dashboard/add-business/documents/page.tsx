@@ -37,15 +37,46 @@ export default function DocumentUploadPage() {
   };
 
   const handleContinue = async () => {
-    setIsUploading(true);
-    // In a real app, this would upload files and trigger AI categorization.
-    // This involves creating a new API endpoint.
-    console.log('Uploading files for businessId:', businessId, files.map(f => f.name));
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    if (!businessId) {
+        toast({ variant: 'destructive', title: 'Error', description: 'Business ID is missing. Please go back to the first step.' });
+        return;
+    }
     
-    toast({ title: 'Setup Almost Complete!', description: `Let's finalize your plan.` });
-    router.push(`/dashboard/add-business/billing?businessId=${businessId}`);
+    setIsUploading(true);
+    toast({ title: 'Uploading files...', description: 'Please wait while we process your documents.' });
+    
+    let allSucceeded = true;
+    for (const file of files) {
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+            const response = await fetch(`/api/modules/business/${businessId}/documents`, {
+                method: 'POST',
+                headers: {
+                    'x-api-key': process.env.NEXT_PUBLIC_MASTER_API_KEY!,
+                },
+                body: formData,
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || `Failed to upload ${file.name}`);
+            }
+             toast({ title: 'File Uploaded!', description: `${file.name} has been saved.` });
+        } catch (error) {
+            allSucceeded = false;
+            toast({ variant: 'destructive', title: `Upload failed for ${file.name}`, description: error instanceof Error ? error.message : 'An unknown error occurred.' });
+            // Stop on first error
+            break; 
+        }
+    }
+    
     setIsUploading(false);
+
+    if (allSucceeded) {
+      toast({ title: 'Setup Almost Complete!', description: `Let's finalize your plan.` });
+      router.push(`/dashboard/add-business/billing?businessId=${businessId}`);
+    }
   };
   
   const handleSkip = () => {
@@ -106,7 +137,7 @@ export default function DocumentUploadPage() {
                     <Button variant="ghost" onClick={handleSkip}>
                         Skip for now
                     </Button>
-                    <Button onClick={handleContinue} disabled={isUploading}>
+                    <Button onClick={handleContinue} disabled={isUploading || files.length === 0}>
                       {isUploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Continue'}
                       {!isUploading && <ArrowRight className="ml-2 h-4 w-4" />}
                     </Button>

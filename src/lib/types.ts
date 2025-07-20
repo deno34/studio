@@ -35,6 +35,20 @@ export type Business = z.infer<typeof BusinessSchema> & {
     selectedAgents: string[];
 };
 
+// Document Schemas
+export const DocumentSchema = z.object({
+  id: z.string(),
+  businessId: z.string(),
+  userId: z.string(),
+  fileName: z.string(),
+  fileUrl: z.string().url(),
+  contentType: z.string(),
+  category: z.string(), // To be filled by AI categorization
+  status: z.enum(['Uploaded', 'Processing', 'Categorized', 'Error']),
+  createdAt: z.string(),
+});
+export type Document = z.infer<typeof DocumentSchema>;
+
 
 // Financial Report Schemas
 const ExpenseSchema = z.object({
