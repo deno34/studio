@@ -11,7 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
-import { LayoutDashboard, KeyRound, Bot, FileText, CreditCard, ChevronRight, BarChart3, ShieldCheck } from 'lucide-react';
+import { LayoutDashboard, KeyRound, Bot, FileText, CreditCard, ChevronRight, BarChart3, ShieldCheck, PlusCircle } from 'lucide-react';
 
 function DashboardSkeleton() {
   return (
@@ -89,9 +89,17 @@ export default function DashboardPage() {
               ))}
             </nav>
             <div className="space-y-8">
-              <div>
-                <h1 className="text-3xl font-bold">Welcome, {user.displayName || user.email?.split('@')[0]}</h1>
-                <p className="text-muted-foreground">Here's a quick overview of your Nerida AI account.</p>
+              <div className="flex justify-between items-start">
+                  <div>
+                    <h1 className="text-3xl font-bold">Welcome, {user.displayName || user.email?.split('@')[0]}</h1>
+                    <p className="text-muted-foreground">Here's a quick overview of your Nerida AI account.</p>
+                  </div>
+                  <Button asChild>
+                    <Link href="/dashboard/add-business">
+                        <PlusCircle className="mr-2 h-4 w-4" />
+                        Add New Business
+                    </Link>
+                  </Button>
               </div>
               <div className="grid gap-6 sm:grid-cols-2">
                  <Card>
