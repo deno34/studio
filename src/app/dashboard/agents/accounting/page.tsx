@@ -15,6 +15,7 @@ import { PayrollTab } from '@/components/dashboard/accounting/payroll-tab';
 import { TaxesTab } from '@/components/dashboard/accounting/taxes-tab';
 import { ReportsTab } from '@/components/dashboard/accounting/reports-tab';
 import { Progress } from '@/components/ui/progress';
+import { AskAI } from '@/components/dashboard/accounting/ask-ai';
 
 const summaryCards = [
     { title: "Total Invoices", value: "KES 450,000", icon: <FileText className="w-6 h-6 text-muted-foreground" /> },
@@ -65,6 +66,7 @@ export default function AccountingAgentPage() {
             <div className="grid gap-8 lg:grid-cols-3">
                 {/* Main Content Area */}
                 <div className="lg:col-span-2 space-y-8">
+                    <AskAI />
                     {/* Summary Cards */}
                     <div className="grid gap-6 sm:grid-cols-2">
                         {summaryCards.map(card => (
@@ -139,5 +141,3 @@ export default function AccountingAgentPage() {
     </div>
   );
 }
-
-    
