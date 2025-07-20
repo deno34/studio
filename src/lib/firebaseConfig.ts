@@ -12,9 +12,8 @@ export function getFirebaseConfig() {
   // Basic validation to ensure all keys are present
   for (const [key, value] of Object.entries(firebaseConfig)) {
     if (!value) {
-      console.error(`Firebase config error: Missing value for ${key}`);
+      console.error(`Firebase config error: Missing value for NEXT_PUBLIC_${key.replace(/([A-Z])/g, '_$1').toUpperCase()}`);
       // Throwing an error here can help in debugging during development
-      // In production, Firebase SDK will throw its own specific error
     }
   }
   

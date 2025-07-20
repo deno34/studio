@@ -81,7 +81,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         photoURL
     });
 
-    // Create a new user object to force re-render
+    // Create a new user object to force re-render in components
     setUser(JSON.parse(JSON.stringify(auth.currentUser)));
   }
 
