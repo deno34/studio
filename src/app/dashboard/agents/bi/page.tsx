@@ -11,6 +11,7 @@ import { ForecastingTab } from '@/components/dashboard/bi/forecasting-tab';
 import { DashboardBuilderTab } from '@/components/dashboard/bi/dashboard-builder-tab';
 import { KpiSummaryTab } from '@/components/dashboard/bi/kpi-summary-tab';
 import { VisualizeTab } from '@/components/dashboard/bi/visualize-tab';
+import { MarketWatchTab } from '@/components/dashboard/bi/market-watch-tab';
 
 export default function BIAgentPage() {
   return (
@@ -38,7 +39,7 @@ export default function BIAgentPage() {
               <TabsTrigger value="dashboard_gen">Dashboard Builder</TabsTrigger>
               <TabsTrigger value="kpi_summary">KPI Summary</TabsTrigger>
               <TabsTrigger value="visualize">Visualize</TabsTrigger>
-              <TabsTrigger value="market_watch" disabled>Market Watch</TabsTrigger>
+              <TabsTrigger value="market_watch">Market Watch</TabsTrigger>
             </TabsList>
             <TabsContent value="forecasting">
               <ForecastingTab />
@@ -51,6 +52,9 @@ export default function BIAgentPage() {
             </TabsContent>
             <TabsContent value="visualize">
               <VisualizeTab />
+            </TabsContent>
+            <TabsContent value="market_watch">
+              <MarketWatchTab />
             </TabsContent>
           </Tabs>
         </div>

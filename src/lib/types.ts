@@ -389,3 +389,24 @@ export const ChartGeneratorOutputSchema = z.object({
   analysis: z.string().describe("A text-based analysis of what the generated chart shows."),
 });
 export type ChartGeneratorOutput = z.infer<typeof ChartGeneratorOutputSchema>;
+
+// Business Intelligence / Competitor Analysis Schemas
+export const AnalysisCategory = z.enum(['Headlines', 'Pricing', 'Key Features', 'Recent News']);
+export type AnalysisCategoryType = z.infer<typeof AnalysisCategory>;
+
+export const CompetitorAnalysisInputSchema = z.object({
+  htmlContent: z.string().describe("The raw HTML content of the competitor's webpage."),
+  categories: z.array(AnalysisCategory).describe("The specific categories of information to extract."),
+});
+export type CompetitorAnalysisInput = z.infer<typeof CompetitorAnalysisInputSchema>;
+
+export const ExtractedInfoSchema = z.object({
+    category: AnalysisCategory,
+    findings: z.array(z.string()).describe("A list of extracted data points for the category."),
+});
+
+export const CompetitorAnalysisOutputSchema = z.object({
+  summary: z.string().describe("A high-level summary of the findings from the webpage."),
+  extractedData: z.array(ExtractedInfoSchema).describe("A list of structured data extracted from the page, grouped by category."),
+});
+export type CompetitorAnalysisOutput = z.infer<typeof CompetitorAnalysisOutputSchema>;
