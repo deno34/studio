@@ -21,6 +21,21 @@ export const EarlyAccessRequestSchema = z.object({
 export type EarlyAccessRequest = z.infer<typeof EarlyAccessRequestSchema>;
 
 
+// Business Profile Schemas
+export const BusinessSchema = z.object({
+  name: z.string().min(3, { message: 'Business name must be at least 3 characters.' }),
+  description: z.string().min(10, { message: 'Please provide a brief description of your business.' }),
+  industry: z.string().nonempty({ message: 'Please select an industry.' }),
+  logoUrl: z.string().url().optional(),
+});
+export type Business = z.infer<typeof BusinessSchema> & {
+    id: string;
+    userId: string;
+    createdAt: string;
+    selectedAgents: string[];
+};
+
+
 // Financial Report Schemas
 const ExpenseSchema = z.object({
   id: z.string(),

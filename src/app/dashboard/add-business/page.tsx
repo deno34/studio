@@ -2,7 +2,6 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -16,9 +15,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Loader2, ArrowLeft, ArrowRight, Building2, Upload } from 'lucide-react';
+import { Loader2, ArrowRight, Building2, Upload } from 'lucide-react';
 import { OnboardingStepper } from '@/components/dashboard/add-business/onboarding-stepper';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useAuth } from '@/contexts/auth-context';
 
 const profileFormSchema = z.object({
   name: z.string().min(3, { message: 'Business name must be at least 3 characters.' }),
@@ -31,6 +31,7 @@ type ProfileFormValues = z.infer<typeof profileFormSchema>;
 
 export default function AddBusinessPage() {
   const router = useRouter();
+  const { user, loading } = useAuth();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
@@ -57,28 +58,67 @@ export default function AddBusinessPage() {
   };
 
   const onSubmit = async (values: ProfileFormValues) => {
+    if (!user) {
+        toast({ variant: 'destructive', title: 'Not authenticated', description: 'You must be logged in to create a business.' });
+        return;
+    }
     setIsSubmitting(true);
-    // In a real app, we would save this data to Firestore.
-    // For now, we'll just navigate to the next step.
-    console.log('Business Profile Data:', values);
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    toast({ title: 'Profile Saved!', description: 'Now, select your AI agents.' });
-    router.push('/dashboard/add-business/agents');
-    setIsSubmitting(false);
+    
+    const formData = new FormData();
+    formData.append('name', values.name);
+    formData.append('description', values.description);
+    formData.append('industry', values.industry);
+    if (values.logo) {
+      formData.append('logo', values.logo);
+    }
+
+    try {
+        const response = await fetch('/api/modules/business', {
+            method: 'POST',
+            headers: {
+                'x-api-key': process.env.NEXT_PUBLIC_MASTER_API_KEY!,
+            },
+            body: formData,
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            throw new Error(result.error || 'Failed to create business profile.');
+        }
+        
+        toast({ title: 'Profile Saved!', description: 'Now, select your AI agents.' });
+        router.push(`/dashboard/add-business/agents?businessId=${result.id}`);
+
+    } catch (error) {
+        toast({
+            variant: 'destructive',
+            title: 'Error creating profile',
+            description: error instanceof Error ? error.message : 'An unknown error occurred.',
+        });
+    } finally {
+        setIsSubmitting(false);
+    }
   };
+
+  if (loading) {
+    return (
+        <div className="flex flex-col min-h-dvh bg-background text-foreground">
+            <Header />
+            <main className="flex-1 flex items-center justify-center">
+                <Loader2 className="h-8 w-8 animate-spin" />
+            </main>
+            <Footer />
+        </div>
+    );
+  }
 
   return (
     <div className="flex flex-col min-h-dvh bg-background text-foreground">
       <Header />
       <main className="flex-1 bg-muted/30 py-12">
         <div className="container max-w-4xl px-4">
-          <Button variant="ghost" asChild className="mb-4">
-            <Link href="/dashboard">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Dashboard
-            </Link>
-          </Button>
-
+           {/* The back button is removed as this is the start of the flow */}
           <OnboardingStepper currentStep="profile" />
 
           <Card className="mt-8">
