@@ -1,9 +1,4 @@
 
-
-
-
-
-
 import {z} from 'zod';
 
 /**
@@ -322,3 +317,25 @@ export const DocumentSummaryOutputSchema = z.object({
   }).describe("Key entities identified in the document."),
 });
 export type DocumentSummaryOutput = z.infer<typeof DocumentSummaryOutputSchema>;
+
+
+// Business Intelligence / Forecasting Schemas
+export const ForecastingInputSchema = z.object({
+  jsonData: z.string().describe("A JSON string representing an array of data points. Each object should have a 'date' key and a key for the metric to be forecasted."),
+  metric: z.string().describe("The name of the key in the data objects to forecast."),
+  period: z.number().describe("The number of future periods to forecast (e.g., 3 for 3 months)."),
+});
+export type ForecastingInput = z.infer<typeof ForecastingInputSchema>;
+
+export const ForecastPointSchema = z.object({
+  date: z.string().describe("The date for the data point."),
+  value: z.number().describe("The historical value for the data point."),
+  forecast?: z.number().describe("The forecasted value for the data point."),
+});
+export type ForecastPoint = z.infer<typeof ForecastPointSchema>;
+
+export const ForecastingOutputSchema = z.object({
+  forecast: z.array(ForecastPointSchema).describe("An array containing both the historical data and the new forecasted data points."),
+  analysis: z.string().describe("A text-based analysis of the forecast, including trends, anomalies, and insights."),
+});
+export type ForecastingOutput = z.infer<typeof ForecastingOutputSchema>;

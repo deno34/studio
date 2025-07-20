@@ -42,8 +42,8 @@ const agents = [
     name: 'Business Intelligence',
     description: 'Generates market analysis, trend reports, and business insights.',
     icon: <BarChart3 className="w-8 h-8" />,
-    status: 'Coming Soon',
-    href: '#',
+    status: 'Operational',
+    href: '/dashboard/agents/bi',
   },
 ];
 
