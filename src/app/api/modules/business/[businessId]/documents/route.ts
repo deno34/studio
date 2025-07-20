@@ -7,6 +7,7 @@ import { formidable, type File } from 'formidable';
 import fs from 'fs/promises';
 import { uploadFile } from '@/lib/storage';
 import { type Document } from '@/lib/types';
+import { categorizeDocument } from '@/ai/flows/document-categorizer-flow';
 import * as z from 'zod';
 
 const db = admin.firestore();
@@ -46,9 +47,30 @@ export async function POST(
     const { file } = await parseFormData(req);
     const fileBuffer = await fs.readFile(file.filepath);
 
-    // TODO: Add AI categorization step here in the future.
-    // For now, we'll use a placeholder category.
-    const aiCategory = 'Uncategorized';
+    // AI Categorization Step
+    let textContent = '';
+    let aiCategory = 'General Document'; // Default category
+
+    try {
+        if (file.mimetype === 'application/pdf') {
+            const pdf = (await import('pdf-parse')).default;
+            const data = await pdf(fileBuffer);
+            textContent = data.text;
+        } else if (file.mimetype?.startsWith('text/')) {
+            textContent = fileBuffer.toString('utf-8');
+        }
+
+        if (textContent) {
+            const result = await categorizeDocument({
+                fileName: file.originalFilename || 'document',
+                fileContent: textContent
+            });
+            aiCategory = result.category;
+        }
+    } catch (aiError) {
+        console.warn('[AI_CATEGORIZATION_WARNING] Could not categorize document, falling back to default.', aiError);
+        // We don't throw an error here, just fall back to the default category.
+    }
     
     // Store file in Firebase Storage
     const filePath = `businesses/${businessId}/documents/${uuidv4()}-${file.originalFilename}`;
@@ -63,9 +85,9 @@ export async function POST(
       fileName: file.originalFilename || 'Untitled',
       fileUrl: downloadUrl,
       contentType: file.mimetype || 'application/octet-stream',
-      category: aiCategory,
+      category: aiCategory, // Use the AI-determined category
       createdAt: new Date().toISOString(),
-      status: 'Uploaded',
+      status: 'Categorized', // Status is now 'Categorized'
     };
 
     await db.collection('documents').doc(docId).set(documentData);

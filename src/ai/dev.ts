@@ -18,3 +18,4 @@ import './flows/dashboard-generator-flow';
 import './flows/kpi-summary-flow';
 import './flows/chart-generator-flow';
 import './flows/competitor-analysis-flow';
+import './flows/document-categorizer-flow';
