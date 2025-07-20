@@ -374,3 +374,18 @@ export const KpiSummaryOutputSchema = z.object({
   action: z.string().describe("A single, actionable recommendation based on the analysis."),
 });
 export type KpiSummaryOutput = z.infer<typeof KpiSummaryOutputSchema>;
+
+// Business Intelligence / Chart Generator Schemas
+export const ChartGeneratorInputSchema = z.object({
+  data: z.string().describe("The dataset as a JSON string."),
+  prompt: z.string().describe("The user's prompt describing what kind of chart to generate and what to show."),
+  chartType: z.enum(['bar', 'line', 'pie']).describe("The desired chart type."),
+});
+export type ChartGeneratorInput = z.infer<typeof ChartGeneratorInputSchema>;
+
+export const ChartGeneratorOutputSchema = z.object({
+  chartData: z.string().describe("A JSON string of the data, transformed and ready to be used by a charting library like Recharts. This should be an array of objects."),
+  chartConfig: z.string().describe("A JSON string describing the chart configuration. This should include keys for the x-axis, y-axis, and any other relevant series."),
+  analysis: z.string().describe("A text-based analysis of what the generated chart shows."),
+});
+export type ChartGeneratorOutput = z.infer<typeof ChartGeneratorOutputSchema>;

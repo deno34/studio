@@ -16,4 +16,5 @@ import './flows/tts-flow';
 import './flows/forecasting-flow';
 import './flows/dashboard-generator-flow';
 import './flows/kpi-summary-flow';
+import './flows/chart-generator-flow';
 
