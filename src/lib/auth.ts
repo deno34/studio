@@ -13,7 +13,7 @@ export async function validateApiKey(req: NextRequest) {
   // We'll use a single master API key stored in environment variables.
   // This allows the frontend to securely talk to the backend.
 
-  const MASTER_API_KEY = process.env.MASTER_API_KEY || process.env.NEXT_PUBLIC_MASTER_API_KEY;
+  const MASTER_API_KEY = process.env.MASTER_API_KEY;
 
   if (MASTER_API_KEY && key === MASTER_API_KEY) {
     // For demo purposes, returning a mock user object.
