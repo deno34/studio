@@ -2,7 +2,12 @@
 import admin from './firebaseAdmin';
 
 export async function uploadFile(fileBuffer: Buffer, path: string, contentType: string): Promise<string> {
-  const bucket = admin.storage().bucket();
+  const bucketName = process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET;
+  if (!bucketName) {
+    throw new Error("Firebase Storage bucket name is not configured. Please check NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET environment variable.");
+  }
+  
+  const bucket = admin.storage().bucket(bucketName);
   const file = bucket.file(path);
   
   await file.save(fileBuffer, {

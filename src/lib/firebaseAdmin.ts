@@ -1,5 +1,6 @@
 
 import * as admin from 'firebase-admin';
+import 'dotenv/config'; // Load environment variables directly
 
 if (!admin.apps.length) {
   try {
@@ -15,7 +16,7 @@ if (!admin.apps.length) {
 
     admin.initializeApp({
       credential: admin.credential.cert(serviceAccount),
-      storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
+      storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET, // Use the public one as it should be the same
     });
     console.log('Firebase Admin SDK initialized successfully.');
   } catch (error) {
