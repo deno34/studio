@@ -1,28 +1,22 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { validateApiKey } from '@/lib/auth';
-// import admin from '@/lib/firebaseAdmin';
 import { JobPostingSchema, type JobPostingFormValues } from '@/lib/types';
 import { v4 as uuidv4 } from 'uuid';
-
-// const db = admin.firestore();
+import { saveJob, getJobs } from '@/lib/firestoreService';
 
 // GET all job postings
 export async function GET(req: NextRequest) {
+  let user;
   try {
-    await validateApiKey(req);
+    user = await validateApiKey(req);
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 401 });
   }
 
   try {
-    // MOCK DATA
-    const mockJobs = [
-        { id: 'job-1', title: 'Senior AI Engineer', location: 'Remote', status: 'Open', createdAt: new Date().toISOString(), userId: 'mock-user' },
-        { id: 'job-2', title: 'Product Designer (UI/UX)', location: 'New York, NY', status: 'Open', createdAt: new Date().toISOString(), userId: 'mock-user' },
-        { id: 'job-3', title: 'Growth Marketing Manager', location: 'Remote', status: 'Closed', createdAt: new Date().toISOString(), userId: 'mock-user' },
-    ];
-    return NextResponse.json(mockJobs, { status: 200 });
+    const jobs = await getJobs(user.uid);
+    return NextResponse.json(jobs, { status: 200 });
   } catch (error) {
     console.error('[HR_JOBS_GET_ERROR]', error);
     return NextResponse.json({ error: 'An internal error occurred' }, { status: 500 });
@@ -31,8 +25,9 @@ export async function GET(req: NextRequest) {
 
 // POST a new job posting
 export async function POST(req: NextRequest) {
+  let user;
   try {
-    await validateApiKey(req);
+    user = await validateApiKey(req);
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 401 });
   }
@@ -45,9 +40,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Invalid data provided.', details: validation.error.flatten() }, { status: 400 });
     }
     
-    // MOCK SUCCESS
-    const refId = uuidv4();
-    return NextResponse.json({ message: 'Job post created successfully (mocked)', id: refId }, { status: 201 });
+    const jobData = {
+      ...validation.data,
+      id: uuidv4(),
+      userId: user.uid,
+      status: 'Open' as const,
+    };
+
+    await saveJob(jobData);
+    
+    return NextResponse.json({ message: 'Job post created successfully', id: jobData.id }, { status: 201 });
 
   } catch (error) {
     console.error('[HR_JOBS_POST_ERROR]', error);

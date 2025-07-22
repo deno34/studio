@@ -2,7 +2,7 @@
 'use server';
 
 import admin from './firebaseAdmin';
-import { type Business } from './types';
+import { type Business, type JobPosting } from './types';
 import { CollectionReference } from 'firebase-admin/firestore';
 
 const db = admin.firestore();
@@ -13,7 +13,10 @@ const getTypedCollection = <T>(collectionPath: string) => {
 };
 
 const businessesCollection = getTypedCollection<Business>('businesses');
+const jobsCollection = getTypedCollection<JobPosting>('jobPostings');
 
+
+// Business Functions
 export async function saveBusiness(businessData: Omit<Business, 'createdAt'>): Promise<string> {
   const businessRef = businessesCollection.doc(businessData.id);
   await businessRef.set({
@@ -32,8 +35,30 @@ export async function getBusinessesForUser(userId: string): Promise<Business[]> 
     return snapshot.docs.map(doc => doc.data());
   } catch (error) {
     console.error("Error fetching businesses for user:", error);
-    // Depending on requirements, you might want to throw the error
-    // or return an empty array.
     return [];
   }
+}
+
+
+// Job Posting Functions
+export async function saveJob(jobData: Omit<JobPosting, 'createdAt'>): Promise<string> {
+    const jobRef = jobsCollection.doc(jobData.id);
+    await jobRef.set({
+        ...jobData,
+        createdAt: new Date().toISOString(),
+    });
+    return jobData.id;
+}
+
+export async function getJobs(userId: string): Promise<JobPosting[]> {
+    try {
+        const snapshot = await jobsCollection.where('userId', '==', userId).orderBy('createdAt', 'desc').get();
+        if (snapshot.empty) {
+            return [];
+        }
+        return snapshot.docs.map(doc => doc.data());
+    } catch (error) {
+        console.error("Error fetching jobs:", error);
+        return [];
+    }
 }
