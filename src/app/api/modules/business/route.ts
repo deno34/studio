@@ -1,8 +1,10 @@
 
+'use server';
+
 import { NextRequest, NextResponse } from 'next/server';
 import { validateApiKey } from '@/lib/auth';
 import { v4 as uuidv4 } from 'uuid';
-import { uploadFile } from '@/lib/storage';
+import { uploadFileToStorage } from '@/lib/storage';
 import { BusinessSchema, type Business } from '@/lib/types';
 import * as z from 'zod';
 import { saveBusiness } from '@/lib/firestoreService';
@@ -36,7 +38,7 @@ export async function POST(req: NextRequest) {
     if (logoFile) {
         const fileBuffer = Buffer.from(await logoFile.arrayBuffer());
         const path = `businesses/logos/${uuidv4()}-${logoFile.name}`;
-        logoUrl = await uploadFile(fileBuffer, path, logoFile.type);
+        logoUrl = await uploadFileToStorage(fileBuffer, path, logoFile.type);
     }
     
     const businessId = uuidv4();

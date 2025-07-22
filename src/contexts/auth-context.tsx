@@ -13,8 +13,8 @@ import {
   sendEmailVerification,
   updateProfile,
 } from 'firebase/auth';
-import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { auth, googleProvider } from '@/lib/firebase/client'; // Import the initialized auth instance & google provider
+import { auth, googleProvider } from '@/lib/firebase/client';
+import { uploadFileToStorage } from '@/lib/storage.client';
 
 
 interface AuthContextType {
@@ -70,10 +70,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     let photoURL = auth.currentUser.photoURL;
 
     if (photoFile) {
-        const storage = getStorage(auth.app);
-        const storageRef = ref(storage, `profile-pictures/${auth.currentUser.uid}`);
-        await uploadBytes(storageRef, photoFile);
-        photoURL = await getDownloadURL(storageRef);
+        const path = `profile-pictures/${auth.currentUser.uid}`;
+        photoURL = await uploadFileToStorage(photoFile, path);
     }
 
     await updateProfile(auth.currentUser, {
