@@ -22,8 +22,9 @@ import { useAuth } from '@/contexts/auth-context';
 import { BusinessSchema } from '@/lib/types';
 
 
-// Using the base schema without the logo for now
-const profileFormSchema = BusinessSchema;
+const profileFormSchema = BusinessSchema.extend({
+  logoFile: z.instanceof(File).optional(),
+});
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
 
@@ -32,6 +33,7 @@ export default function AddBusinessPage() {
   const { user, loading } = useAuth();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
@@ -39,8 +41,21 @@ export default function AddBusinessPage() {
       name: '',
       description: '',
       industry: '',
+      logoFile: undefined,
     },
   });
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      form.setValue('logoFile', file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreviewImage(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const onSubmit = async (values: ProfileFormValues) => {
     if (!user) {
@@ -50,20 +65,26 @@ export default function AddBusinessPage() {
     setIsSubmitting(true);
     
     try {
+        const formData = new FormData();
+        formData.append('name', values.name);
+        formData.append('description', values.description);
+        formData.append('industry', values.industry);
+        if (values.logoFile) {
+            formData.append('logoFile', values.logoFile);
+        }
+
         const response = await fetch('/api/modules/business', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
                 'x-api-key': process.env.NEXT_PUBLIC_MASTER_API_KEY!,
             },
-            body: JSON.stringify(values),
+            body: formData,
         });
 
         const result = await response.json();
 
         if (!response.ok) {
-            // Attempt to read the response as text to see the HTML error
-            const errorText = await response.text();
+            const errorText = await response.text().catch(() => 'Could not read error response.');
             console.error("Server Response Error:", errorText);
             throw new Error(result.error || `Failed to create business profile. Server responded with: ${response.status}`);
         }
@@ -99,7 +120,6 @@ export default function AddBusinessPage() {
       <Header />
       <main className="flex-1 bg-muted/30 py-12">
         <div className="container max-w-4xl px-4">
-           {/* The back button is removed as this is the start of the flow */}
           <OnboardingStepper currentStep="profile" />
 
           <Card className="mt-8">
@@ -110,7 +130,37 @@ export default function AddBusinessPage() {
             <CardContent>
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                  {/* Logo upload is temporarily disabled */}
+                  <FormField
+                    control={form.control}
+                    name="logoFile"
+                    render={() => (
+                      <FormItem>
+                        <FormLabel>Business Logo (Optional)</FormLabel>
+                        <div className="flex items-center gap-4">
+                          <Avatar className="h-20 w-20 rounded-lg">
+                            <AvatarImage src={previewImage || undefined} alt="Logo preview"/>
+                            <AvatarFallback className="rounded-lg"><Building2 className="w-8 h-8" /></AvatarFallback>
+                          </Avatar>
+                           <Button asChild variant="outline">
+                                <label htmlFor="logo-upload" className="cursor-pointer">
+                                  <Upload className="mr-2 h-4 w-4" />
+                                  Upload Logo
+                                </label>
+                            </Button>
+                           <FormControl>
+                                <Input 
+                                    id="logo-upload" 
+                                    type="file" 
+                                    className="sr-only" 
+                                    accept="image/png, image/jpeg, image/gif"
+                                    onChange={handleFileChange}
+                                />
+                           </FormControl>
+                        </div>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                   <FormField
                     control={form.control}
                     name="name"

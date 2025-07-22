@@ -7,7 +7,6 @@ import { CollectionReference } from 'firebase-admin/firestore';
 
 const db = admin.firestore();
 
-// Type assertion for collection with converter
 const getTypedCollection = <T>(collectionPath: string) => {
   return db.collection(collectionPath) as CollectionReference<T>;
 };
@@ -16,18 +15,16 @@ const businessesCollection = getTypedCollection<Business>('businesses');
 const jobsCollection = getTypedCollection<JobPosting>('jobPostings');
 
 
-// Business Functions
-export async function saveBusiness(businessData: Omit<Business, 'createdAt' | 'logoUrl'>): Promise<string> {
+export async function saveBusiness(businessData: Omit<Business, 'createdAt'>): Promise<string> {
   console.log('[FirestoreService] Attempting to save business:', JSON.stringify(businessData, null, 2));
   const businessRef = businessesCollection.doc(businessData.id);
   const dataToSave = {
     ...businessData,
-    logoUrl: 'https://placehold.co/100x100.png', // Default logo
     createdAt: new Date().toISOString(),
   };
 
   try {
-    await businessRef.set(dataToSave as Business);
+    await businessRef.set(dataToSave);
     console.log(`[FirestoreService] Successfully saved business with ID: ${businessData.id}`);
     return businessData.id;
   } catch (error) {
@@ -35,7 +32,6 @@ export async function saveBusiness(businessData: Omit<Business, 'createdAt' | 'l
     throw new Error('Failed to save business data to Firestore.');
   }
 }
-
 
 export async function getBusinessesForUser(userId: string): Promise<Business[]> {
   console.log(`[FirestoreService] Fetching businesses for user ID: ${userId}`);
@@ -50,13 +46,10 @@ export async function getBusinessesForUser(userId: string): Promise<Business[]> 
     return businesses;
   } catch (error) {
     console.error(`[FirestoreService] Error fetching businesses for user ${userId}:`, error);
-    // Return empty array on failure to prevent breaking the frontend
     return [];
   }
 }
 
-
-// Job Posting Functions
 export async function saveJob(jobData: Omit<JobPosting, 'createdAt'>): Promise<string> {
     console.log(`[FirestoreService] Attempting to save job: ${jobData.title}`);
     const jobRef = jobsCollection.doc(jobData.id);
