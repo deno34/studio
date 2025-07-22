@@ -17,10 +17,11 @@ const jobsCollection = getTypedCollection<JobPosting>('jobPostings');
 
 
 // Business Functions
-export async function saveBusiness(businessData: Omit<Business, 'createdAt'>): Promise<string> {
+export async function saveBusiness(businessData: Omit<Business, 'createdAt' | 'logoUrl'> & { logoUrl?: string }): Promise<string> {
   const businessRef = businessesCollection.doc(businessData.id);
   await businessRef.set({
     ...businessData,
+    logoUrl: businessData.logoUrl || 'https://placehold.co/100x100.png', // Save with a default logo
     createdAt: new Date().toISOString(),
   });
   return businessData.id;
