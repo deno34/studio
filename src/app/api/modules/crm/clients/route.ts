@@ -1,11 +1,10 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { validateApiKey } from '@/lib/auth';
-import admin from '@/lib/firebaseAdmin';
 import { ClientSchema, type Client } from '@/lib/types';
 import { v4 as uuidv4 } from 'uuid';
 
-const db = admin.firestore();
+// const db = admin.firestore();
 
 // POST a new client
 export async function POST(req: NextRequest) {
@@ -24,14 +23,9 @@ export async function POST(req: NextRequest) {
     }
 
     const clientId = uuidv4();
-    const clientData: Omit<Client, 'id'> = {
-      ...validation.data,
-      createdAt: new Date().toISOString(),
-    };
-
-    await db.collection('clients').doc(clientId).set({ id: clientId, ...clientData });
-
-    return NextResponse.json({ message: 'Client created successfully', id: clientId }, { status: 201 });
+    
+    // Mock success without DB write
+    return NextResponse.json({ message: 'Client created successfully (mocked)', id: clientId }, { status: 201 });
 
   } catch (error) {
     console.error('[CRM_CLIENTS_POST_ERROR]', error);
@@ -48,12 +42,13 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const snapshot = await db.collection('clients').orderBy('createdAt', 'desc').get();
-    if (snapshot.empty) {
-      return NextResponse.json([], { status: 200 });
-    }
-    const data = snapshot.docs.map(doc => doc.data());
-    return NextResponse.json(data, { status: 200 });
+    // MOCK DATA
+    const mockClients = [
+        { id: 'client-1', name: 'Innovate Inc.', email: 'contact@innovate.com', company: 'Innovate Inc.', status: 'Proposal', createdAt: new Date().toISOString() },
+        { id: 'client-2', name: 'Tech Solutions LLC', email: 'info@techsolutions.com', company: 'Tech Solutions LLC', status: 'Lead', createdAt: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString() },
+        { id: 'client-3', name: 'Data Corp', email: 'sales@datacorp.com', company: 'Data Corp', status: 'Contacted', createdAt: new Date().toISOString() },
+    ];
+    return NextResponse.json(mockClients, { status: 200 });
   } catch (error) {
     console.error('[CRM_CLIENTS_GET_ERROR]', error);
     return NextResponse.json({ error: 'An internal error occurred' }, { status: 500 });

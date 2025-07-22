@@ -1,11 +1,11 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { validateApiKey } from '@/lib/auth';
-import admin from '@/lib/firebaseAdmin';
+// import admin from '@/lib/firebaseAdmin';
 import { VendorSchema, type Vendor } from '@/lib/types';
 import { v4 as uuidv4 } from 'uuid';
 
-const db = admin.firestore();
+// const db = admin.firestore();
 
 // POST a new vendor
 export async function POST(req: NextRequest) {
@@ -24,15 +24,8 @@ export async function POST(req: NextRequest) {
     }
 
     const vendorId = uuidv4();
-    const vendorData = {
-      id: vendorId,
-      ...validation.data,
-      createdAt: new Date().toISOString(),
-    };
-
-    await db.collection('vendors').doc(vendorId).set(vendorData);
-
-    return NextResponse.json({ message: 'Vendor created successfully', id: vendorId }, { status: 201 });
+    // Mock success
+    return NextResponse.json({ message: 'Vendor created successfully (mocked)', id: vendorId }, { status: 201 });
 
   } catch (error) {
     console.error('[OPERATIONS_VENDORS_POST_ERROR]', error);
@@ -49,12 +42,13 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const snapshot = await db.collection('vendors').orderBy('name', 'asc').get();
-    if (snapshot.empty) {
-      return NextResponse.json([], { status: 200 });
-    }
-    const data = snapshot.docs.map(doc => doc.data());
-    return NextResponse.json(data, { status: 200 });
+    // MOCK DATA
+    const mockVendors = [
+        { id: 'v1', name: 'Apple Inc.', contactPerson: 'Tim Cook' },
+        { id: 'v2', name: 'Logitech', contactPerson: 'Jane Doe' },
+        { id: 'v3', name: 'Anker', contactPerson: 'John Smith' },
+    ];
+    return NextResponse.json(mockVendors, { status: 200 });
   } catch (error) {
     console.error('[OPERATIONS_VENDORS_GET_ERROR]', error);
     return NextResponse.json({ error: 'An internal error occurred' }, { status: 500 });

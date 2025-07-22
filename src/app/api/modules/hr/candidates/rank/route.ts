@@ -2,10 +2,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { validateApiKey } from '@/lib/auth';
 import { rankCandidate } from '@/ai/flows/candidate-ranking-flow';
-import admin from '@/lib/firebaseAdmin';
+// import admin from '@/lib/firebaseAdmin';
 import * as z from 'zod';
 
-const db = admin.firestore();
+// const db = admin.firestore();
 
 const RankRequestSchema = z.object({
   jobId: z.string(),
@@ -29,16 +29,11 @@ export async function POST(req: NextRequest) {
 
     const { jobId, resumeText } = validation.data;
 
-    // Fetch job details from Firestore
-    const jobDoc = await db.collection('jobPostings').doc(jobId).get();
-    if (!jobDoc.exists) {
-      return NextResponse.json({ error: 'Job posting not found.' }, { status: 404 });
-    }
-    const jobData = jobDoc.data();
-    if (!jobData) {
-        return NextResponse.json({ error: 'Job data is invalid.' }, { status: 500 });
-    }
-
+    // MOCK JOB DATA
+    const jobData = {
+        title: "Senior AI Engineer (Mock)",
+        description: "Looking for a skilled engineer with experience in LLMs and system design. (Mock data)"
+    };
 
     // Call the AI ranking flow
     const rankingResult = await rankCandidate({

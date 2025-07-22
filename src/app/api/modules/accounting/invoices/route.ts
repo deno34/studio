@@ -1,7 +1,8 @@
+
 import { NextRequest, NextResponse } from 'next/server';
 import { validateApiKey } from '@/lib/auth';
 import { generateInvoicePdf } from '@/lib/pdf';
-import { uploadFile } from '@/lib/storage';
+// import { uploadFile } from '@/lib/storage'; // Removed storage interaction
 import { v4 as uuidv4 } from 'uuid';
 import * as z from 'zod';
 
@@ -34,24 +35,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Invalid invoice data.', details: validation.error.flatten() }, { status: 400 });
     }
     
-    const { clientName, items, tax, companyName } = validation.data;
-    const invoiceNumber = uuidv4().substring(0, 8).toUpperCase();
-    
-    const pdfBuffer = await generateInvoicePdf({
-      invoiceNumber,
-      clientName,
-      items,
-      tax,
-      companyName,
-    });
+    // For this simplified version, we just return a success message.
+    // The PDF generation and upload are skipped.
+    const mockUrl = `https://example.com/mock-invoice-${uuidv4()}.pdf`;
 
-    const fileName = `invoices/${user.uid}/${invoiceNumber}.pdf`;
-    const downloadUrl = await uploadFile(pdfBuffer, fileName, 'application/pdf');
-
-    // Here you would also save invoice metadata to Firestore, but for now we just return the URL
-    // e.g., db.collection('invoices').add({ ...data, url: downloadUrl, userId: user.uid });
-
-    return NextResponse.json({ message: 'Invoice created successfully', url: downloadUrl }, { status: 201 });
+    return NextResponse.json({ message: 'Invoice created successfully (mocked)', url: mockUrl }, { status: 201 });
 
   } catch (error) {
     console.error('[ACCOUNTING_INVOICES_ERROR]', error);

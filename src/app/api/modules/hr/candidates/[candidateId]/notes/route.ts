@@ -1,10 +1,10 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { validateApiKey } from '@/lib/auth';
-import admin from '@/lib/firebaseAdmin';
+// import admin from '@/lib/firebaseAdmin';
 import * as z from 'zod';
 
-const db = admin.firestore();
+// const db = admin.firestore();
 
 const NotesUpdateSchema = z.object({
   notes: z.string().optional(),
@@ -32,19 +32,9 @@ export async function PATCH(
     if (!validation.success) {
       return NextResponse.json({ error: 'Invalid request body', details: validation.error.flatten() }, { status: 400 });
     }
-
-    const { notes } = validation.data;
-
-    const candidateRef = db.collection('candidates').doc(candidateId);
-    const candidateDoc = await candidateRef.get();
-
-    if (!candidateDoc.exists) {
-      return NextResponse.json({ error: 'Candidate not found' }, { status: 404 });
-    }
     
-    await candidateRef.update({ notes: notes || "" });
-    
-    return NextResponse.json({ message: 'Candidate notes updated successfully', id: candidateId });
+    // Mock success
+    return NextResponse.json({ message: 'Candidate notes updated successfully (mocked)', id: candidateId });
 
   } catch (error) {
     console.error(`[CANDIDATE_NOTES_UPDATE_ERROR]`, error);

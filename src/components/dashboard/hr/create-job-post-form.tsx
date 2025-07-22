@@ -65,11 +65,7 @@ export function CreateJobPostForm({ children, onJobCreated }: CreateJobPostFormP
         throw new Error(errorData.error || 'Failed to create job post.');
       }
 
-      toast({
-        title: 'Job Post Created!',
-        description: 'Your new job posting is now live.',
-      });
-
+      // No toast here, parent component will show it
       form.reset();
       setIsOpen(false);
       onJobCreated();

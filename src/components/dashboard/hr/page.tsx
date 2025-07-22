@@ -48,6 +48,10 @@ export default function HRAgentPage() {
   }, []);
 
   const handleJobCreated = () => {
+    toast({
+        title: "Job Created (Mocked)",
+        description: "Your new job has been added to the list."
+    })
     fetchJobs(); // Refresh the job list after a new job is created
   };
 

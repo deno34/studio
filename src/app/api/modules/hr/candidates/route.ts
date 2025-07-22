@@ -1,18 +1,17 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { validateApiKey } from '@/lib/auth';
-import admin from '@/lib/firebaseAdmin';
-import { uploadFile } from '@/lib/storage';
+// import admin from '@/lib/firebaseAdmin';
+// import { uploadFile } from '@/lib/storage';
 import { v4 as uuidv4 } from 'uuid';
 import type { Candidate } from '@/lib/types';
 
-const db = admin.firestore();
+// const db = admin.firestore();
 
 // POST a new candidate from a resume upload
 export async function POST(req: NextRequest) {
-  let user;
   try {
-    user = await validateApiKey(req);
+    await validateApiKey(req);
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 401 });
   }
@@ -29,49 +28,17 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'No jobId provided.' }, { status: 400 });
     }
 
-    const fileBuffer = Buffer.from(await file.arrayBuffer());
-    let resumeText = '';
-
-    // Extract text from PDF
-    if (file.type === 'application/pdf') {
-        const pdf = (await import('pdf-parse')).default;
-        const data = await pdf(fileBuffer);
-        resumeText = data.text;
-    } else {
-         return NextResponse.json({ error: 'Unsupported file type. Only PDF is currently supported.' }, { status: 400 });
-    }
-
-    if (!resumeText) {
-        return NextResponse.json({ error: 'Could not extract text from the resume.' }, { status: 400 });
-    }
-
-    // Upload original resume to Firebase Storage
-    const fileName = `resumes/${jobId}/${uuidv4()}-${file.name}`;
-    const downloadUrl = await uploadFile(fileBuffer, fileName, file.type || 'application/pdf');
-
-    // Create candidate record in Firestore
+    // Mock success without DB write or file upload
     const candidateId = uuidv4();
-    const candidateData: Candidate = {
-        id: candidateId,
-        jobId: jobId,
-        // The AI will extract the name later, for now we use the file name
-        name: file.name || 'Unnamed Candidate',
-        email: '', // AI will extract this
-        resumeUrl: downloadUrl,
-        resumeText: resumeText,
-        createdAt: new Date().toISOString(),
-        status: 'New',
+    const mockCandidate = {
+      id: candidateId,
+      resumeText: "This is mock resume text extracted from the PDF.",
+      name: file.name || 'Unnamed Candidate',
     };
-
-    await db.collection('candidates').doc(candidateId).set(candidateData);
-
+    
     return NextResponse.json({ 
-        message: 'Candidate created successfully', 
-        candidate: {
-            id: candidateId,
-            resumeText: resumeText,
-            name: file.name || 'Unnamed Candidate',
-        }
+        message: 'Candidate created successfully (mocked)', 
+        candidate: mockCandidate
     }, { status: 201 });
 
   } catch (error) {
@@ -96,17 +63,14 @@ export async function GET(req: NextRequest) {
     }
 
     try {
-        const snapshot = await db.collection('candidates')
-            .where('jobId', '==', jobId)
-            .orderBy('createdAt', 'desc')
-            .get();
+        // MOCK DATA
+        const mockCandidates = [
+            { id: 'cand-1', jobId, name: 'Elena Rodriguez', email: 'elena@example.com', resumeUrl: '#', resumeText: '', createdAt: new Date().toISOString(), status: 'Shortlisted', matchPercentage: 98, matchExplanation: 'Excellent fit.', matchingSkills: ['Python', 'PyTorch', 'System Design'] },
+            { id: 'cand-2', jobId, name: 'Ben Carter', email: 'ben@example.com', resumeUrl: '#', resumeText: '', createdAt: new Date().toISOString(), status: 'New', matchPercentage: 95, matchExplanation: 'Strong candidate.', matchingSkills: ['Go', 'Kubernetes', 'APIs'] },
+            { id: 'cand-3', jobId, name: 'Priya Sharma', email: 'priya@example.com', resumeUrl: '#', resumeText: '', createdAt: new Date().toISOString(), status: 'Interviewing', matchPercentage: 92, matchExplanation: 'Good experience.', matchingSkills: ['React', 'UX/UI', 'Figma'] },
+        ];
         
-        if (snapshot.empty) {
-            return NextResponse.json([], { status: 200 });
-        }
-        
-        const data = snapshot.docs.map(doc => doc.data());
-        return NextResponse.json(data, { status: 200 });
+        return NextResponse.json(mockCandidates, { status: 200 });
 
     } catch (error) {
         console.error('[HR_CANDIDATES_GET_ERROR]', error);

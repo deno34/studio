@@ -1,10 +1,10 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { validateApiKey } from '@/lib/auth';
-import admin from '@/lib/firebaseAdmin';
+// import admin from '@/lib/firebaseAdmin'; // DB interaction removed
 import * as z from 'zod';
 
-const db = admin.firestore();
+// const db = admin.firestore();
 
 const AgentsUpdateSchema = z.object({
   agents: z.array(z.string()).min(1, 'At least one agent must be selected.'),
@@ -33,21 +33,8 @@ export async function PATCH(
       return NextResponse.json({ error: 'Invalid request body', details: validation.error.flatten() }, { status: 400 });
     }
 
-    const { agents } = validation.data;
-
-    const businessRef = db.collection('businesses').doc(businessId);
-    const businessDoc = await businessRef.get();
-
-    if (!businessDoc.exists) {
-      return NextResponse.json({ error: 'Business not found' }, { status: 404 });
-    }
-    
-    // In a real app, you might also validate that the user making the request owns this business.
-    // For now, we trust the API key validation.
-    
-    await businessRef.update({ selectedAgents: agents });
-    
-    return NextResponse.json({ message: 'Agents selected successfully', id: businessId });
+    // Mock success without DB interaction
+    return NextResponse.json({ message: 'Agents selected successfully (mocked)', id: businessId });
 
   } catch (error) {
     console.error(`[BUSINESS_AGENTS_UPDATE_ERROR]`, error);

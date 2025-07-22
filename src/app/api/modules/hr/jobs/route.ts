@@ -1,10 +1,11 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { validateApiKey } from '@/lib/auth';
-import admin from '@/lib/firebaseAdmin';
+// import admin from '@/lib/firebaseAdmin';
 import { JobPostingSchema, type JobPostingFormValues } from '@/lib/types';
+import { v4 as uuidv4 } from 'uuid';
 
-const db = admin.firestore();
+// const db = admin.firestore();
 
 // GET all job postings
 export async function GET(req: NextRequest) {
@@ -15,12 +16,13 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const snapshot = await db.collection('jobPostings').orderBy('createdAt', 'desc').get();
-    if (snapshot.empty) {
-      return NextResponse.json([], { status: 200 });
-    }
-    const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    return NextResponse.json(data, { status: 200 });
+    // MOCK DATA
+    const mockJobs = [
+        { id: 'job-1', title: 'Senior AI Engineer', location: 'Remote', status: 'Open', createdAt: new Date().toISOString(), userId: 'mock-user' },
+        { id: 'job-2', title: 'Product Designer (UI/UX)', location: 'New York, NY', status: 'Open', createdAt: new Date().toISOString(), userId: 'mock-user' },
+        { id: 'job-3', title: 'Growth Marketing Manager', location: 'Remote', status: 'Closed', createdAt: new Date().toISOString(), userId: 'mock-user' },
+    ];
+    return NextResponse.json(mockJobs, { status: 200 });
   } catch (error) {
     console.error('[HR_JOBS_GET_ERROR]', error);
     return NextResponse.json({ error: 'An internal error occurred' }, { status: 500 });
@@ -29,9 +31,8 @@ export async function GET(req: NextRequest) {
 
 // POST a new job posting
 export async function POST(req: NextRequest) {
-  let user;
   try {
-    user = await validateApiKey(req);
+    await validateApiKey(req);
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 401 });
   }
@@ -44,21 +45,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Invalid data provided.', details: validation.error.flatten() }, { status: 400 });
     }
     
-    const { title, location, description } = validation.data;
-    
-    const jobData = {
-        title,
-        location,
-        description,
-        status: 'Open',
-        createdAt: new Date().toISOString(),
-        // In a real multi-user system, you'd use a real user ID here.
-        userId: user.uid, 
-    };
-
-    const ref = await db.collection('jobPostings').add(jobData);
-
-    return NextResponse.json({ message: 'Job post created successfully', id: ref.id }, { status: 201 });
+    // MOCK SUCCESS
+    const refId = uuidv4();
+    return NextResponse.json({ message: 'Job post created successfully (mocked)', id: refId }, { status: 201 });
 
   } catch (error) {
     console.error('[HR_JOBS_POST_ERROR]', error);

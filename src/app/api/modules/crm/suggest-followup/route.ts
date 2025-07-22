@@ -1,11 +1,11 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { validateApiKey } from '@/lib/auth';
-import admin from '@/lib/firebaseAdmin';
+// import admin from '@/lib/firebaseAdmin';
 import { generateFollowupSuggestions } from '@/ai/flows/lead-followup-flow';
 import { Client, LeadFollowupSuggestionInput } from '@/lib/types';
 
-const db = admin.firestore();
+// const db = admin.firestore();
 
 export async function GET(req: NextRequest) {
   try {
@@ -15,8 +15,12 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const clientsSnapshot = await db.collection('clients').get();
-    const clients = clientsSnapshot.docs.map(doc => doc.data()) as Client[];
+    // MOCK DATA
+    const clients: Client[] = [
+        { id: 'client-1', name: 'Innovate Inc.', email: 'contact@innovate.com', company: 'Innovate Inc.', status: 'Proposal', createdAt: new Date().toISOString() },
+        { id: 'client-2', name: 'Tech Solutions LLC', email: 'info@techsolutions.com', company: 'Tech Solutions LLC', status: 'Lead', createdAt: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString() },
+        { id: 'client-3', name: 'Data Corp', email: 'sales@datacorp.com', company: 'Data Corp', status: 'Contacted', createdAt: new Date().toISOString() },
+    ];
 
     if (clients.length === 0) {
         return NextResponse.json({ suggestions: [] });

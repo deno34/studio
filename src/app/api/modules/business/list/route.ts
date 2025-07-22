@@ -1,9 +1,9 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { validateApiKey } from '@/lib/auth';
-import admin from '@/lib/firebaseAdmin';
+// import admin from '@/lib/firebaseAdmin'; // DB interaction removed
 
-const db = admin.firestore();
+// const db = admin.firestore();
 
 // GET all businesses for the authenticated user
 export async function GET(req: NextRequest) {
@@ -15,17 +15,31 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const snapshot = await db.collection('businesses')
-      .where('userId', '==', user.uid)
-      .orderBy('createdAt', 'desc')
-      .get();
-      
-    if (snapshot.empty) {
-      return NextResponse.json([], { status: 200 });
-    }
+    // MOCK DATA
+    const mockBusinesses = [
+        {
+            id: 'biz-1',
+            userId: user.uid,
+            name: 'Acme Innovations Inc.',
+            description: 'A mock company for testing purposes.',
+            industry: 'Technology / SaaS',
+            logoUrl: 'https://placehold.co/100x100.png',
+            createdAt: new Date().toISOString(),
+            selectedAgents: ['accounting', 'hr', 'operations'],
+        },
+        {
+            id: 'biz-2',
+            userId: user.uid,
+            name: 'Global Logistics',
+            description: 'Another mock company.',
+            industry: 'Logistics / Supply Chain',
+            logoUrl: 'https://placehold.co/100x100.png',
+            createdAt: new Date().toISOString(),
+            selectedAgents: ['operations', 'document'],
+        }
+    ];
     
-    const data = snapshot.docs.map(doc => doc.data());
-    return NextResponse.json(data, { status: 200 });
+    return NextResponse.json(mockBusinesses, { status: 200 });
 
   } catch (error) {
     console.error('[BUSINESS_GET_ERROR]', error);

@@ -1,11 +1,11 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { validateApiKey } from '@/lib/auth';
-import admin from '@/lib/firebaseAdmin';
+// import admin from '@/lib/firebaseAdmin';
 import { generateRestockSuggestions } from '@/ai/flows/restock-suggestion-flow';
 import { InventoryItem, RestockSuggestionInput } from '@/lib/types';
 
-const db = admin.firestore();
+// const db = admin.firestore();
 
 export async function GET(req: NextRequest) {
   try {
@@ -15,8 +15,11 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const inventorySnapshot = await db.collection('inventory').get();
-    const inventoryItems = inventorySnapshot.docs.map(doc => doc.data()) as InventoryItem[];
+    // MOCK DATA
+    const inventoryItems: Partial<InventoryItem>[] = [
+        { name: 'Wireless Mouse', sku: 'WM-GRY-01', stockLevel: 15, reorderLevel: 30 },
+        { name: 'External Webcam', sku: 'CAM-HD-01', stockLevel: 8, reorderLevel: 10 },
+    ];
 
     if (inventoryItems.length === 0) {
         return NextResponse.json({ suggestions: [] });
@@ -24,10 +27,10 @@ export async function GET(req: NextRequest) {
 
     const input: RestockSuggestionInput = {
         inventoryItems: inventoryItems.map(item => ({
-            name: item.name,
-            sku: item.sku,
-            stockLevel: item.stockLevel,
-            reorderLevel: item.reorderLevel,
+            name: item.name!,
+            sku: item.sku!,
+            stockLevel: item.stockLevel!,
+            reorderLevel: item.reorderLevel!,
         }))
     };
     

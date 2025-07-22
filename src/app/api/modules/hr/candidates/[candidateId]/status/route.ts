@@ -1,11 +1,11 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { validateApiKey } from '@/lib/auth';
-import admin from '@/lib/firebaseAdmin';
+// import admin from '@/lib/firebaseAdmin';
 import * as z from 'zod';
 import { CandidateStatus } from '@/lib/types';
 
-const db = admin.firestore();
+// const db = admin.firestore();
 
 const StatusUpdateSchema = z.object({
   status: CandidateStatus,
@@ -36,17 +36,8 @@ export async function PATCH(
 
     const { status } = validation.data;
 
-    const candidateRef = db.collection('candidates').doc(candidateId);
-    const candidateDoc = await candidateRef.get();
-
-    if (!candidateDoc.exists) {
-      return NextResponse.json({ error: 'Candidate not found' }, { status: 404 });
-    }
-    
-    // In a real application, you might add a history log of status changes here
-    await candidateRef.update({ status });
-    
-    return NextResponse.json({ message: 'Candidate status updated successfully', id: candidateId, newStatus: status });
+    // Mock success
+    return NextResponse.json({ message: 'Candidate status updated successfully (mocked)', id: candidateId, newStatus: status });
 
   } catch (error) {
     console.error(`[CANDIDATE_STATUS_UPDATE_ERROR]`, error);
