@@ -2,16 +2,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { validateApiKey } from '@/lib/auth';
 import { v4 as uuidv4 } from 'uuid';
-// import { uploadFile } from '@/lib/storage';
+import { uploadFile } from '@/lib/storage';
 import { BusinessSchema, type Business } from '@/lib/types';
 import * as z from 'zod';
+import { saveBusiness } from '@/lib/firestoreService';
 
-// const db = admin.firestore();
-
-// POST a new business profile
 export async function POST(req: NextRequest) {
+  let user;
   try {
-    await validateApiKey(req);
+    user = await validateApiKey(req);
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 401 });
   }
@@ -33,13 +32,27 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Invalid data provided.', details: validation.error.flatten() }, { status: 400 });
     }
     
+    let logoUrl = 'https://placehold.co/100x100.png'; // Default logo
+    if (logoFile) {
+        const fileBuffer = Buffer.from(await logoFile.arrayBuffer());
+        const path = `businesses/logos/${uuidv4()}-${logoFile.name}`;
+        logoUrl = await uploadFile(fileBuffer, path, logoFile.type);
+    }
+    
     const businessId = uuidv4();
-    let logoUrl = 'https://placehold.co/100x100.png'; // Mock logo URL
+    const businessData: Omit<Business, 'createdAt'> = {
+        id: businessId,
+        userId: user.uid,
+        name: validation.data.name,
+        description: validation.data.description,
+        industry: validation.data.industry,
+        logoUrl,
+        selectedAgents: [], // Start with no agents selected
+    };
 
-    // Skip file upload logic
-    // if (logoFile) { ... }
+    await saveBusiness(businessData);
 
-    return NextResponse.json({ message: 'Business created successfully (mocked)', id: businessId }, { status: 201 });
+    return NextResponse.json({ message: 'Business created successfully', id: businessId }, { status: 201 });
 
   } catch (error: any) {
     console.error('[BUSINESS_POST_ERROR]', error);

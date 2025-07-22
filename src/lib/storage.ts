@@ -2,10 +2,16 @@
 import admin from './firebaseAdmin';
 
 export async function uploadFile(fileBuffer: Buffer, path: string, contentType: string): Promise<string> {
-    // MOCK FUNCTION: Simulate file upload
-    console.log(`Mock uploadFile called for path: ${path}`);
-    const bucketName = process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || 'mock-bucket.appspot.com';
-    
-    // Return a plausible-looking mock URL
-    return `https://storage.googleapis.com/${bucketName}/${path}`;
+    const bucket = admin.storage().bucket();
+    const file = bucket.file(path);
+
+    await file.save(fileBuffer, {
+        metadata: {
+            contentType,
+        },
+    });
+
+    // Make the file public and get the URL
+    await file.makePublic();
+    return file.publicUrl();
 }
