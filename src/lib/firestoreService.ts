@@ -1,79 +1,49 @@
 
 'use server';
 
-import admin from './firebaseAdmin';
 import { type Business, type JobPosting } from './types';
-import { CollectionReference } from 'firebase-admin/firestore';
 
-const db = admin.firestore();
-
-const getTypedCollection = <T>(collectionPath: string) => {
-  return db.collection(collectionPath) as CollectionReference<T>;
-};
-
-const businessesCollection = getTypedCollection<Business>('businesses');
-const jobsCollection = getTypedCollection<JobPosting>('jobPostings');
-
+// MOCKED FUNCTIONS - NO DATABASE INTERACTION
 
 export async function saveBusiness(businessData: Omit<Business, 'createdAt'>): Promise<string> {
-  console.log('[FirestoreService] Attempting to save business:', JSON.stringify(businessData, null, 2));
-  const businessRef = businessesCollection.doc(businessData.id);
-  const dataToSave = {
-    ...businessData,
-    createdAt: new Date().toISOString(),
-  };
-
-  try {
-    await businessRef.set(dataToSave);
-    console.log(`[FirestoreService] Successfully saved business with ID: ${businessData.id}`);
-    return businessData.id;
-  } catch (error) {
-    console.error(`[FirestoreService] Error saving business with ID ${businessData.id}:`, error);
-    throw new Error('Failed to save business data to Firestore.');
-  }
+  console.log('[FirestoreService Mock] Pretending to save business:', businessData.name);
+  return Promise.resolve(businessData.id);
 }
 
 export async function getBusinessesForUser(userId: string): Promise<Business[]> {
-  console.log(`[FirestoreService] Fetching businesses for user ID: ${userId}`);
-  try {
-    const snapshot = await businessesCollection.where('userId', '==', userId).orderBy('createdAt', 'desc').get();
-    if (snapshot.empty) {
-      console.log(`[FirestoreService] No businesses found for user ID: ${userId}`);
-      return [];
+  console.log(`[FirestoreService Mock] Pretending to fetch businesses for user: ${userId}`);
+  const mockBusinesses: Business[] = [
+    {
+      id: 'mock-biz-1',
+      userId: userId,
+      name: 'Mock Innovations',
+      description: 'A mock business for testing purposes.',
+      industry: 'tech',
+      logoUrl: 'https://placehold.co/100x100.png',
+      selectedAgents: ['accounting', 'hr'],
+      createdAt: new Date().toISOString(),
     }
-    const businesses = snapshot.docs.map(doc => doc.data());
-    console.log(`[FirestoreService] Found ${businesses.length} businesses for user ID: ${userId}`);
-    return businesses;
-  } catch (error) {
-    console.error(`[FirestoreService] Error fetching businesses for user ${userId}:`, error);
-    return [];
-  }
+  ];
+  return Promise.resolve(mockBusinesses);
 }
 
 export async function saveJob(jobData: Omit<JobPosting, 'createdAt'>): Promise<string> {
-    console.log(`[FirestoreService] Attempting to save job: ${jobData.title}`);
-    const jobRef = jobsCollection.doc(jobData.id);
-    await jobRef.set({
-        ...jobData,
-        createdAt: new Date().toISOString(),
-    });
-    console.log(`[FirestoreService] Successfully saved job with ID: ${jobData.id}`);
-    return jobData.id;
+    console.log(`[FirestoreService Mock] Pretending to save job: ${jobData.title}`);
+    return Promise.resolve(jobData.id);
 }
 
 export async function getJobs(userId: string): Promise<JobPosting[]> {
-    console.log(`[FirestoreService] Fetching jobs for user ID: ${userId}`);
-    try {
-        const snapshot = await jobsCollection.where('userId', '==', userId).orderBy('createdAt', 'desc').get();
-        if (snapshot.empty) {
-            console.log(`[FirestoreService] No jobs found for user ID: ${userId}`);
-            return [];
+    console.log(`[FirestoreService Mock] Pretending to fetch jobs for user ${userId}`);
+    const mockJobs: JobPosting[] = [
+        {
+            id: 'mock-job-1',
+            userId: userId,
+            title: 'Mock Senior AI Engineer',
+            location: 'Remote',
+            description: 'This is a mocked job description.',
+            status: 'Open',
+            createdAt: new Date().toISOString(),
         }
-        const jobs = snapshot.docs.map(doc => doc.data());
-        console.log(`[FirestoreService] Found ${jobs.length} jobs for user ID: ${userId}`);
-        return jobs;
-    } catch (error) {
-        console.error(`[FirestoreService] Error fetching jobs for user ${userId}:`, error);
-        return [];
-    }
+    ];
+    return Promise.resolve(mockJobs);
 }

@@ -1,72 +1,45 @@
 
 'use server';
 
-import admin from './firebaseAdmin';
 import { v4 as uuidv4 } from 'uuid';
 
-const storage = admin.storage().bucket();
-
 /**
- * Upload a file to Firebase Storage and get a secure download URL.
+ * MOCKED: Upload a file to Firebase Storage and get a secure download URL.
  * @param buffer - File buffer to upload.
  * @param path - The desired path and filename in the bucket (e.g., 'profile-pictures/user123.jpg').
  * @param contentType - The MIME type of the file (e.g., 'image/jpeg').
- * @returns A promise that resolves to the secure, tokenized download URL of the file.
+ * @returns A promise that resolves to a mock URL.
  */
 export async function uploadFileToStorage(
   buffer: Buffer,
   path: string,
   contentType: string
 ): Promise<string> {
-  const file = storage.file(path);
-  const token = uuidv4();
-
-  await file.save(buffer, {
-    metadata: {
-      contentType,
-      // Add a custom metadata token for secure access
-      metadata: {
-        firebaseStorageDownloadTokens: token,
-      },
-    },
-  });
-
-  // Construct the public URL with the token
-  return `https://firebasestorage.googleapis.com/v0/b/${storage.name}/o/${encodeURIComponent(path)}?alt=media&token=${token}`;
+  console.log(`[StorageService Mock] Pretending to upload file to: ${path}`);
+  // Return a placeholder URL
+  return `https://placehold.co/200x200.png?text=MockUpload`;
 }
 
 /**
- * Deletes a file from Firebase Storage.
- * @param path - The full path to the file in the bucket.
- * @returns A promise that resolves when the file is deleted.
+ * MOCKED: Deletes a file from Firebase Storage.
  */
 export async function deleteFileFromStorage(path: string): Promise<void> {
-  await storage.file(path).delete({ ignoreNotFound: true });
+    console.log(`[StorageService Mock] Pretending to delete file from: ${path}`);
+    return Promise.resolve();
 }
 
 /**
- * Checks if a file exists in Firebase Storage.
- * @param path - The full path to the file in the bucket.
- * @returns A promise that resolves to true if the file exists, false otherwise.
+ * MOCKED: Checks if a file exists in Firebase Storage.
  */
 export async function fileExistsInStorage(path: string): Promise<boolean> {
-  const [exists] = await storage.file(path).exists();
-  return exists;
+    console.log(`[StorageService Mock] Pretending to check for file at: ${path}`);
+    return Promise.resolve(true);
 }
 
 /**
- * Generates a signed URL for a private file, valid for a limited time.
- * @param path - The full path to the file in the bucket.
- * @param durationMinutes - The number of minutes the URL should be valid for. Defaults to 60.
- * @returns A promise that resolves to the signed URL.
+ * MOCKED: Generates a signed URL for a private file.
  */
 export async function getSignedUrl(path: string, durationMinutes: number = 60): Promise<string> {
-    const options = {
-        version: 'v4' as const,
-        action: 'read' as const,
-        expires: Date.now() + durationMinutes * 60 * 1000,
-    };
-
-    const [url] = await storage.file(path).getSignedUrl(options);
-    return url;
+    console.log(`[StorageService Mock] Pretending to get signed URL for: ${path}`);
+    return Promise.resolve(`https://example.com/mock-signed-url/${path}`);
 }

@@ -1,28 +1,33 @@
 
-import admin from 'firebase-admin';
-import 'dotenv/config';
+// This file is temporarily disabled for debugging.
+// The firebase-admin dependency has been removed from package.json
+// to isolate the source of the 500 Internal Server Error.
 
-if (!admin.apps.length) {
-  try {
-    const privateKey = process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n');
+// import admin from 'firebase-admin';
+// import 'dotenv/config';
 
-    if (!process.env.FIREBASE_PROJECT_ID || !privateKey || !process.env.FIREBASE_CLIENT_EMAIL) {
-      throw new Error('Firebase server credentials are not set in .env. Please check FIREBASE_PROJECT_ID, FIREBASE_PRIVATE_KEY, and FIREBASE_CLIENT_EMAIL.');
-    }
+// if (!admin.apps.length) {
+//   try {
+//     const privateKey = process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n');
 
-    console.log('Attempting to initialize Firebase Admin SDK...');
-    admin.initializeApp({
-      credential: admin.credential.cert({
-        projectId: process.env.FIREBASE_PROJECT_ID,
-        privateKey: privateKey,
-        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-      }),
-      storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-    });
-    console.log('Firebase Admin SDK initialized successfully.');
-  } catch (error: any) {
-    console.error('CRITICAL: Firebase Admin SDK initialization error:', error.message);
-  }
-}
+//     if (!process.env.FIREBASE_PROJECT_ID || !privateKey || !process.env.FIREBASE_CLIENT_EMAIL) {
+//       throw new Error('Firebase server credentials are not set in .env. Please check FIREBASE_PROJECT_ID, FIREBASE_PRIVATE_KEY, and FIREBASE_CLIENT_EMAIL.');
+//     }
 
-export default admin;
+//     console.log('Attempting to initialize Firebase Admin SDK...');
+//     admin.initializeApp({
+//       credential: admin.credential.cert({
+//         projectId: process.env.FIREBASE_PROJECT_ID,
+//         privateKey: privateKey,
+//         clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+//       }),
+//       storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+//     });
+//     console.log('Firebase Admin SDK initialized successfully.');
+//   } catch (error: any) {
+//     console.error('CRITICAL: Firebase Admin SDK initialization error:', error.message);
+//   }
+// }
+
+// export default admin;
+export default {};

@@ -69,9 +69,10 @@ export default function AddBusinessPage() {
         formData.append('name', values.name);
         formData.append('description', values.description);
         formData.append('industry', values.industry);
-        if (values.logoFile) {
-            formData.append('logoFile', values.logoFile);
-        }
+        // Temporarily disable file upload
+        // if (values.logoFile) {
+        //     formData.append('logoFile', values.logoFile);
+        // }
 
         const response = await fetch('/api/modules/business', {
             method: 'POST',
@@ -84,8 +85,6 @@ export default function AddBusinessPage() {
         const result = await response.json();
 
         if (!response.ok) {
-            const errorText = await response.text().catch(() => 'Could not read error response.');
-            console.error("Server Response Error:", errorText);
             throw new Error(result.error || `Failed to create business profile. Server responded with: ${response.status}`);
         }
         
@@ -135,14 +134,14 @@ export default function AddBusinessPage() {
                     name="logoFile"
                     render={() => (
                       <FormItem>
-                        <FormLabel>Business Logo (Optional)</FormLabel>
-                        <div className="flex items-center gap-4">
+                        <FormLabel>Business Logo (Optional & Disabled)</FormLabel>
+                        <div className="flex items-center gap-4 opacity-50">
                           <Avatar className="h-20 w-20 rounded-lg">
                             <AvatarImage src={previewImage || undefined} alt="Logo preview"/>
                             <AvatarFallback className="rounded-lg"><Building2 className="w-8 h-8" /></AvatarFallback>
                           </Avatar>
-                           <Button asChild variant="outline">
-                                <label htmlFor="logo-upload" className="cursor-pointer">
+                           <Button asChild variant="outline" disabled>
+                                <label htmlFor="logo-upload" className="cursor-not-allowed">
                                   <Upload className="mr-2 h-4 w-4" />
                                   Upload Logo
                                 </label>
@@ -154,6 +153,7 @@ export default function AddBusinessPage() {
                                     className="sr-only" 
                                     accept="image/png, image/jpeg, image/gif"
                                     onChange={handleFileChange}
+                                    disabled
                                 />
                            </FormControl>
                         </div>
