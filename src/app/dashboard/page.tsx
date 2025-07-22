@@ -74,7 +74,7 @@ export default function DashboardPage() {
       <main className="flex-1 bg-muted/30">
         <div className="container max-w-7xl py-12 px-4">
           <div className="grid md:grid-cols-[240px_1fr] gap-8 items-start">
-            <nav className="flex flex-col gap-1 sticky top-20">
+            <nav className="hidden md:flex flex-col gap-1 sticky top-20">
               {navItems.map((item) => (
                 <Button
                   key={item.label}
