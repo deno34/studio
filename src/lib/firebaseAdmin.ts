@@ -10,6 +10,7 @@ if (!admin.apps.length) {
       throw new Error('Firebase server credentials are not set in .env. Please check FIREBASE_PROJECT_ID, FIREBASE_PRIVATE_KEY, and FIREBASE_CLIENT_EMAIL.');
     }
 
+    console.log('Attempting to initialize Firebase Admin SDK...');
     admin.initializeApp({
       credential: admin.credential.cert({
         projectId: process.env.FIREBASE_PROJECT_ID,
@@ -20,7 +21,7 @@ if (!admin.apps.length) {
     });
     console.log('Firebase Admin SDK initialized successfully.');
   } catch (error: any) {
-    console.error('Firebase Admin SDK initialization error:', error.message);
+    console.error('CRITICAL: Firebase Admin SDK initialization error:', error.message);
   }
 }
 

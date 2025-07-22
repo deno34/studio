@@ -9,20 +9,24 @@ import * as z from 'zod';
 import { saveBusiness } from '@/lib/firestoreService';
 
 export async function POST(req: NextRequest) {
+  console.log('[API /api/modules/business] Received POST request.');
   let user;
   try {
     user = await validateApiKey(req);
+    console.log('[API /api/modules/business] API Key validated for user:', user.uid);
   } catch (error: any) {
+    console.error('[API /api/modules/business] API Key validation failed:', error.message);
     return NextResponse.json({ error: error.message }, { status: 401 });
   }
 
   try {
     const body = await req.json();
+    console.log('[API /api/modules/business] Request body parsed:', body);
     
-    // We are only validating text fields now
     const validation = BusinessSchema.safeParse(body);
 
     if (!validation.success) {
+      console.error('[API /api/modules/business] Validation failed:', validation.error.flatten());
       return NextResponse.json({ error: 'Invalid data provided.', details: validation.error.flatten() }, { status: 400 });
     }
     
@@ -36,13 +40,14 @@ export async function POST(req: NextRequest) {
         selectedAgents: [], // Start with no agents selected
     };
 
-    // Since we are not handling file upload, we will save the data without the logoUrl for now
+    console.log('[API /api/modules/business] Business data prepared. Calling saveBusiness...');
     await saveBusiness(businessData);
+    console.log('[API /api/modules/business] saveBusiness completed successfully.');
 
     return NextResponse.json({ message: 'Business created successfully (without logo)', id: businessId }, { status: 201 });
 
   } catch (error: any) {
-    console.error('[BUSINESS_POST_ERROR]', error);
+    console.error('[API /api/modules/business] CRITICAL ERROR:', error);
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: 'Invalid data provided.', details: error.flatten() }, { status: 400 });
     }

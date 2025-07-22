@@ -18,24 +18,38 @@ const jobsCollection = getTypedCollection<JobPosting>('jobPostings');
 
 // Business Functions
 export async function saveBusiness(businessData: Omit<Business, 'createdAt' | 'logoUrl'> & { logoUrl?: string }): Promise<string> {
+  console.log('[FirestoreService] Attempting to save business:', JSON.stringify(businessData, null, 2));
   const businessRef = businessesCollection.doc(businessData.id);
-  await businessRef.set({
+  const dataToSave = {
     ...businessData,
-    logoUrl: businessData.logoUrl || 'https://placehold.co/100x100.png', // Save with a default logo
+    logoUrl: businessData.logoUrl || 'https://placehold.co/100x100.png',
     createdAt: new Date().toISOString(),
-  });
-  return businessData.id;
+  };
+
+  try {
+    await businessRef.set(dataToSave);
+    console.log(`[FirestoreService] Successfully saved business with ID: ${businessData.id}`);
+    return businessData.id;
+  } catch (error) {
+    console.error(`[FirestoreService] Error saving business with ID ${businessData.id}:`, error);
+    throw new Error('Failed to save business data to Firestore.');
+  }
 }
 
 export async function getBusinessesForUser(userId: string): Promise<Business[]> {
+  console.log(`[FirestoreService] Fetching businesses for user ID: ${userId}`);
   try {
     const snapshot = await businessesCollection.where('userId', '==', userId).orderBy('createdAt', 'desc').get();
     if (snapshot.empty) {
+      console.log(`[FirestoreService] No businesses found for user ID: ${userId}`);
       return [];
     }
-    return snapshot.docs.map(doc => doc.data());
+    const businesses = snapshot.docs.map(doc => doc.data());
+    console.log(`[FirestoreService] Found ${businesses.length} businesses for user ID: ${userId}`);
+    return businesses;
   } catch (error) {
-    console.error("Error fetching businesses for user:", error);
+    console.error(`[FirestoreService] Error fetching businesses for user ${userId}:`, error);
+    // Return empty array on failure to prevent breaking the frontend
     return [];
   }
 }
@@ -43,23 +57,29 @@ export async function getBusinessesForUser(userId: string): Promise<Business[]> 
 
 // Job Posting Functions
 export async function saveJob(jobData: Omit<JobPosting, 'createdAt'>): Promise<string> {
+    console.log(`[FirestoreService] Attempting to save job: ${jobData.title}`);
     const jobRef = jobsCollection.doc(jobData.id);
     await jobRef.set({
         ...jobData,
         createdAt: new Date().toISOString(),
     });
+    console.log(`[FirestoreService] Successfully saved job with ID: ${jobData.id}`);
     return jobData.id;
 }
 
 export async function getJobs(userId: string): Promise<JobPosting[]> {
+    console.log(`[FirestoreService] Fetching jobs for user ID: ${userId}`);
     try {
         const snapshot = await jobsCollection.where('userId', '==', userId).orderBy('createdAt', 'desc').get();
         if (snapshot.empty) {
+            console.log(`[FirestoreService] No jobs found for user ID: ${userId}`);
             return [];
         }
-        return snapshot.docs.map(doc => doc.data());
+        const jobs = snapshot.docs.map(doc => doc.data());
+        console.log(`[FirestoreService] Found ${jobs.length} jobs for user ID: ${userId}`);
+        return jobs;
     } catch (error) {
-        console.error("Error fetching jobs:", error);
+        console.error(`[FirestoreService] Error fetching jobs for user ${userId}:`, error);
         return [];
     }
 }
