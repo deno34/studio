@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
     }
     
     const businessId = uuidv4();
-    const businessData: Omit<Business, 'createdAt' | 'logoUrl'> & { logoUrl?: string } = {
+    const businessData: Omit<Business, 'createdAt' | 'logoUrl'> = {
         id: businessId,
         userId: user.uid,
         name: validation.data.name,

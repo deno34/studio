@@ -17,17 +17,17 @@ const jobsCollection = getTypedCollection<JobPosting>('jobPostings');
 
 
 // Business Functions
-export async function saveBusiness(businessData: Omit<Business, 'createdAt' | 'logoUrl'> & { logoUrl?: string }): Promise<string> {
+export async function saveBusiness(businessData: Omit<Business, 'createdAt' | 'logoUrl'>): Promise<string> {
   console.log('[FirestoreService] Attempting to save business:', JSON.stringify(businessData, null, 2));
   const businessRef = businessesCollection.doc(businessData.id);
   const dataToSave = {
     ...businessData,
-    logoUrl: businessData.logoUrl || 'https://placehold.co/100x100.png',
+    logoUrl: 'https://placehold.co/100x100.png', // Default logo
     createdAt: new Date().toISOString(),
   };
 
   try {
-    await businessRef.set(dataToSave);
+    await businessRef.set(dataToSave as Business);
     console.log(`[FirestoreService] Successfully saved business with ID: ${businessData.id}`);
     return businessData.id;
   } catch (error) {
@@ -35,6 +35,7 @@ export async function saveBusiness(businessData: Omit<Business, 'createdAt' | 'l
     throw new Error('Failed to save business data to Firestore.');
   }
 }
+
 
 export async function getBusinessesForUser(userId: string): Promise<Business[]> {
   console.log(`[FirestoreService] Fetching businesses for user ID: ${userId}`);
