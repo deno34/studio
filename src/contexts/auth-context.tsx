@@ -20,8 +20,8 @@ import { uploadFileToStorage } from '@/lib/storage.client';
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  signInWithEmail: (email, password) => Promise<any>;
-  signUpWithEmail: (email, password) => Promise<any>;
+  signInWithEmail: (email: string, password: string) => Promise<any>;
+  signUpWithEmail: (email: string, password: string) => Promise<any>;
   signInWithGoogle: () => Promise<any>;
   sendVerificationEmail: (user: User) => Promise<void>;
   signOutUser: () => Promise<void>;

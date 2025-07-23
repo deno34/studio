@@ -1,12 +1,11 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { validateApiKey } from '@/lib/auth';
-// import admin from '@/lib/firebaseAdmin';
-// import { uploadFile } from '@/lib/storage';
 import { v4 as uuidv4 } from 'uuid';
 import type { Candidate } from '@/lib/types';
 
-// const db = admin.firestore();
+// This endpoint is no longer for uploading, but for creating a candidate record
+// after the file has been uploaded client-side.
 
 // POST a new candidate from a resume upload
 export async function POST(req: NextRequest) {
@@ -17,33 +16,35 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const formData = await req.formData();
-    const file = formData.get('file') as File | null;
-    const jobId = formData.get('jobId') as string | null;
+    const { jobId, fileName, resumeUrl, resumeText } = await req.json();
 
-    if (!file) {
-      return NextResponse.json({ error: 'No file uploaded.' }, { status: 400 });
-    }
-    if (!jobId) {
-      return NextResponse.json({ error: 'No jobId provided.' }, { status: 400 });
+    if (!jobId || !fileName || !resumeUrl || resumeText === undefined) {
+      return NextResponse.json({ error: 'Missing required fields: jobId, fileName, resumeUrl, resumeText' }, { status: 400 });
     }
 
-    // Mock success without DB write or file upload
     const candidateId = uuidv4();
-    const mockCandidate = {
+    const newCandidate: Partial<Candidate> = {
       id: candidateId,
-      resumeText: "This is mock resume text extracted from the PDF.",
-      name: file.name || 'Unnamed Candidate',
+      jobId,
+      name: fileName.replace(/\.[^/.]+$/, ""), // Use filename as initial name
+      email: '', // To be extracted by AI later
+      resumeUrl,
+      resumeText,
+      status: 'New',
+      createdAt: new Date().toISOString(),
     };
+    
+    // In a real app, this would be saved to Firestore.
+    // For this mock, we just return it.
     
     return NextResponse.json({ 
         message: 'Candidate created successfully (mocked)', 
-        candidate: mockCandidate
+        candidate: newCandidate
     }, { status: 201 });
 
   } catch (error) {
     console.error('[HR_CANDIDATES_POST_ERROR]', error);
-    return NextResponse.json({ error: 'An internal error occurred while processing the resume.' }, { status: 500 });
+    return NextResponse.json({ error: 'An internal error occurred while creating the candidate record.' }, { status: 500 });
   }
 }
 
