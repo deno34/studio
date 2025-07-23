@@ -1,8 +1,7 @@
-
 'use client';
 
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { auth } from '@/lib/firebase/client';
+import { getFirebaseClient } from '@/lib/firebase/client';
 
 /**
  * Uploads a file to Firebase Storage from the client-side.
@@ -11,7 +10,7 @@ import { auth } from '@/lib/firebase/client';
  * @returns A promise that resolves with the public download URL of the file.
  */
 export async function uploadFileToStorage(file: File, path: string): Promise<string> {
-    const storage = getStorage(auth.app);
+    const { storage } = getFirebaseClient();
     const storageRef = ref(storage, path);
     
     await uploadBytes(storageRef, file);

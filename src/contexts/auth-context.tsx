@@ -1,4 +1,3 @@
-
 'use client';
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
@@ -13,7 +12,7 @@ import {
   sendEmailVerification,
   updateProfile,
 } from 'firebase/auth';
-import { auth, googleProvider } from '@/lib/firebase/client';
+import { getFirebaseClient } from '@/lib/firebase/client';
 import { uploadFileToStorage } from '@/lib/storage.client';
 
 
@@ -31,36 +30,34 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
+  const { auth, googleProvider } = getFirebaseClient();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
+    if (!auth) return;
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setUser(user);
-      } else {
-        setUser(null);
-      }
+      setUser(user);
       setLoading(false);
     });
     
     return () => unsubscribe();
-  }, []);
+  }, [auth]);
 
-  const handleSignInWithEmail = async (email, password) => {
+  const handleSignInWithEmail = (email: string, password: string) => {
     return signInWithEmailAndPassword(auth, email, password);
   }
   
-  const handleSignUpWithEmail = async (email, password) => {
+  const handleSignUpWithEmail = (email: string, password: string) => {
     return createUserWithEmailAndPassword(auth, email, password);
   }
 
-  const handleSignInWithGoogle = async () => {
+  const handleSignInWithGoogle = () => {
     return signInWithPopup(auth, googleProvider);
   }
   
-  const handleSendVerificationEmail = async (user: User) => {
+  const handleSendVerificationEmail = (user: User) => {
     return sendEmailVerification(user);
   }
 
@@ -99,6 +96,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     updateUserProfile: handleUpdateProfile,
   };
 
+  if (loading) {
+    return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
+  }
+  
   return (
     <AuthContext.Provider value={value}>
       {children}

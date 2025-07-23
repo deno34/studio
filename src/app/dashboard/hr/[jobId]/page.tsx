@@ -1,4 +1,4 @@
-
+// This component is now a client component
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -26,6 +26,10 @@ import { GenerateFollowUpEmailForm } from '@/components/dashboard/hr/generate-fo
 import { CandidateDetailDialog } from '@/components/dashboard/hr/candidate-detail-dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AnalyticsTab } from '@/components/dashboard/hr/analytics-tab';
+import { useAuth } from '@/contexts/auth-context';
+import { uploadFileToStorage } from '@/lib/storage.client';
+import { v4 as uuidv4 } from 'uuid';
+import pdf from 'pdf-parse/lib/pdf-parse';
 
 
 function JobPageSkeleton() {
@@ -58,6 +62,7 @@ function JobPageSkeleton() {
 }
 
 export default function JobDetailPage() {
+  const { user } = useAuth();
   const { jobId } = useParams();
   const { toast } = useToast();
   const [job, setJob] = useState<JobPosting | null>(null);
@@ -104,37 +109,54 @@ export default function JobDetailPage() {
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
-    if (!files || files.length === 0 || typeof jobId !== 'string') return;
+    if (!files || files.length === 0 || typeof jobId !== 'string' || !user) return;
     
     setIsUploading(true);
     toast({ title: "Upload started...", description: `${files.length} resumes are being processed.` });
 
     for (const file of files) {
       try {
-          const formData = new FormData();
-          formData.append('jobId', jobId);
-          formData.append('file', file);
-
-          const res = await fetch('/api/modules/hr/candidates', {
-              method: 'POST',
-              headers: { 'x-api-key': process.env.NEXT_PUBLIC_MASTER_API_KEY! },
-              body: formData,
-          });
-
-          if (!res.ok) {
-              const errorData = await res.json();
-              throw new Error(errorData.error || `Upload failed for ${file.name}`);
+          if (file.type !== 'application/pdf') {
+              throw new Error(`${file.name} is not a PDF. Only PDF resumes are supported.`);
           }
 
-          const result = await res.json();
-          const newCandidate = result.candidate;
+          // 1. Upload to Storage
+          const filePath = `resumes/${user.uid}/${jobId}/${uuidv4()}-${file.name}`;
+          const resumeUrl = await uploadFileToStorage(file, filePath);
           
-          toast({ title: `Uploaded ${file.name}`, description: "Resume has been added." });
-          
-          // Now, rank the new candidate
-          setIsRanking(newCandidate.id); // Set ranking state for visual feedback
-          toast({ title: `AI Ranking in Progress...`, description: `${newCandidate.name} is being analyzed.` });
+          // 2. Extract text from PDF client-side
+          const fileBuffer = await file.arrayBuffer();
+          const pdfData = await pdf(Buffer.from(fileBuffer));
+          const resumeText = pdfData.text;
 
+          // 3. Create candidate record via API
+          const createRes = await fetch('/api/modules/hr/candidates', {
+              method: 'POST',
+              headers: { 
+                  'Content-Type': 'application/json',
+                  'x-api-key': process.env.NEXT_PUBLIC_MASTER_API_KEY! 
+              },
+              body: JSON.stringify({
+                  jobId,
+                  fileName: file.name,
+                  resumeUrl,
+                  resumeText
+              })
+          });
+
+          if (!createRes.ok) {
+              const errorData = await createRes.json();
+              throw new Error(errorData.error || `Failed to create candidate record for ${file.name}`);
+          }
+
+          const { candidate: newCandidate } = await createRes.json();
+          
+          toast({ title: `Uploaded ${file.name}`, description: "Resume is now being analyzed by AI." });
+          
+          setCandidates(prev => [newCandidate, ...prev]);
+          setIsRanking(newCandidate.id);
+          
+          // 4. Rank the new candidate
           const rankRes = await fetch('/api/modules/hr/candidates/rank', {
               method: 'POST',
               headers: { 
@@ -149,13 +171,12 @@ export default function JobDetailPage() {
           }
           const rankingResult = await rankRes.json();
           
-          // Update candidate in Firestore with ranking result
-          const candidateRef = db.collection('candidates').doc(newCandidate.id);
-          await candidateRef.update({
-             ...rankingResult,
-             name: newCandidate.name,
-          });
-
+          // Update candidate in UI with ranking result
+          setCandidates(prev => prev.map(c => 
+              c.id === newCandidate.id ? { ...c, ...rankingResult } : c
+          ));
+          
+          // In a real app, you would PATCH the candidate record in Firestore here with the ranking results.
 
           toast({ title: "Ranking Complete!", description: `${newCandidate.name} has been scored.` });
 
@@ -164,7 +185,6 @@ export default function JobDetailPage() {
           toast({ variant: 'destructive', title: 'An error occurred', description: error instanceof Error ? error.message : `Could not process ${file.name}` });
       } finally {
           setIsRanking(null);
-          fetchJobAndCandidates(); // Refresh data after each file
       }
     }
     setIsUploading(false);

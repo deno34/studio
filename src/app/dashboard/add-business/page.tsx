@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -7,7 +6,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { v4 as uuidv4 } from 'uuid';
-import { getFirestore, doc, setDoc } from "firebase/firestore";
+import { doc, setDoc } from "firebase/firestore";
 
 import { Header } from '@/components/landing/header';
 import { Footer } from '@/components/landing/footer';
@@ -23,7 +22,7 @@ import { OnboardingStepper } from '@/components/dashboard/add-business/onboardin
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAuth } from '@/contexts/auth-context';
 import { BusinessSchema, type Business } from '@/lib/types';
-import { auth } from '@/lib/firebase/client';
+import { getFirebaseClient } from '@/lib/firebase/client';
 import { uploadFileToStorage } from '@/lib/storage.client';
 
 
@@ -70,6 +69,7 @@ export default function AddBusinessPage() {
     setIsSubmitting(true);
     
     try {
+        const { db } = getFirebaseClient();
         let logoUrl = 'https://placehold.co/100x100.png';
         if (values.logoFile) {
             const filePath = `business-logos/${user.uid}/${uuidv4()}-${values.logoFile.name}`;
@@ -88,7 +88,6 @@ export default function AddBusinessPage() {
             createdAt: new Date().toISOString(),
         };
 
-        const db = getFirestore(auth.app);
         await setDoc(doc(db, "businesses", businessId), businessData);
         
         toast({ title: 'Profile Saved!', description: 'Now, select your AI agents.' });

@@ -20,8 +20,7 @@ import { Lock, Loader2 } from "lucide-react"
 import { useState } from "react"
 import { EarlyAccessRequestSchema, type EarlyAccessRequest } from "@/lib/types"
 import { collection, addDoc } from "firebase/firestore";
-import { auth } from '@/lib/firebase/client'; // Assuming client-side db instance is exported from here
-import { getFirestore } from "firebase/firestore"
+import { getFirebaseClient } from '@/lib/firebase/client';
 
 
 const formSchema = EarlyAccessRequestSchema;
@@ -40,10 +39,9 @@ export function EarlyAccess() {
     },
   })
   
-  // Client-side data saving function
   async function saveRequest(values: EarlyAccessRequest) {
     try {
-        const db = getFirestore(auth.app);
+        const { db } = getFirebaseClient();
         await addDoc(collection(db, "earlyAccessRequests"), {
             ...values,
             createdAt: new Date().toISOString(),
