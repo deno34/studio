@@ -82,13 +82,13 @@ export default function AddBusinessPage() {
             body: formData,
         });
 
+        const result = await response.json();
+
         if (!response.ok) {
-            const errorResult = await response.json().catch(() => ({ error: 'Could not parse error response.' }));
-            console.error("Server Response Error:", errorResult);
-            throw new Error(errorResult.error || `Failed to create business profile. Server responded with: ${response.status}`);
+            console.error("Server Response Error:", result);
+            throw new Error(result.error || `Failed to create business profile. Server responded with: ${response.status}`);
         }
         
-        const result = await response.json();
         toast({ title: 'Profile Saved!', description: 'Now, select your AI agents.' });
         router.push(`/dashboard/add-business/agents?businessId=${result.id}`);
 

@@ -10,17 +10,17 @@ import { saveBusiness } from '@/lib/firestoreService';
 import { uploadFileToStorage } from '@/lib/storage';
 
 export async function POST(req: NextRequest) {
-  console.log('[API /api/modules/business] Received POST request.');
-  let user;
   try {
-    user = await validateApiKey(req);
-    console.log('[API /api/modules/business] API Key validated for user:', user.uid);
-  } catch (error: any) {
-    console.error('[API /api/modules/business] API Key validation failed:', error.message);
-    return NextResponse.json({ error: error.message }, { status: 401 });
-  }
+    console.log('[API /api/modules/business] Received POST request.');
+    let user;
+    try {
+      user = await validateApiKey(req);
+      console.log('[API /api/modules/business] API Key validated for user:', user.uid);
+    } catch (error: any) {
+      console.error('[API /api/modules/business] API Key validation failed:', error.message);
+      return NextResponse.json({ error: error.message }, { status: 401 });
+    }
 
-  try {
     const formData = await req.formData();
     const name = formData.get('name') as string;
     const description = formData.get('description') as string;
@@ -67,9 +67,6 @@ export async function POST(req: NextRequest) {
 
   } catch (error: any) {
     console.error('[API /api/modules/business] CRITICAL ERROR:', error);
-    if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: 'Invalid data provided.', details: error.flatten() }, { status: 400 });
-    }
-    return NextResponse.json({ error: 'An internal error occurred while creating the business profile.', details: error.message }, { status: 500 });
+    return NextResponse.json({ error: 'An internal server error occurred.', details: error.message }, { status: 500 });
   }
 }
