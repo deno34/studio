@@ -4,11 +4,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { validateApiKey } from '@/lib/auth';
 import { type Business, BusinessSchema } from '@/lib/types';
-import admin from '@/lib/firebaseAdmin'; // We need the initialized admin app
 import { v4 as uuidv4 } from 'uuid';
+import { saveBusiness } from '@/lib/databaseService'; // SWITCHED TO databaseService
 
-// This is a new, self-contained route for creating a business profile.
-
+// This is a self-contained route for creating a business profile.
 export async function POST(req: NextRequest) {
   console.log('[API /api/modules/business/create] Received POST request.');
   let user;
@@ -45,13 +44,11 @@ export async function POST(req: NextRequest) {
         createdAt: new Date().toISOString(),
     };
 
-    console.log('[API /api/modules/business/create] Business data prepared. Attempting to save to Firestore...');
+    console.log('[API /api/modules/business/create] Business data prepared. Attempting to save to Realtime Database...');
     
-    // Get Firestore instance and save directly here
-    const db = admin.firestore();
-    await db.collection('businesses').doc(businessId).set(businessData);
+    await saveBusiness(businessData);
     
-    console.log('[API /api/modules/business/create] Successfully saved to Firestore.');
+    console.log('[API /api/modules/business/create] Successfully saved to Realtime Database.');
 
     return NextResponse.json({ message: 'Business created successfully via new route', id: businessId }, { status: 201 });
 
