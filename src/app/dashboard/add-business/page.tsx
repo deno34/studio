@@ -6,6 +6,9 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
+import { v4 as uuidv4 } from 'uuid';
+import { getDatabase, ref, set } from "firebase/database";
+
 import { Header } from '@/components/landing/header';
 import { Footer } from '@/components/landing/footer';
 import { Button } from '@/components/ui/button';
@@ -19,7 +22,9 @@ import { Loader2, ArrowRight, Building2, Upload } from 'lucide-react';
 import { OnboardingStepper } from '@/components/dashboard/add-business/onboarding-stepper';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAuth } from '@/contexts/auth-context';
-import { BusinessSchema } from '@/lib/types';
+import { BusinessSchema, type Business } from '@/lib/types';
+import { auth } from '@/lib/firebase/client';
+import { uploadFileToStorage } from '@/lib/storage.client';
 
 
 const profileFormSchema = BusinessSchema.extend({
@@ -65,32 +70,29 @@ export default function AddBusinessPage() {
     setIsSubmitting(true);
     
     try {
-        const formData = new FormData();
-        formData.append('name', values.name);
-        formData.append('description', values.description);
-        formData.append('industry', values.industry);
+        let logoUrl = 'https://placehold.co/100x100.png';
         if (values.logoFile) {
-            formData.append('logoFile', values.logoFile);
+            const filePath = `business-logos/${user.uid}/${uuidv4()}-${values.logoFile.name}`;
+            logoUrl = await uploadFileToStorage(values.logoFile, filePath);
         }
 
-        const response = await fetch('/api/modules/business', {
-            method: 'POST',
-            headers: {
-                // Content-Type is not set, the browser will set it to multipart/form-data
-                'x-api-key': process.env.NEXT_PUBLIC_MASTER_API_KEY!,
-            },
-            body: formData,
-        });
+        const businessId = uuidv4();
+        const businessData: Business = {
+            id: businessId,
+            userId: user.uid,
+            name: values.name,
+            description: values.description,
+            industry: values.industry,
+            logoUrl: logoUrl,
+            selectedAgents: [],
+            createdAt: new Date().toISOString(),
+        };
 
-        const result = await response.json();
-
-        if (!response.ok) {
-            console.error("Server Response Error:", result);
-            throw new Error(result.error || `Failed to create business profile. Server responded with: ${response.status}`);
-        }
+        const db = getDatabase(auth.app);
+        await set(ref(db, 'businesses/' + businessId), businessData);
         
         toast({ title: 'Profile Saved!', description: 'Now, select your AI agents.' });
-        router.push(`/dashboard/add-business/agents?businessId=${result.id}`);
+        router.push(`/dashboard/add-business/agents?businessId=${businessId}`);
 
     } catch (error) {
         toast({

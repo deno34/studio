@@ -2,70 +2,16 @@
 'use server';
 
 import { NextRequest, NextResponse } from 'next/server';
-import { validateApiKey } from '@/lib/auth';
-import { v4 as uuidv4 } from 'uuid';
-import { type Business, BusinessSchema } from '@/lib/types';
-import { saveBusiness } from '@/lib/firestoreService';
-import { uploadFileToStorage } from '@/lib/storage';
+
+// This route is being bypassed. The business creation logic has been moved
+// to the client-side component in `src/app/dashboard/add-business/page.tsx`
+// to use the Realtime Database directly, avoiding server-side initialization issues.
+// This file is kept to prevent 404 errors but does not perform any actions.
 
 export async function POST(req: NextRequest) {
-  try {
-    console.log('[API /api/modules/business] Received POST request.');
-    let user;
-    try {
-      user = await validateApiKey(req);
-      console.log('[API /api/modules/business] API Key validated for user:', user.uid);
-    } catch (error: any) {
-      console.error('[API /api/modules/business] API Key validation failed:', error.message);
-      return NextResponse.json({ error: error.message }, { status: 401 });
-    }
-
-    const formData = await req.formData();
-    const name = formData.get('name') as string;
-    const description = formData.get('description') as string;
-    const industry = formData.get('industry') as string;
-    const logoFile = formData.get('logoFile') as File | null;
-
-    console.log('[API /api/modules/business] Form data parsed:', { name, description, industry, logoFile: logoFile?.name });
-    
-    const validation = BusinessSchema.safeParse({ name, description, industry });
-
-    if (!validation.success) {
-      console.error('[API /api/modules/business] Validation failed:', validation.error.flatten());
-      return NextResponse.json({ error: 'Invalid data provided.', details: validation.error.flatten() }, { status: 400 });
-    }
-    
-    let logoUrl = 'https://placehold.co/100x100.png';
-    if (logoFile) {
-        console.log('[API /api/modules/business] Logo file found. Starting upload...');
-        const fileBuffer = Buffer.from(await logoFile.arrayBuffer());
-        const filePath = `business-logos/${uuidv4()}-${logoFile.name}`;
-        logoUrl = await uploadFileToStorage(fileBuffer, filePath, logoFile.type);
-        console.log('[API /api/modules/business] Logo uploaded successfully:', logoUrl);
-    } else {
-        console.log('[API /api/modules/business] No logo file provided. Using default.');
-    }
-
-    const businessId = uuidv4();
-    const businessData: Business = {
-        id: businessId,
-        userId: user.uid,
-        name: validation.data.name,
-        description: validation.data.description,
-        industry: validation.data.industry,
-        selectedAgents: [], // Start with no agents selected
-        logoUrl: logoUrl,
-        createdAt: new Date().toISOString(),
-    };
-
-    console.log('[API /api/modules/business] Business data prepared. Calling saveBusiness...');
-    await saveBusiness(businessData);
-    console.log('[API /api/modules/business] saveBusiness completed successfully.');
-
-    return NextResponse.json({ message: 'Business created successfully', id: businessId }, { status: 201 });
-
-  } catch (error: any) {
-    console.error('[API /api/modules/business] CRITICAL ERROR:', error);
-    return NextResponse.json({ error: 'An internal server error occurred.', details: error.message }, { status: 500 });
-  }
+    console.warn("[API /api/modules/business] This route is deprecated and should not be called. Logic moved to client-side.");
+    return NextResponse.json(
+        { error: 'This endpoint is deprecated. Business creation is handled client-side.' },
+        { status: 410 } // 410 Gone
+    );
 }

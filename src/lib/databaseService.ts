@@ -37,7 +37,9 @@ export async function getBusinessesForUser(userId: string): Promise<Business[]> 
   const businessesRef = db.ref('businesses');
   
   try {
+    // This query is specific to Realtime Database syntax
     const snapshot = await businessesRef.orderByChild('userId').equalTo(userId).once('value');
+    
     if (!snapshot.exists()) {
       console.log(`[DatabaseService] No businesses found for user ID: ${userId}`);
       return [];
@@ -45,7 +47,7 @@ export async function getBusinessesForUser(userId: string): Promise<Business[]> 
 
     const businessesData = snapshot.val();
     // Convert the object of businesses into an array
-    const businesses = Object.keys(businessesData).map(key => businessesData[key]);
+    const businesses = Object.values<Business>(businessesData);
     
     // Sort by createdAt descending
     businesses.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
