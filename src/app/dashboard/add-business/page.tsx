@@ -19,7 +19,11 @@ import { Loader2, ArrowRight, Building2, Upload } from 'lucide-react';
 import { OnboardingStepper } from '@/components/dashboard/add-business/onboarding-stepper';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAuth } from '@/contexts/auth-context';
-import { BusinessSchema } from '@/lib/types';
+import { BusinessSchema, type Business } from '@/lib/types';
+import { getFirestore, doc, setDoc } from 'firebase/firestore';
+import { auth } from '@/lib/firebase/client';
+import { v4 as uuidv4 } from 'uuid';
+import { uploadFileToStorage } from '@/lib/storage.client';
 
 
 const profileFormSchema = BusinessSchema.extend({
@@ -65,32 +69,31 @@ export default function AddBusinessPage() {
     setIsSubmitting(true);
     
     try {
-        const formData = new FormData();
-        formData.append('name', values.name);
-        formData.append('description', values.description);
-        formData.append('industry', values.industry);
-        // Temporarily disable file upload to simplify
-        // if (values.logoFile) {
-        //     formData.append('logoFile', values.logoFile);
-        // }
+        const businessId = uuidv4();
+        let logoUrl = 'https://placehold.co/100x100.png';
 
-        // Point to the new, clean API route
-        const response = await fetch('/api/modules/business/create', {
-            method: 'POST',
-            headers: {
-                'x-api-key': process.env.NEXT_PUBLIC_MASTER_API_KEY!,
-            },
-            body: formData,
-        });
-
-        const result = await response.json();
-
-        if (!response.ok) {
-            throw new Error(result.error || `Failed to create business profile. Server responded with: ${response.status}`);
+        if (values.logoFile) {
+            const filePath = `business-logos/${businessId}-${values.logoFile.name}`;
+            logoUrl = await uploadFileToStorage(values.logoFile, filePath);
         }
+
+        const businessData: Business = {
+            id: businessId,
+            userId: user.uid,
+            name: values.name,
+            description: values.description,
+            industry: values.industry,
+            logoUrl: logoUrl,
+            selectedAgents: [],
+            createdAt: new Date().toISOString(),
+        };
+        
+        // Save directly to Firestore from the client
+        const db = getFirestore(auth.app);
+        await setDoc(doc(db, "businesses", businessId), businessData);
         
         toast({ title: 'Profile Saved!', description: 'Now, select your AI agents.' });
-        router.push(`/dashboard/add-business/agents?businessId=${result.id}`);
+        router.push(`/dashboard/add-business/agents?businessId=${businessId}`);
 
     } catch (error) {
         toast({
@@ -135,14 +138,14 @@ export default function AddBusinessPage() {
                     name="logoFile"
                     render={() => (
                       <FormItem>
-                        <FormLabel>Business Logo (Optional & Disabled)</FormLabel>
-                        <div className="flex items-center gap-4 opacity-50">
+                        <FormLabel>Business Logo (Optional)</FormLabel>
+                        <div className="flex items-center gap-4">
                           <Avatar className="h-20 w-20 rounded-lg">
                             <AvatarImage src={previewImage || undefined} alt="Logo preview"/>
                             <AvatarFallback className="rounded-lg"><Building2 className="w-8 h-8" /></AvatarFallback>
                           </Avatar>
-                           <Button asChild variant="outline" disabled>
-                                <label htmlFor="logo-upload" className="cursor-not-allowed">
+                           <Button asChild variant="outline">
+                                <label htmlFor="logo-upload" className="cursor-pointer">
                                   <Upload className="mr-2 h-4 w-4" />
                                   Upload Logo
                                 </label>
@@ -154,7 +157,6 @@ export default function AddBusinessPage() {
                                     className="sr-only" 
                                     accept="image/png, image/jpeg, image/gif"
                                     onChange={handleFileChange}
-                                    disabled
                                 />
                            </FormControl>
                         </div>
