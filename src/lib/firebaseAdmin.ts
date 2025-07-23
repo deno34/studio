@@ -23,6 +23,8 @@ if (!admin.apps.length) {
      console.log('Firebase Admin SDK initialized successfully.');
   } catch (error: any) {
     console.error('CRITICAL: Firebase Admin SDK initialization error:', error.message);
+    // Propagate the error to make it clear that the server may not function correctly.
+    throw error;
   }
 }
 

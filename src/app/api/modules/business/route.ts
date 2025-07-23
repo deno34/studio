@@ -5,7 +5,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { validateApiKey } from '@/lib/auth';
 import { v4 as uuidv4 } from 'uuid';
 import { type Business, BusinessSchema } from '@/lib/types';
-import * as z from 'zod';
 import { saveBusiness } from '@/lib/firestoreService';
 import { uploadFileToStorage } from '@/lib/storage';
 
