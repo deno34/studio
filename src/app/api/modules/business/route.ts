@@ -51,11 +51,12 @@ export async function POST(req: NextRequest) {
         logoUrl: logoUrl,
     };
 
-    console.log('[API /api/modules/business] Business data prepared. Calling saveBusiness...');
-    await saveBusiness(businessData);
-    console.log('[API /api/modules/business] saveBusiness completed successfully.');
+    // MOCK: Temporarily skip saving to Firestore to isolate the error
+    // console.log('[API /api/modules/business] Business data prepared. SKIPPING saveBusiness...');
+    // await saveBusiness(businessData);
+    // console.log('[API /api/modules/business] saveBusiness SKIPPED.');
 
-    return NextResponse.json({ message: 'Business created successfully', id: businessId }, { status: 201 });
+    return NextResponse.json({ message: 'Business created successfully (mocked)', id: businessId }, { status: 201 });
 
   } catch (error: any) {
     console.error('[API /api/modules/business] CRITICAL ERROR:', error);
