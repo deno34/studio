@@ -13,6 +13,7 @@ const getTypedCollection = <T>(collectionPath: string) => {
 };
 
 const businessesCollection = getTypedCollection<Business>('businesses');
+const jobsCollection = getTypedCollection<JobPosting>('jobPostings');
 
 
 // Business Functions
@@ -52,23 +53,46 @@ export async function getBusinessesForUser(userId: string): Promise<Business[]> 
   }
 }
 
+// Job Posting Functions
 export async function saveJob(jobData: Omit<JobPosting, 'createdAt'>): Promise<string> {
-    console.log(`[FirestoreService Mock] Pretending to save job: ${jobData.title}`);
-    return Promise.resolve(jobData.id);
+    console.log(`[FirestoreService] Attempting to save job: ${jobData.title}`);
+    const jobRef = jobsCollection.doc(jobData.id);
+    await jobRef.set({
+        ...jobData,
+        createdAt: new Date().toISOString(),
+    });
+    console.log(`[FirestoreService] Successfully saved job with ID: ${jobData.id}`);
+    return jobData.id;
 }
 
 export async function getJobs(userId: string): Promise<JobPosting[]> {
-    console.log(`[FirestoreService Mock] Pretending to fetch jobs for user ${userId}`);
-    const mockJobs: JobPosting[] = [
-        {
-            id: 'mock-job-1',
-            userId: userId,
-            title: 'Mock Senior AI Engineer',
-            location: 'Remote',
-            description: 'This is a mocked job description.',
-            status: 'Open',
-            createdAt: new Date().toISOString(),
+    console.log(`[FirestoreService] Fetching jobs for user ID: ${userId}`);
+    try {
+        const snapshot = await jobsCollection.where('userId', '==', userId).orderBy('createdAt', 'desc').get();
+        if (snapshot.empty) {
+            console.log(`[FirestoreService] No jobs found for user ID: ${userId}`);
+            return [];
         }
-    ];
-    return Promise.resolve(mockJobs);
+        const jobs = snapshot.docs.map(doc => doc.data());
+        console.log(`[FirestoreService] Found ${jobs.length} jobs for user ID: ${userId}`);
+        return jobs;
+    } catch (error) {
+        console.error(`[FirestoreService] Error fetching jobs for user ${userId}:`, error);
+        return [];
+    }
+}
+
+export async function getJobById(jobId: string): Promise<JobPosting | null> {
+    console.log(`[FirestoreService] Fetching job with ID: ${jobId}`);
+    try {
+        const doc = await jobsCollection.doc(jobId).get();
+        if (!doc.exists) {
+            console.log(`[FirestoreService] No job found with ID: ${jobId}`);
+            return null;
+        }
+        return doc.data() as JobPosting;
+    } catch (error) {
+        console.error(`[FirestoreService] Error fetching job with ID ${jobId}:`, error);
+        return null;
+    }
 }
