@@ -17,7 +17,7 @@ const getTypedCollection = <T>(collectionPath: string) => {
 };
 
 // Business Functions
-export async function saveBusiness(businessData: Omit<Business, 'createdAt'>): Promise<string> {
+export async function saveBusiness(businessData: Business): Promise<string> {
   const businessesCollection = getTypedCollection<Business>('businesses');
   console.log('[FirestoreService] Attempting to save business:', JSON.stringify(businessData, null, 2));
   const businessRef = businessesCollection.doc(businessData.id);
