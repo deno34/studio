@@ -1,23 +1,24 @@
 
 export function getFirebaseConfig() {
+  // This check ensures these variables are only accessed on the client side.
+  if (typeof window === 'undefined') {
+    return {};
+  }
+  
   const firebaseConfig = {
-    apiKey: "AIzaSyAVMkl7ZKj1QyU2tRKlLRrSkHI8aBNT0Ug",
-  authDomain: "find-me-d9858.firebaseapp.com",
-  databaseURL: "https://find-me-d9858-default-rtdb.firebaseio.com",
-  projectId: "find-me-d9858",
-  storageBucket: "find-me-d9858.appspot.com",
-  messagingSenderId: "988807644256",
-  appId: "1:988807644256:web:02629da7d353afbf822f05",
-  measurementId: "G-38C4M26XC3"
+    apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+    authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+    databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL,
+    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+    storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+    appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
   };
 
-  // Basic validation to ensure all keys are present
+  // Basic validation to ensure all keys are present on the client
   for (const [key, value] of Object.entries(firebaseConfig)) {
     if (!value) {
-      // This check is important for client-side execution
-      if (typeof window !== 'undefined') {
-        console.error(`Firebase config error: Missing value for NEXT_PUBLIC_${key.replace(/([A-Z])/g, '_$1').toUpperCase()}`);
-      }
+      console.error(`Firebase config error: Missing value for NEXT_PUBLIC_${key.replace(/([A-Z])/g, '_$1').toUpperCase()}`);
     }
   }
   

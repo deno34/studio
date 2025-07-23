@@ -5,7 +5,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { validateApiKey } from '@/lib/auth';
 import { type Business, BusinessSchema } from '@/lib/types';
 import { v4 as uuidv4 } from 'uuid';
-import { saveBusiness } from '@/lib/databaseService'; // SWITCHED TO databaseService
+import { saveBusiness } from '@/lib/firestoreService';
 
 // This route is NOT USED by the client-side form anymore.
 // It is kept here as a server-side alternative if needed in the future,
@@ -46,11 +46,11 @@ export async function POST(req: NextRequest) {
         createdAt: new Date().toISOString(),
     };
 
-    console.log('[API /api/modules/business/create] Business data prepared. Attempting to save to Realtime Database...');
+    console.log('[API /api/modules/business/create] Business data prepared. Attempting to save to Firestore...');
     
     await saveBusiness(businessData);
     
-    console.log('[API /api/modules/business/create] Successfully saved to Realtime Database.');
+    console.log('[API /api/modules/business/create] Successfully saved to Firestore.');
 
     return NextResponse.json({ message: 'Business created successfully via server route', id: businessId }, { status: 201 });
 

@@ -1,7 +1,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { validateApiKey } from '@/lib/auth';
-import { getBusinessesForUser } from '@/lib/databaseService'; // SWITCHED TO databaseService
+import { getBusinessesForUser } from '@/lib/firestoreService';
 
 // GET all businesses for the authenticated user
 export async function GET(req: NextRequest) {

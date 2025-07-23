@@ -7,7 +7,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { v4 as uuidv4 } from 'uuid';
-import { getDatabase, ref, set } from "firebase/database";
+import { getFirestore, doc, setDoc } from "firebase/firestore";
 
 import { Header } from '@/components/landing/header';
 import { Footer } from '@/components/landing/footer';
@@ -88,8 +88,8 @@ export default function AddBusinessPage() {
             createdAt: new Date().toISOString(),
         };
 
-        const db = getDatabase(auth.app);
-        await set(ref(db, 'businesses/' + businessId), businessData);
+        const db = getFirestore(auth.app);
+        await setDoc(doc(db, "businesses", businessId), businessData);
         
         toast({ title: 'Profile Saved!', description: 'Now, select your AI agents.' });
         router.push(`/dashboard/add-business/agents?businessId=${businessId}`);
