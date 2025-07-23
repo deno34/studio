@@ -7,7 +7,9 @@ import { type Business, BusinessSchema } from '@/lib/types';
 import { v4 as uuidv4 } from 'uuid';
 import { saveBusiness } from '@/lib/databaseService'; // SWITCHED TO databaseService
 
-// This is a self-contained route for creating a business profile.
+// This route is NOT USED by the client-side form anymore.
+// It is kept here as a server-side alternative if needed in the future,
+// but the primary business creation logic is now in `add-business/page.tsx`.
 export async function POST(req: NextRequest) {
   console.log('[API /api/modules/business/create] Received POST request.');
   let user;
@@ -39,7 +41,7 @@ export async function POST(req: NextRequest) {
         name: validation.data.name,
         description: validation.data.description,
         industry: validation.data.industry,
-        logoUrl: 'https://placehold.co/100x100.png', // Using default logo for simplicity
+        logoUrl: 'https://placehold.co/100x100.png', // Default logo, as file uploads are now client-side
         selectedAgents: [],
         createdAt: new Date().toISOString(),
     };
@@ -50,10 +52,10 @@ export async function POST(req: NextRequest) {
     
     console.log('[API /api/modules/business/create] Successfully saved to Realtime Database.');
 
-    return NextResponse.json({ message: 'Business created successfully via new route', id: businessId }, { status: 201 });
+    return NextResponse.json({ message: 'Business created successfully via server route', id: businessId }, { status: 201 });
 
   } catch (error: any) {
     console.error('[API /api/modules/business/create] CRITICAL ERROR:', error);
-    return NextResponse.json({ error: 'An internal error occurred in the new business creation route.', details: error.message }, { status: 500 });
+    return NextResponse.json({ error: 'An internal error occurred in the business creation route.', details: error.message }, { status: 500 });
   }
 }
