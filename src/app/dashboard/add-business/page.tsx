@@ -69,12 +69,13 @@ export default function AddBusinessPage() {
         formData.append('name', values.name);
         formData.append('description', values.description);
         formData.append('industry', values.industry);
-        // Temporarily disable file upload
+        // Temporarily disable file upload to simplify
         // if (values.logoFile) {
         //     formData.append('logoFile', values.logoFile);
         // }
 
-        const response = await fetch('/api/modules/business', {
+        // Point to the new, clean API route
+        const response = await fetch('/api/modules/business/create', {
             method: 'POST',
             headers: {
                 'x-api-key': process.env.NEXT_PUBLIC_MASTER_API_KEY!,
