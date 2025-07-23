@@ -5,19 +5,20 @@ import admin from './firebaseAdmin';
 import { type Business, type JobPosting } from './types';
 import { CollectionReference } from 'firebase-admin/firestore';
 
-const db = admin.firestore();
+// DO NOT initialize db here. It can cause a race condition on server start.
+// const db = admin.firestore(); 
+
+// Instead, get the db instance inside each function.
 
 // Type assertion for collection with converter
 const getTypedCollection = <T>(collectionPath: string) => {
+  const db = admin.firestore();
   return db.collection(collectionPath) as CollectionReference<T>;
 };
 
-const businessesCollection = getTypedCollection<Business>('businesses');
-const jobsCollection = getTypedCollection<JobPosting>('jobPostings');
-
-
 // Business Functions
 export async function saveBusiness(businessData: Omit<Business, 'createdAt'>): Promise<string> {
+  const businessesCollection = getTypedCollection<Business>('businesses');
   console.log('[FirestoreService] Attempting to save business:', JSON.stringify(businessData, null, 2));
   const businessRef = businessesCollection.doc(businessData.id);
   const dataToSave = {
@@ -36,6 +37,7 @@ export async function saveBusiness(businessData: Omit<Business, 'createdAt'>): P
 }
 
 export async function getBusinessesForUser(userId: string): Promise<Business[]> {
+  const businessesCollection = getTypedCollection<Business>('businesses');
   console.log(`[FirestoreService] Fetching businesses for user ID: ${userId}`);
   try {
     const snapshot = await businessesCollection.where('userId', '==', userId).orderBy('createdAt', 'desc').get();
@@ -54,7 +56,8 @@ export async function getBusinessesForUser(userId: string): Promise<Business[]> 
 }
 
 // Job Posting Functions
-export async function saveJob(jobData: Omit<JobPosting, 'createdAt'>): Promise<string> {
+export async function saveJob(jobData: JobPosting): Promise<string> {
+    const jobsCollection = getTypedCollection<JobPosting>('jobPostings');
     console.log(`[FirestoreService] Attempting to save job: ${jobData.title}`);
     const jobRef = jobsCollection.doc(jobData.id);
     await jobRef.set({
@@ -66,6 +69,7 @@ export async function saveJob(jobData: Omit<JobPosting, 'createdAt'>): Promise<s
 }
 
 export async function getJobs(userId: string): Promise<JobPosting[]> {
+    const jobsCollection = getTypedCollection<JobPosting>('jobPostings');
     console.log(`[FirestoreService] Fetching jobs for user ID: ${userId}`);
     try {
         const snapshot = await jobsCollection.where('userId', '==', userId).orderBy('createdAt', 'desc').get();
@@ -83,6 +87,7 @@ export async function getJobs(userId: string): Promise<JobPosting[]> {
 }
 
 export async function getJobById(jobId: string): Promise<JobPosting | null> {
+    const jobsCollection = getTypedCollection<JobPosting>('jobPostings');
     console.log(`[FirestoreService] Fetching job with ID: ${jobId}`);
     try {
         const doc = await jobsCollection.doc(jobId).get();
