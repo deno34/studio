@@ -6,12 +6,10 @@ import { type Business, type JobPosting } from './types';
 import { CollectionReference } from 'firebase-admin/firestore';
 
 // DO NOT initialize db here. It can cause a race condition on server start.
-// const db = admin.firestore(); 
-
 // Instead, get the db instance inside each function.
 
 // Type assertion for collection with converter
-const getTypedCollection = <T>(collectionPath: string) => {
+const getTypedCollection = <T>(collectionPath: string): CollectionReference<T> => {
   const db = admin.firestore();
   return db.collection(collectionPath) as CollectionReference<T>;
 };
@@ -21,10 +19,9 @@ export async function saveBusiness(businessData: Business): Promise<string> {
   const businessesCollection = getTypedCollection<Business>('businesses');
   console.log('[FirestoreService] Attempting to save business:', JSON.stringify(businessData, null, 2));
   const businessRef = businessesCollection.doc(businessData.id);
-  const dataToSave = {
-    ...businessData,
-    createdAt: new Date().toISOString(),
-  };
+  
+  // The createdAt is already part of the businessData object from the API route
+  const dataToSave = businessData;
 
   try {
     await businessRef.set(dataToSave);
@@ -60,10 +57,7 @@ export async function saveJob(jobData: JobPosting): Promise<string> {
     const jobsCollection = getTypedCollection<JobPosting>('jobPostings');
     console.log(`[FirestoreService] Attempting to save job: ${jobData.title}`);
     const jobRef = jobsCollection.doc(jobData.id);
-    await jobRef.set({
-        ...jobData,
-        createdAt: new Date().toISOString(),
-    });
+    await jobRef.set(jobData); // Assumes createdAt is already set
     console.log(`[FirestoreService] Successfully saved job with ID: ${jobData.id}`);
     return jobData.id;
 }

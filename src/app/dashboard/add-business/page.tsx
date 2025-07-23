@@ -19,11 +19,7 @@ import { Loader2, ArrowRight, Building2, Upload } from 'lucide-react';
 import { OnboardingStepper } from '@/components/dashboard/add-business/onboarding-stepper';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAuth } from '@/contexts/auth-context';
-import { BusinessSchema, type Business } from '@/lib/types';
-import { getFirestore, doc, setDoc } from 'firebase/firestore';
-import { auth } from '@/lib/firebase/client';
-import { v4 as uuidv4 } from 'uuid';
-import { uploadFileToStorage } from '@/lib/storage.client';
+import { BusinessSchema } from '@/lib/types';
 
 
 const profileFormSchema = BusinessSchema.extend({
@@ -69,31 +65,33 @@ export default function AddBusinessPage() {
     setIsSubmitting(true);
     
     try {
-        const businessId = uuidv4();
-        let logoUrl = 'https://placehold.co/100x100.png';
-
+        const formData = new FormData();
+        formData.append('name', values.name);
+        formData.append('description', values.description);
+        formData.append('industry', values.industry);
         if (values.logoFile) {
-            const filePath = `business-logos/${businessId}-${values.logoFile.name}`;
-            logoUrl = await uploadFileToStorage(values.logoFile, filePath);
+            formData.append('logoFile', values.logoFile);
         }
 
-        const businessData: Business = {
-            id: businessId,
-            userId: user.uid,
-            name: values.name,
-            description: values.description,
-            industry: values.industry,
-            logoUrl: logoUrl,
-            selectedAgents: [],
-            createdAt: new Date().toISOString(),
-        };
-        
-        // Save directly to Firestore from the client
-        const db = getFirestore(auth.app);
-        await setDoc(doc(db, "businesses", businessId), businessData);
+        const response = await fetch('/api/modules/business', {
+            method: 'POST',
+            headers: {
+                // Content-Type is not set, the browser will set it to multipart/form-data
+                'x-api-key': process.env.NEXT_PUBLIC_MASTER_API_KEY!,
+            },
+            body: formData,
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            const errorText = await response.text().catch(() => 'Could not read error response.');
+            console.error("Server Response Error:", errorText);
+            throw new Error(result.error || `Failed to create business profile. Server responded with: ${response.status}`);
+        }
         
         toast({ title: 'Profile Saved!', description: 'Now, select your AI agents.' });
-        router.push(`/dashboard/add-business/agents?businessId=${businessId}`);
+        router.push(`/dashboard/add-business/agents?businessId=${result.id}`);
 
     } catch (error) {
         toast({

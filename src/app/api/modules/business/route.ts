@@ -7,6 +7,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { type Business, BusinessSchema } from '@/lib/types';
 import * as z from 'zod';
 import { saveBusiness } from '@/lib/firestoreService';
+import { uploadFileToStorage } from '@/lib/storage';
 
 export async function POST(req: NextRequest) {
   console.log('[API /api/modules/business] Received POST request.');
@@ -24,11 +25,9 @@ export async function POST(req: NextRequest) {
     const name = formData.get('name') as string;
     const description = formData.get('description') as string;
     const industry = formData.get('industry') as string;
-    
-    // Temporarily disable file upload logic
-    const logoFile = null; 
+    const logoFile = formData.get('logoFile') as File | null;
 
-    console.log('[API /api/modules/business] Form data parsed:', { name, description, industry });
+    console.log('[API /api/modules/business] Form data parsed:', { name, description, industry, logoFile: logoFile?.name });
     
     const validation = BusinessSchema.safeParse({ name, description, industry });
 
@@ -37,11 +36,19 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Invalid data provided.', details: validation.error.flatten() }, { status: 400 });
     }
     
-    const logoUrl = 'https://placehold.co/100x100.png'; // Default logo
-    console.log('[API /api/modules/business] Using default logo.');
+    let logoUrl = 'https://placehold.co/100x100.png';
+    if (logoFile) {
+        console.log('[API /api/modules/business] Logo file found. Starting upload...');
+        const fileBuffer = Buffer.from(await logoFile.arrayBuffer());
+        const filePath = `business-logos/${uuidv4()}-${logoFile.name}`;
+        logoUrl = await uploadFileToStorage(fileBuffer, filePath, logoFile.type);
+        console.log('[API /api/modules/business] Logo uploaded successfully:', logoUrl);
+    } else {
+        console.log('[API /api/modules/business] No logo file provided. Using default.');
+    }
 
     const businessId = uuidv4();
-    const businessData: Omit<Business, 'createdAt'> = {
+    const businessData: Business = {
         id: businessId,
         userId: user.uid,
         name: validation.data.name,
@@ -49,6 +56,7 @@ export async function POST(req: NextRequest) {
         industry: validation.data.industry,
         selectedAgents: [], // Start with no agents selected
         logoUrl: logoUrl,
+        createdAt: new Date().toISOString(),
     };
 
     console.log('[API /api/modules/business] Business data prepared. Calling saveBusiness...');
